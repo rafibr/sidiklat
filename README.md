@@ -275,6 +275,48 @@ sidiklat/
 - [ ] API endpoints
 - [ ] Multi-language support
 
+### TODO: Migrasi ke SPA (Inertia + Vue 3) — untuk dilanjutkan besok
+Berikut langkah terstruktur yang bisa dikerjakan bertahap untuk mengubah aplikasi menjadi SPA menggunakan Inertia (Vue 3). Simpan ini di README supaya tim bisa melanjutkan besok.
+
+1. Persiapan paket
+    - composer require inertiajs/inertia-laravel
+    - npm install vue@3 @inertiajs/inertia @inertiajs/inertia-vue3 @inertiajs/progress
+
+2. Middleware & konfigurasi server
+    - Buat/registrasi `HandleInertiaRequests` (inertia-laravel menyediakan stub).
+    - Tambahkan middleware ke grup web di `app/Http/Kernel.php`.
+
+3. Root view & entry JS
+    - Tambah `resources/views/app.blade.php` dengan `@inertiaHead` dan `@inertia`.
+    - Ubah `resources/js/app.js` menjadi entry Inertia + Vue (createInertiaApp).
+
+4. Migrasi halaman secara bertahap (recommended)
+    - Pilih 1 halaman contoh (mis. `pelatihan.index`).
+    - Buat `resources/js/Pages/Pelatihan/Index.vue` dan terjemahkan template Blade ke Vue.
+    - Update `PelatihanController@index` -> `return Inertia::render('Pelatihan/Index', [...props...])`.
+    - Jalankan `npm run dev` dan tes halaman tersebut.
+
+5. Forms, file upload, pagination
+    - Gunakan FormData/axios untuk upload file; pastikan CSRF token ada.
+    - Serialisasi paginasi (atau gunakan response pagination Inertia-friendly).
+
+6. Cleanup bertahap
+    - Setelah halaman SPA berfungsi, hapus view Blade yang tidak diperlukan.
+    - Konsolidasi komponen UI ke `resources/js/Components`.
+
+7. Quality gates & testing
+    - Jalankan `npm run dev` dan `php artisan serve` untuk dev.
+    - Tambah unit test / smoke test untuk endpoint yang dimigrasi.
+
+Perintah cepat untuk pengembang (Windows, cmd.exe):
+```
+composer require inertiajs/inertia-laravel
+npm install vue@3 @inertiajs/inertia @inertiajs/inertia-vue3 @inertiajs/progress
+npm run dev
+```
+
+Catatan: migrasi bisa dilakukan incremental — jangan hapus Blade sampai halaman SPA diuji dan stabil.
+
 ## 👥 Data Source
 
 Data pegawai dan struktur organisasi berasal dari **Inspektorat Kota Banjarbaru** dengan 14 pegawai dari berbagai unit kerja dan tingkat pangkat/golongan.

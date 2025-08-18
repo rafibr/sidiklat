@@ -18,6 +18,10 @@
 /public/storage
 /storage/*.key
 /storage/pail
+
+# Seeder files dengan data real - jangan di-push ke git
+/database/seeders/PegawaiSeeder.php
+/database/seeders/PelatihanSeeder.php
 /vendor
 Homestead.json
 Homestead.yaml

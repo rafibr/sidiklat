@@ -189,4 +189,127 @@
 		</form>
 	</div>
 </div>
+
+@push('scripts')
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+    // Form validation and UX enhancements
+    const form = document.querySelector('form');
+    const fileInput = document.querySelector('#sertifikat');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    // File upload preview
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('file-preview') || createFilePreview();
+
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const fileType = file.type;
+
+                preview.innerHTML = `
+                    <div class="flex items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <i class="fas fa-file-${fileType.includes('pdf') ? 'pdf' : 'image'} text-blue-600 mr-3 text-lg"></i>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-gray-900">${file.name}</div>
+                            <div class="text-xs text-gray-500">${fileSize} MB</div>
+                        </div>
+                        <button type="button" onclick="clearFile()" class="text-red-500 hover:text-red-700 ml-2">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                preview.classList.remove('hidden');
+
+                // File size validation
+                if (file.size > 2 * 1024 * 1024) {
+                    showNotification('Ukuran file terlalu besar! Maksimal 2MB.', 'error');
+                    fileInput.value = '';
+                    preview.classList.add('hidden');
+                }
+            } else {
+                preview.classList.add('hidden');
+            }
+        });
+    }
+
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+        // Re-enable button after 5 seconds as fallback
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan Pelatihan';
+        }, 5000);
+    });
+
+    // Real-time validation
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('border-red-300');
+                showFieldError(this, 'Field ini wajib diisi');
+            } else {
+                this.classList.remove('border-red-300');
+                hideFieldError(this);
+            }
+        });
+
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('border-red-300');
+                hideFieldError(this);
+            }
+        });
+    });
+
+    // JP field validation
+    const jpField = document.querySelector('#jp');
+    if (jpField) {
+        jpField.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (value < 1 || value > 200) {
+                this.classList.add('border-red-300');
+                showFieldError(this, 'JP harus antara 1-200');
+            } else {
+                this.classList.remove('border-red-300');
+                hideFieldError(this);
+            }
+        });
+    }
+});
+
+function createFilePreview() {
+    const preview = document.createElement('div');
+    preview.id = 'file-preview';
+    preview.className = 'mt-3 hidden';
+    document.querySelector('#sertifikat').parentNode.appendChild(preview);
+    return preview;
+}
+
+function clearFile() {
+    document.querySelector('#sertifikat').value = '';
+    document.getElementById('file-preview').classList.add('hidden');
+}
+
+function showFieldError(field, message) {
+    hideFieldError(field);
+    const error = document.createElement('div');
+    error.className = 'field-error text-red-600 text-sm mt-1';
+    error.textContent = message;
+    field.parentNode.appendChild(error);
+}
+
+function hideFieldError(field) {
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+}
+</script>
+@endpush
 @endsection

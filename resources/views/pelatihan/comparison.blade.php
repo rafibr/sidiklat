@@ -3,66 +3,68 @@
 @section('title', 'Perbandingan Data Pelatihan')
 
 @section('content')
-<div class="p-6">
-	<h2 class="text-2xl font-bold text-gray-800 mb-6">Perbandingan Data Pelatihan</h2>
+<div class="p-3 sm:p-4 md:p-6">
+	<h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Perbandingan Data Pelatihan</h2>
 
 	<!-- Summary Cards -->
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-		<div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl text-white">
+	<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-8">
+		<div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 md:p-6 rounded-xl text-white">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-blue-100 text-sm">Pelatihan {{ $currentYear }}</p>
-					<p class="text-3xl font-bold">{{ $pelatihanCurrentYear }}</p>
+					<p class="text-blue-100 text-xs sm:text-sm">Pelatihan {{ $currentYear }}</p>
+					<p class="text-2xl md:text-3xl font-bold">{{ $pelatihanCurrentYear }}</p>
 				</div>
-				<div class="bg-white/20 p-3 rounded-lg">
-					<i class="fas fa-calendar-alt text-2xl"></i>
+				<div class="bg-white/20 p-2 md:p-3 rounded-lg">
+					<i class="fas fa-calendar-alt text-lg md:text-2xl"></i>
 				</div>
 			</div>
 		</div>
 
-		<div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl text-white">
+		<div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 md:p-6 rounded-xl text-white">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-purple-100 text-sm">Pelatihan {{ $lastYear }}</p>
-					<p class="text-3xl font-bold">{{ $pelatihanLastYear }}</p>
+					<p class="text-purple-100 text-xs sm:text-sm">Pelatihan {{ $lastYear }}</p>
+					<p class="text-2xl md:text-3xl font-bold">{{ $pelatihanLastYear }}</p>
 				</div>
-				<div class="bg-white/20 p-3 rounded-lg">
-					<i class="fas fa-history text-2xl"></i>
+				<div class="bg-white/20 p-2 md:p-3 rounded-lg">
+					<i class="fas fa-history text-lg md:text-2xl"></i>
 				</div>
 			</div>
 		</div>
 
-		<div class="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl text-white">
+		<div class="bg-gradient-to-r from-green-500 to-green-600 p-4 md:p-6 rounded-xl text-white">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-green-100 text-sm">Perubahan</p>
+					<p class="text-green-100 text-xs sm:text-sm">Perubahan</p>
 					@php
 					$change = $pelatihanLastYear > 0 ? (($pelatihanCurrentYear - $pelatihanLastYear) /
 					$pelatihanLastYear) * 100 : 0;
 					@endphp
-					<p class="text-3xl font-bold">{{ $change >= 0 ? '+' : '' }}{{ number_format($change, 1) }}%</p>
+					<p class="text-2xl md:text-3xl font-bold">{{ $change >= 0 ? '+' : '' }}{{ number_format($change, 1)
+						}}%</p>
 				</div>
-				<div class="bg-white/20 p-3 rounded-lg">
-					<i class="fas fa-chart-line text-2xl"></i>
+				<div class="bg-white/20 p-2 md:p-3 rounded-lg">
+					<i class="fas fa-chart-line text-lg md:text-2xl"></i>
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Charts Row -->
-	<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
 		<!-- Comparison by Type Chart -->
-		<div class="bg-white p-6 rounded-xl shadow-lg">
-			<h3 class="text-lg font-semibold mb-4 text-gray-800">Perbandingan Per Jenis Pelatihan</h3>
-			<div class="h-80">
+		<div class="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-lg">
+			<h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Perbandingan Per Jenis Pelatihan
+			</h3>
+			<div class="h-48 sm:h-60 md:h-80">
 				<canvas id="comparisonChart"></canvas>
 			</div>
 		</div>
 
 		<!-- Monthly Trend Chart -->
-		<div class="bg-white p-6 rounded-xl shadow-lg">
-			<h3 class="text-lg font-semibold mb-4 text-gray-800">Tren Bulanan</h3>
-			<div class="h-80">
+		<div class="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-lg">
+			<h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Tren Bulanan</h3>
+			<div class="h-48 sm:h-60 md:h-80">
 				<canvas id="trendChart"></canvas>
 			</div>
 		</div>
@@ -70,14 +72,15 @@
 
 	<!-- Detailed Comparison Table -->
 	<div class="bg-white rounded-xl shadow-lg overflow-hidden">
-		<div class="px-6 py-4 border-b border-gray-200">
-			<h3 class="text-lg font-semibold text-gray-800">Detail Perbandingan Per Jenis</h3>
+		<div class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-gray-200">
+			<h3 class="text-base sm:text-lg font-semibold text-gray-800">Detail Perbandingan Per Jenis</h3>
 		</div>
 		<div class="overflow-x-auto">
 			<table class="min-w-full divide-y divide-gray-200">
 				<thead class="bg-gray-50">
 					<tr>
-						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+						<th
+							class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 							Jenis Pelatihan
 						</th>
 						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

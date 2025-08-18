@@ -7,4 +7,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
+Route::get('/pelatihan/comparison', [PelatihanController::class, 'comparison'])->name('pelatihan.comparison');
 Route::resource('pelatihan', PelatihanController::class);

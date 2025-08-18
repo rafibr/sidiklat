@@ -154,24 +154,26 @@
         }
 
         .tab-button {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.75);
+            /* light but opaque so text remains readable */
+            color: #334155;
+            /* dark text for contrast on light header */
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            transition: all 0.18s ease;
+            backdrop-filter: blur(6px);
         }
 
         .tab-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
+            color: #0f172a;
             transform: translateY(-1px);
         }
 
         .tab-button.active {
-            background: white;
-            color: #334155;
-            border-color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            color: #0f172a;
+            border-color: rgba(15, 23, 42, 0.08);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
         }
 
         /* Loading animations */
@@ -230,7 +232,9 @@
                 height: 200px;
             }
         }
+    </style>
 
+    <style>
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -249,8 +253,33 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 0, 0, 0.3);
         }
-    </style>
-    }
+
+        /* Clearer borders across panels, cards and gradients */
+        .bg-white,
+        .bg-white\/95,
+        .bg-gradient-to-r,
+        .card-hover {
+            border: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        /* Slightly stronger border for main containers */
+        .max-w-7xl>.bg-white\/95,
+        .max-w-7xl>.bg-white {
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        /* Compact border & card utilities for tighter look */
+        .border-compact {
+            border-width: 1px !important;
+            border-style: solid !important;
+            border-color: rgba(15, 23, 42, 0.09) !important;
+        }
+
+        .card-compact {
+            padding: 0.5rem 0.75rem !important;
+            /* tighter padding */
+            border-radius: 0.5rem !important;
+        }
     </style>
 </body>
 

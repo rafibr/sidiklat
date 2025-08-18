@@ -6,51 +6,55 @@
 <div class="p-3 sm:p-4 md:p-6">
 	<!-- Statistics Cards -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-8">
-		<div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-3 sm:p-4 md:p-6 text-white">
+		<div
+			class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
 			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 				<div class="mb-2 sm:mb-0">
-					<p class="text-blue-100 text-xs sm:text-sm font-medium">Total Pegawai</p>
+					<p class="text-white/90 text-xs sm:text-sm font-medium">Total Pegawai</p>
 					<p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ $stats['total_pegawai'] }}</p>
 				</div>
 				<div class="bg-blue-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-					<i class="fas fa-users text-sm sm:text-lg md:text-xl"></i>
+					<i class="fas fa-users text-sm sm:text-lg md:text-xl text-blue-700"></i>
 				</div>
 			</div>
 		</div>
 
-		<div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-3 sm:p-4 md:p-6 text-white">
+		<div
+			class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
 			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 				<div class="mb-2 sm:mb-0">
-					<p class="text-green-100 text-xs sm:text-sm font-medium">Total Pelatihan</p>
+					<p class="text-white/90 text-xs sm:text-sm font-medium">Total Pelatihan</p>
 					<p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ $stats['total_pelatihan'] }}</p>
 				</div>
 				<div class="bg-green-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-					<i class="fas fa-graduation-cap text-sm sm:text-lg md:text-xl"></i>
+					<i class="fas fa-graduation-cap text-sm sm:text-lg md:text-xl text-green-700"></i>
 				</div>
 			</div>
 		</div>
 
-		<div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-3 sm:p-4 md:p-6 text-white">
+		<div
+			class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
 			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 				<div class="mb-2 sm:mb-0">
-					<p class="text-purple-100 text-xs sm:text-sm font-medium">Total JP</p>
+					<p class="text-white/90 text-xs sm:text-sm font-medium">Total JP</p>
 					<p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ number_format($stats['total_jp']) }}</p>
 				</div>
 				<div class="bg-purple-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-					<i class="fas fa-clock text-sm sm:text-lg md:text-xl"></i>
+					<i class="fas fa-clock text-sm sm:text-lg md:text-xl text-purple-700"></i>
 				</div>
 			</div>
 		</div>
 
-		<div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-3 sm:p-4 md:p-6 text-white">
+		<div
+			class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
 			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 				<div class="mb-2 sm:mb-0">
-					<p class="text-orange-100 text-xs sm:text-sm font-medium">Rata-rata Progress</p>
+					<p class="text-white/90 text-xs sm:text-sm font-medium">Rata-rata Progress</p>
 					<p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ number_format($stats['rata_progress'], 1)
 						}}%</p>
 				</div>
 				<div class="bg-orange-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-					<i class="fas fa-chart-line text-sm sm:text-lg md:text-xl"></i>
+					<i class="fas fa-chart-line text-sm sm:text-lg md:text-xl text-orange-700"></i>
 				</div>
 			</div>
 		</div>
@@ -59,7 +63,7 @@
 	<!-- Charts Row -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
 		<!-- Pelatihan by Jenis Chart -->
-		<div class="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6">
+		<div class="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6 border-compact card-compact">
 			<h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Distribusi Jenis Pelatihan</h3>
 			<div class="relative h-48 sm:h-56 md:h-64">
 				<canvas id="jenisChart"></canvas>
@@ -67,7 +71,7 @@
 		</div>
 
 		<!-- Progress Chart -->
-		<div class="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6">
+		<div class="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6 border-compact card-compact">
 			<h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Top 10 Progress Pegawai</h3>
 			<div class="relative h-48 sm:h-56 md:h-64">
 				<canvas id="progressChart"></canvas>
@@ -76,7 +80,7 @@
 	</div>
 
 	<!-- Recent Activities Table -->
-	<div class="bg-white rounded-lg shadow-lg overflow-hidden">
+	<div class="bg-white rounded-lg shadow-lg overflow-hidden border-compact card-compact">
 		<div class="px-3 sm:px-4 md:px-6 py-4 border-b border-gray-200">
 			<h3 class="text-base sm:text-lg font-semibold text-gray-800">Top Performer</h3>
 		</div>
@@ -85,22 +89,22 @@
 				<thead class="bg-gray-50">
 					<tr>
 						<th
-							class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							class="px-3 sm:px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 							<span class="hidden sm:inline">Nama Pegawai</span>
 							<span class="sm:hidden">Nama</span>
 						</th>
 						<th
-							class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							class="px-3 sm:px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 							<span class="hidden sm:inline">Target JP</span>
 							<span class="sm:hidden">Target</span>
 						</th>
 						<th
-							class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							class="px-3 sm:px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 							<span class="hidden sm:inline">JP Tercapai</span>
 							<span class="sm:hidden">Tercapai</span>
 						</th>
 						<th
-							class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							class="px-3 sm:px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 							Progress
 						</th>
 					</tr>

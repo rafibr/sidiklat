@@ -163,26 +163,74 @@
             backdrop-filter: blur(6px);
         }
 
-        .tab-button:hover {
-            background: rgba(255, 255, 255, 0.95);
+        /* Enhanced pill-style tabs */
+        .tab-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
             color: #0f172a;
-            transform: translateY(-1px);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            padding: 0.45rem 0.9rem;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+            backdrop-filter: blur(6px);
+            border-radius: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tab-button i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.04);
+            color: #334155;
+            transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
         }
 
         .tab-button.active {
-            background: #ffffff;
-            color: #0f172a;
-            border-color: rgba(15, 23, 42, 0.08);
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+            background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
+            color: #06263b;
+            border-color: rgba(15, 23, 42, 0.09);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
         }
 
-        /* Loading animations */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
+        .tab-button.active i {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.18);
         }
 
-        /* Smooth scroll */
+        /* Active indicator bar under the active tab */
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            left: 14%;
+            right: 14%;
+            bottom: -9px;
+            height: 4px;
+            background: transparent;
+            border-radius: 9999px;
+            transition: all 0.18s ease;
+            opacity: 0;
+        }
+
+        .tab-button.active::after {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            opacity: 1;
+            bottom: -10px;
+            height: 5px;
+        }
+
         html {
             scroll-behavior: smooth;
         }

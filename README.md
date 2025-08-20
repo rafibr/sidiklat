@@ -291,52 +291,100 @@ Berikut langkah terstruktur yang bisa dikerjakan bertahap untuk mengubah aplikas
     - Ubah `resources/js/app.js` menjadi entry Inertia + Vue (createInertiaApp).
 
 4. Migrasi halaman secara bertahap (recommended)
-    - Pilih 1 halaman contoh (mis. `pelatihan.index`).
-    - Buat `resources/js/Pages/Pelatihan/Index.vue` dan terjemahkan template Blade ke Vue.
-    - Update `PelatihanController@index` -> `return Inertia::render('Pelatihan/Index', [...props...])`.
-    - Jalankan `npm run dev` dan tes halaman tersebut.
+    # SIDIKLAT — Analisis & Panduan Singkat
 
-5. Forms, file upload, pagination
-    - Gunakan FormData/axios untuk upload file; pastikan CSRF token ada.
-    - Serialisasi paginasi (atau gunakan response pagination Inertia-friendly).
+    README ini berisi ringkasan analisis aplikasi, arsitektur, cara menjalankan, instruksi seeding, dan catatan pengembangan (termasuk status migrasi ke Inertia/Vue).
 
-6. Cleanup bertahap
-    - Setelah halaman SPA berfungsi, hapus view Blade yang tidak diperlukan.
-    - Konsolidasi komponen UI ke `resources/js/Components`.
+    ## Checklist singkat (apa yang ada di repo saat ini)
+    - Backend: Laravel 12 (kode menargetkan PHP 8.2+)
+    - Frontend: Vite + Tailwind + Inertia + Vue 3 (migrasi Inertia sedang berlangsung)
+    - Database: SQLite (default dev), migrations dan seeders tersedia
+    - Assets: `resources/js` berisi bootstrap Inertia/Vue dan `resources/js/Pages` untuk halaman Vue
 
-7. Quality gates & testing
-    - Jalankan `npm run dev` dan `php artisan serve` untuk dev.
-    - Tambah unit test / smoke test untuk endpoint yang dimigrasi.
+    ## Ringkasan arsitektur
+    - Server: Laravel meng-handle routing dan controller; banyak controller mereturn Inertia::render saat ini (migrasi ke SPA sebagian sudah diterapkan).
+    - Frontend: Inertia.js + Vue 3 single-page pages di `resources/js/Pages/*` dengan `resources/js/Layouts/AppLayout.vue` sebagai shared layout.
+    - Build: Vite digunakan untuk bundling; plugin Vue sudah dikonfigurasi di `vite.config.js`.
+    - Routes: didefinisikan di `routes/web.php` (dashboard, progress, pelatihan resource).
+    - Models: `Pegawai` (hasMany Pelatihan) dan `Pelatihan` (belongsTo Pegawai). JP (Jam Pelajaran) tercatat di masing-masing pelatihan dan dijumlahkan ke `pegawai.jp_tercapai`.
 
-Perintah cepat untuk pengembang (Windows, cmd.exe):
-```
-composer require inertiajs/inertia-laravel
-npm install vue@3 @inertiajs/inertia @inertiajs/inertia-vue3 @inertiajs/progress
-npm run dev
-```
+    ## Lokasi file penting
+    - Entry view server-side: `resources/views/app.blade.php` (Inertia root, berisi `@routes` untuk Ziggy dan `@inertiaHead`).
+    - JS entry: `resources/js/app.js` (createInertiaApp, global route helper menggunakan Ziggy jika tersedia).
+    - Vue pages: `resources/js/Pages/` (Dashboard, Pelatihan, Progress, dsb.)
+    - Layouts/Components: `resources/js/Layouts/` dan `resources/js/Components/`.
+    - Seeders: `database/seeders/` (PegawaiSeeder, PelatihanSeeder, MultiPelatihanSeeder).
 
-Catatan: migrasi bisa dilakukan incremental — jangan hapus Blade sampai halaman SPA diuji dan stabil.
+    ## Cara menjalankan (development, Windows cmd.exe)
+    1) Pasang dependensi PHP & JS jika belum:
+    ```cmd
+    composer install
+    npm install
+    ```
 
-## 👥 Data Source
+    2) Setup environment dan database (contoh SQLite):
+    ```cmd
+    copy .env.example .env
+    php artisan key:generate
+    type NUL > database\database.sqlite
+    ```
 
-Data pegawai dan struktur organisasi berasal dari **Inspektorat Kota Banjarbaru** dengan 14 pegawai dari berbagai unit kerja dan tingkat pangkat/golongan.
+    3) Migrate + seed (non-destruktif):
+    ```cmd
+    php artisan migrate
+    php artisan db:seed
+    ```
 
-## 📞 Support
+    Jika ingin reset penuh (HATI‑HATI — menghapus semua data):
+    ```cmd
+    php artisan migrate:fresh --seed
+    ```
 
-Untuk pertanyaan atau masalah terkait aplikasi ini, silakan buat issue di repository atau hubungi tim development.
+    4) Jalankan dev servers (Vite + Laravel). Di Windows gunakan dua terminal atau tool seperti `concurrently`:
+    ```cmd
+    npm run dev
+    php artisan serve
+    ```
 
----
+    ## Seeder & troubleshooting cepat
+    - Jika Anda menambahkan file seeder baru, jalankan:
+    ```cmd
+    composer dump-autoload
+    ```
+    Kemudian jalankan seeder tertentu:
+    ```cmd
+    php artisan db:seed --class=Database\\Seeders\\MultiPelatihanSeeder
+    ```
+    Catatan Windows: bila terjadi masalah escaping di cmd, bungkus argumen class dengan tanda kutip seperti di atas. Jika muncul error "Target class ... does not exist", pastikan `composer dump-autoload` dieksekusi dan path namespace di file seeder sesuai (`namespace Database\Seeders;`).
 
-**Dibuat dengan ❤️ menggunakan Laravel 11 & Tailwind CSS**
+    Verifikasi cepat lewat Tinker:
+    ```cmd
+    php artisan tinker
+    >>> App\\Models\\Pegawai::where('nama_lengkap','LIKE','%Muhammad Rafi%')->first()->pelatihans()->count()
+    >>> App\\Models\\Pegawai::where('nama_lengkap','LIKE','%Muhammad Rafi%')->first()->jp_tercapai
+    ```
 
-## Code of Conduct
+    ## Catatan pengembangan / temuan penting
+    - Inertia migration: beberapa controller sudah mereturn Inertia::render — frontend sudah berisi `resources/js/Pages/*` dan `createInertiaApp` bootstrap.
+    - Ziggy digunakan untuk menyediakan helper `route()` di JS; pastikan `@routes` ada di `resources/views/app.blade.php`.
+    - Vite membutuhkan `@vite` di Blade untuk memuat assets di server-side render.
+    - Teleport/tag `<style>` harus berada di blok `<style>` SFC — ada perbaikan di `AppLayout.vue` sebelumnya untuk menghindari error build.
+    - Saat menambah seeder baru di Windows, perhatikan escaping backslash di argumen `--class`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    ## Rekomendasi pekerjaan lanjutan (prioritas)
+    1. Lengkapi migrasi halaman kunci ke Inertia/Vue (mulai dari `pelatihan.index`).
+    2. Tambah otentikasi dan otorisasi (Laravel Breeze / Sanctum) jika aplikasi akan multi-user.
+    3. Tambah test otomatis untuk controller & seeder critical flows.
+    4. Pertimbangkan normalisasi tanggal (`tanggal_mulai`/`tanggal_selesai`) ke format date untuk kemudahan filter dan chart.
+    5. Implementasi export (CSV/Excel) dan API endpoint jika diperlukan.
 
-## Security Vulnerabilities
+    ## Quick links untuk developer
+    - Routes: `routes/web.php`
+    - JS entry: `resources/js/app.js`
+    - Vue pages: `resources/js/Pages/`
+    - Layouts: `resources/js/Layouts/`
+    - Seeders: `database/seeders/`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ---
 
-## License
-
-**Dibuat dengan ❤️ menggunakan Laravel 11 & Tailwind CSS**
+    Dokumentasi terakhir diperbarui otomatis berdasarkan struktur kode di branch `migrate-to-inertia`.

@@ -6,6 +6,7 @@ use App\Models\Pegawai;
 use App\Models\Pelatihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -26,6 +27,11 @@ class DashboardController extends Controller
 			->orderByDesc('jp_tercapai')
 			->limit(10)
 			->get();
-		return view('dashboard.index', compact('stats', 'pelatihanByJenis', 'progressPegawai'));
+
+		return Inertia::render('Dashboard/Index', [
+			'stats' => $stats,
+			'pelatihanByJenis' => $pelatihanByJenis,
+			'progressPegawai' => $progressPegawai,
+		]);
 	}
 }

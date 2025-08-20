@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pegawai_id')->constrained('pegawais')->onDelete('cascade');
             $table->string('nama_pelatihan'); // dari field 'diklat'
-            $table->string('jenis_pelatihan'); // dari field 'jenis'
+            $table->foreignId('jenis_pelatihan_id')->nullable()->constrained('jenis_pelatihans')->onDelete('set null');
             $table->string('penyelenggara');
             $table->string('tempat')->nullable();
-            $table->string('tanggal_mulai'); // String karena format bervariasi dalam JSON
-            $table->string('tanggal_selesai'); // String karena format bervariasi dalam JSON
+            $table->date('tanggal_mulai')->nullable(); // gunakan DATE untuk memudahkan operasi tanggal
+            $table->date('tanggal_selesai')->nullable(); // gunakan DATE untuk memudahkan operasi tanggal
             $table->integer('jp')->default(0);
             $table->string('status')->default('selesai'); // selesai, sedang_berjalan, akan_datang
             $table->string('sertifikat_path')->nullable();

@@ -16,11 +16,14 @@ class DashboardController extends Controller
 			'total_pegawai' => Pegawai::count(),
 			'total_pelatihan' => Pelatihan::count(),
 			'total_jp' => Pelatihan::sum('jp'),
-			'rata_progress' => Pegawai::avg('jp_tercapai'),
+			// avg may return null; cast to float to ensure frontend numeric usage
+			'rata_progress' => (float) (Pegawai::avg('jp_tercapai') ?? 0),
 		];
 
-		$pelatihanByJenis = Pelatihan::select('jenis_pelatihan', DB::raw('count(*) as total'))
-			->groupBy('jenis_pelatihan')
+		// Aggregate counts grouped by jenis_pelatihans nama
+		$pelatihanByJenis = Pelatihan::leftJoin('jenis_pelatihans', 'pelatihans.jenis_pelatihan_id', '=', 'jenis_pelatihans.id')
+			->select('jenis_pelatihans.nama as jenis_pelatihan', DB::raw('count(*) as total'))
+			->groupBy('jenis_pelatihans.nama')
 			->get();
 
 		$progressPegawai = Pegawai::select('nama_lengkap', 'jp_target', 'jp_tercapai')

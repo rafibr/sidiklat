@@ -12,7 +12,7 @@ class Pelatihan extends Model
     protected $fillable = [
         'pegawai_id',
         'nama_pelatihan',
-        'jenis_pelatihan',
+        'jenis_pelatihan_id',
         'penyelenggara',
         'tempat',
         'tanggal_mulai',
@@ -23,14 +23,30 @@ class Pelatihan extends Model
         'deskripsi'
     ];
 
-    // Tidak menggunakan date casting karena format tanggal bervariasi dalam JSON
-    // protected $casts = [
-    //     'tanggal_mulai' => 'date',
-    //     'tanggal_selesai' => 'date',
-    // ];
+    protected $casts = [
+        'tanggal_mulai' => 'date:Y-m-d',
+        'tanggal_selesai' => 'date:Y-m-d',
+    ];
 
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class);
+    }
+
+    public function jenisPelatihan()
+    {
+        return $this->belongsTo(JenisPelatihan::class, 'jenis_pelatihan_id');
+    }
+
+    // Append an accessor to expose jenis_pelatihan string for frontend compatibility
+    protected $appends = ['jenis_pelatihan'];
+
+    public function getJenisPelatihanAttribute()
+    {
+        $jenis = $this->getRelationValue('jenisPelatihan');
+        if ($jenis) {
+            return $jenis->nama ?? null;
+        }
+        return null;
     }
 }

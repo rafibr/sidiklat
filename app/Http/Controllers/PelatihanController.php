@@ -4,62 +4,73 @@ namespace App\Http\Controllers;
 
 use App\Models\Pelatihan;
 use App\Models\Pegawai;
+use App\Models\JenisPelatihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class PelatihanController extends Controller
 {
-	public function comparison()
+	public function comparison(Request $request)
 	{
-		// Statistik untuk perbandingan
-		$currentYear = date('Y');
-		$lastYear = $currentYear - 1;
+		// Get available years from tanggal_mulai using YEAR()
+		$availableYears = Pelatihan::selectRaw('YEAR(tanggal_mulai) as year')
+			->groupBy('year')
+			->orderBy('year', 'desc')
+			->pluck('year')
+			->filter()
+			->values();
 
-		$pelatihanCurrentYear = Pelatihan::whereRaw("tanggal_mulai LIKE '%$currentYear'")->count();
-		$pelatihanLastYear = Pelatihan::whereRaw("tanggal_mulai LIKE '%$lastYear'")->count();
+		// Get selected years from request or use default (current and last year)
+		$selectedYears = $request->get('years', [date('Y'), date('Y') - 1]);
+		if (!is_array($selectedYears)) {
+			$selectedYears = explode(',', $selectedYears);
+		}
+		$selectedYears = array_filter($selectedYears); // Remove empty values
 
-		// Data untuk chart perbandingan per jenis
-		$jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
-
-		$comparisonData = [];
-		foreach ($jenisPelatihan as $jenis) {
-			$currentCount = Pelatihan::where('jenis_pelatihan', $jenis)
-				->whereRaw("tanggal_mulai LIKE '%$currentYear'")
-				->count();
-			$lastCount = Pelatihan::where('jenis_pelatihan', $jenis)
-				->whereRaw("tanggal_mulai LIKE '%$lastYear'")
-				->count();
-
-			$comparisonData[] = [
-				'jenis' => $jenis,
-				'current' => $currentCount,
-				'last' => $lastCount,
-				'change' => $lastCount > 0 ? (($currentCount - $lastCount) / $lastCount) * 100 : 0
-			];
+		// Get counts for each selected year using whereYear
+		$yearlyData = [];
+		foreach ($selectedYears as $year) {
+			$yearlyData[$year] = Pelatihan::whereYear('tanggal_mulai', $year)->count();
 		}
 
-		// Data bulanan untuk trend
-		$monthlyData = [];
-		for ($i = 1; $i <= 12; $i++) {
-			$monthNum = str_pad($i, 2, '0', STR_PAD_LEFT);
-			$currentMonthCount = Pelatihan::whereRaw("tanggal_mulai LIKE '%$currentYear' AND tanggal_mulai LIKE '%.$monthNum.%'")->count();
-			$lastMonthCount = Pelatihan::whereRaw("tanggal_mulai LIKE '%$lastYear' AND tanggal_mulai LIKE '%.$monthNum.%'")->count();
+		// Data untuk chart perbandingan per jenis
+		// Build comparison data grouped by jenis_pelatihans table
+		$jenisList = \App\Models\JenisPelatihan::pluck('nama', 'id')->toArray();
+		$comparisonData = [];
+		foreach ($jenisList as $id => $nama) {
+			$jenisData = ['jenis' => $nama];
+			foreach ($selectedYears as $year) {
+				$count = Pelatihan::where('jenis_pelatihan_id', $id)
+					->whereYear('tanggal_mulai', $year)
+					->count();
+				$jenisData[$year] = $count;
+			}
+			$comparisonData[] = $jenisData;
+		}
 
-			$monthlyData[] = [
-				'month' => $i,
-				'current' => $currentMonthCount,
-				'last' => $lastMonthCount
-			];
+		// Data bulanan untuk trend (hanya untuk 2 tahun pertama untuk clarity)
+		$monthlyData = [];
+		$trendYears = array_slice($selectedYears, 0, 2); // Limit to 2 years for trend chart
+		for ($i = 1; $i <= 12; $i++) {
+			$monthNum = $i;
+			$monthData = ['month' => $i];
+			foreach ($trendYears as $year) {
+				$count = Pelatihan::whereYear('tanggal_mulai', $year)
+					->whereMonth('tanggal_mulai', $monthNum)
+					->count();
+				$monthData[$year] = $count;
+			}
+			$monthlyData[] = $monthData;
 		}
 
 		return Inertia::render('Pelatihan/Comparison', [
-			'currentYear' => $currentYear,
-			'lastYear' => $lastYear,
-			'pelatihanCurrentYear' => $pelatihanCurrentYear,
-			'pelatihanLastYear' => $pelatihanLastYear,
+			'selectedYears' => $selectedYears,
+			'yearlyData' => $yearlyData,
 			'comparisonData' => $comparisonData,
 			'monthlyData' => $monthlyData,
+			'availableYears' => $availableYears,
 		]);
 	}
 
@@ -69,7 +80,8 @@ class PelatihanController extends Controller
 
 		// Filter by jenis pelatihan
 		if ($request->filled('jenis')) {
-			$query->where('jenis_pelatihan', $request->jenis);
+			// Accept jenis id (foreign key)
+			$query->where('jenis_pelatihan_id', $request->jenis);
 		}
 
 		// Search
@@ -83,7 +95,8 @@ class PelatihanController extends Controller
 		}
 
 		$pelatihans = $query->latest()->paginate(10);
-		$jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+		// Provide jenis list from DB (id + nama) for filters/forms
+		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
 
 		return Inertia::render('Pelatihan/Index', [
 			'pelatihans' => $pelatihans,
@@ -94,7 +107,7 @@ class PelatihanController extends Controller
 	public function create()
 	{
 		$pegawais = Pegawai::orderBy('nama_lengkap')->get();
-		$jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
 
 		return Inertia::render('Pelatihan/Create', [
 			'pegawais' => $pegawais,
@@ -107,11 +120,11 @@ class PelatihanController extends Controller
 		$validated = $request->validate([
 			'pegawai_id' => 'required|exists:pegawais,id',
 			'nama_pelatihan' => 'required|string|max:255',
-			'jenis_pelatihan' => 'required|string',
+			'jenis_pelatihan_id' => 'required|exists:jenis_pelatihans,id',
 			'penyelenggara' => 'required|string|max:255',
 			'tempat' => 'nullable|string|max:255',
-			'tanggal_mulai' => 'required|string|max:255',
-			'tanggal_selesai' => 'required|string|max:255',
+			'tanggal_mulai' => 'required|date',
+			'tanggal_selesai' => 'required|date',
 			'jp' => 'required|integer|min:1',
 			'status' => 'required|in:selesai,sedang_berjalan,akan_datang',
 			'deskripsi' => 'nullable|string',
@@ -145,7 +158,7 @@ class PelatihanController extends Controller
 	public function edit(Pelatihan $pelatihan)
 	{
 		$pegawais = Pegawai::orderBy('nama_lengkap')->get();
-		$jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
 
 		return Inertia::render('Pelatihan/Edit', [
 			'pelatihan' => $pelatihan,
@@ -159,11 +172,11 @@ class PelatihanController extends Controller
 		$validated = $request->validate([
 			'pegawai_id' => 'required|exists:pegawais,id',
 			'nama_pelatihan' => 'required|string|max:255',
-			'jenis_pelatihan' => 'required|string',
+			'jenis_pelatihan_id' => 'required|exists:jenis_pelatihans,id',
 			'penyelenggara' => 'required|string|max:255',
 			'tempat' => 'nullable|string|max:255',
-			'tanggal_mulai' => 'required|string|max:255',
-			'tanggal_selesai' => 'required|string|max:255',
+			'tanggal_mulai' => 'required|date',
+			'tanggal_selesai' => 'required|date',
 			'jp' => 'required|integer|min:1',
 			'status' => 'required|in:selesai,sedang_berjalan,akan_datang',
 			'deskripsi' => 'nullable|string',

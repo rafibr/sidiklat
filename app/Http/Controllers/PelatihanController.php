@@ -16,8 +16,8 @@ class PelatihanController extends Controller
 		$currentYear = date('Y');
 		$lastYear = $currentYear - 1;
 
-		$pelatihanCurrentYear = Pelatihan::whereYear('created_at', $currentYear)->count();
-		$pelatihanLastYear = Pelatihan::whereYear('created_at', $lastYear)->count();
+		$pelatihanCurrentYear = Pelatihan::whereRaw("tanggal_mulai LIKE '%$currentYear'")->count();
+		$pelatihanLastYear = Pelatihan::whereRaw("tanggal_mulai LIKE '%$lastYear'")->count();
 
 		// Data untuk chart perbandingan per jenis
 		$jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
@@ -25,10 +25,10 @@ class PelatihanController extends Controller
 		$comparisonData = [];
 		foreach ($jenisPelatihan as $jenis) {
 			$currentCount = Pelatihan::where('jenis_pelatihan', $jenis)
-				->whereYear('created_at', $currentYear)
+				->whereRaw("tanggal_mulai LIKE '%$currentYear'")
 				->count();
 			$lastCount = Pelatihan::where('jenis_pelatihan', $jenis)
-				->whereYear('created_at', $lastYear)
+				->whereRaw("tanggal_mulai LIKE '%$lastYear'")
 				->count();
 
 			$comparisonData[] = [
@@ -42,12 +42,9 @@ class PelatihanController extends Controller
 		// Data bulanan untuk trend
 		$monthlyData = [];
 		for ($i = 1; $i <= 12; $i++) {
-			$currentMonthCount = Pelatihan::whereYear('created_at', $currentYear)
-				->whereMonth('created_at', $i)
-				->count();
-			$lastMonthCount = Pelatihan::whereYear('created_at', $lastYear)
-				->whereMonth('created_at', $i)
-				->count();
+			$monthNum = str_pad($i, 2, '0', STR_PAD_LEFT);
+			$currentMonthCount = Pelatihan::whereRaw("tanggal_mulai LIKE '%$currentYear' AND tanggal_mulai LIKE '%.$monthNum.%'")->count();
+			$lastMonthCount = Pelatihan::whereRaw("tanggal_mulai LIKE '%$lastYear' AND tanggal_mulai LIKE '%.$monthNum.%'")->count();
 
 			$monthlyData[] = [
 				'month' => $i,

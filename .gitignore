@@ -31,3 +31,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local data dumps (do not commit)
+data-pegawai.json
+data-pelatihan.json
+jenis-pelatihan.json

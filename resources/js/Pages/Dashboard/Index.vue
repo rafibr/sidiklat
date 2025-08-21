@@ -74,7 +74,7 @@
             </div>
 
             <!-- Charts Row -->
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div class="grid grid-cols-1  gap-4 md:gap-6 mb-6 md:mb-8">
                 <!-- Pie Chart -->
                 <div class="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-lg border-compact card-compact">
                     <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Distribusi Pelatihan by
@@ -84,14 +84,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart -->
-                <div class="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-lg border-compact card-compact">
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Progress Jam Pelajaran
-                        (JP)</h3>
-                    <div class="flex justify-center">
-                        <canvas ref="progressChart" class="max-h-64 sm:max-h-80 md:max-h-96"></canvas>
-                    </div>
-                </div>
             </div>
 
             <!-- Recent Progress Table -->
@@ -129,13 +121,13 @@
                                     </div>
                                     <div class="text-xs mt-1 sm:hidden">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </td>
                                 <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap hidden sm:table-cell">
                                     <div class="text-sm">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </td>
                                 <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
@@ -183,7 +175,6 @@ export default {
     data() {
         return {
             jenisChart: null,
-            progressChart: null,
         };
     },
     mounted() {
@@ -195,10 +186,6 @@ export default {
         if (this.jenisChart) {
             try { this.jenisChart.destroy(); } catch (e) { }
             this.jenisChart = null;
-        }
-        if (this.progressChart) {
-            try { this.progressChart.destroy(); } catch (e) { }
-            this.progressChart = null;
         }
     },
     watch: {
@@ -340,58 +327,7 @@ export default {
                     }
                 }
             });
-
-            // Progress Chart
-            if (!this.$refs.progressChart || typeof this.$refs.progressChart.getContext !== 'function') {
-                this.$nextTick(() => this.initCharts());
-                return;
-            }
-            const progressCanvas = this.$refs.progressChart;
-            if (!progressCanvas) {
-                this.$nextTick(() => this.initCharts());
-                return;
-            }
-            this.progressChart = new Chart(progressCanvas, {
-                type: 'bar',
-                data: {
-                    labels: this.progressPegawai.map(item =>
-                        item.nama_lengkap.length > 15 ? item.nama_lengkap.substring(0, 15) + '...' : item.nama_lengkap
-                    ),
-                    datasets: [{
-                        label: 'JP Tercapai',
-                        data: this.progressPegawai.map(item => Number(item.jp_tercapai_filtered || item.jp_tercapai || 0)),
-                        backgroundColor: '#3B82F6',
-                        borderRadius: 4,
-                    }, {
-                        label: 'JP Target',
-                        data: this.progressPegawai.map(item => Number(item.jp_target || 0)),
-                        backgroundColor: '#E5E7EB',
-                        borderRadius: 4,
-                    }]
-                },
-                options: {
-                    animation: false,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: `Progress JP — ${this.selectedYear}`
-                        },
-                        legend: { display: true, position: 'top' },
-                        tooltip: { enabled: true }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 10
-                            }
-                        }
-                    }
-                }
-            });
+            // progressChart removed — only jenisChart is initialized here
         },
 
         updateCharts(animate = true) {
@@ -413,17 +349,7 @@ export default {
 
             // Update progress bar chart
             try {
-                if (!this.progressChart || !this.progressChart.ctx) return this.initCharts();
-                this.progressChart.data.labels = this.progressPegawai.map(item =>
-                    item.nama_lengkap.length > 15 ? item.nama_lengkap.substring(0, 15) + '...' : item.nama_lengkap
-                );
-                this.progressChart.data.datasets[0].data = this.progressPegawai.map(item => Number(item.jp_tercapai_filtered || item.jp_tercapai || 0));
-                this.progressChart.data.datasets[1].data = this.progressPegawai.map(item => Number(item.jp_target || 0));
-                // safe mutate title
-                this.progressChart.options.plugins = this.progressChart.options.plugins || {};
-                this.progressChart.options.plugins.title = this.progressChart.options.plugins.title || { display: true, text: '' };
-                this.progressChart.options.plugins.title.text = `Progress JP — ${this.selectedYear}`;
-                this.progressChart.update(animate ? undefined : 'none');
+                // progressChart removed — nothing to update here
             } catch (e) {
                 this.initCharts();
             }

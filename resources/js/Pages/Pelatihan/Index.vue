@@ -4,10 +4,10 @@
             <div
                 class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 sm:gap-0">
                 <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Data Pelatihan</h2>
-                <Link :href="route('pelatihan.create')"
+                <button @click="startAddNew" v-if="!isAddingNew"
                     class="w-full sm:w-auto bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm">
-                <i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Pelatihan
-                </Link>
+                    <i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Pelatihan
+                </button>
             </div>
 
             <!-- Filters -->
@@ -80,57 +80,198 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-if="pelatihans.data.length === 0">
+                            <!-- Add New Row -->
+                            <tr v-if="isAddingNew" class="adding-row">
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
+                                    <v-combobox v-model="newRowPegawai" :items="pegawaiOptions"
+                                        item-title="nama_lengkap" item-value="id" placeholder="Pilih Pegawai"
+                                        density="compact" variant="outlined" hide-details clearable
+                                        class="mini-combobox"></v-combobox>
+                                </td>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 editable-cell">
+                                    <input v-model="newRow.nama_pelatihan"
+                                        class="text-xs border rounded px-1 py-1 w-full" placeholder="Nama Pelatihan" />
+                                    <input v-model="newRow.penyelenggara"
+                                        class="text-xs border rounded px-1 py-1 w-full mt-1"
+                                        placeholder="Penyelenggara" />
+                                </td>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
+                                    <v-combobox v-model="newRowJenis" :items="jenisPelatihan" item-title="nama"
+                                        item-value="id" placeholder="Pilih Jenis" density="compact" variant="outlined"
+                                        hide-details clearable class="mini-combobox"></v-combobox>
+                                </td>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 editable-cell date-jp-container">
+                                    <div class="flex gap-1">
+                                        <div class="date-inputs flex-1">
+                                            <input v-model="newRow.tanggal_mulai" type="date"
+                                                class="text-xs border rounded px-1 py-1 w-full mb-1" />
+                                            <input v-model="newRow.tanggal_selesai" type="date"
+                                                class="text-xs border rounded px-1 py-1 w-full" />
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
+                                    <input v-model="newRow.jp" type="number"
+                                        class="text-xs border rounded px-1 py-1 w-full" placeholder="JP" />
+                                </td>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
+                                    <div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
+                                        @dragover.prevent @drop.prevent="handleFileDrop($event, 'new')"
+                                        @click="$refs.newFileInput.click()">
+                                        <span v-if="!newRow.sertifikat" class="text-xs text-gray-500">
+                                            <i class="fas fa-cloud-upload"></i> Drop/Click
+                                        </span>
+                                        <span v-else class="text-xs text-green-600">
+                                            <i class="fas fa-file-pdf"></i> {{ newRow.sertifikat.name }}
+                                        </span>
+                                        <input ref="newFileInput" type="file" @change="handleFileSelect($event, 'new')"
+                                            accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                                    </div>
+                                </td>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
+                                    <div class="action-buttons">
+                                        <button @click="saveNew" class="text-green-600 hover:text-green-800 p-1"
+                                            title="Simpan">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                        <button @click="cancelAddNew" class="text-red-600 hover:text-red-800 p-1"
+                                            title="Batal">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Empty State -->
+                            <tr v-if="pelatihans.data.length === 0 && !isAddingNew">
                                 <td colspan="7" class="px-2 py-6 sm:px-3 sm:py-6 text-center text-gray-500">
                                     <i class="fas fa-database text-4xl mb-4"></i>
                                     <p>Tidak ada data pelatihan</p>
                                 </td>
                             </tr>
-                            <tr v-for="pelatihan in pelatihans.data" :key="pelatihan.id">
-                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ pelatihan.pegawai.nama_lengkap }}
+
+                            <!-- Existing Rows -->
+                            <tr v-for="pelatihan in pelatihans.data" :key="pelatihan.id"
+                                :class="{ 'editing-row': isEditing(pelatihan) }"
+                                @dblclick="!isEditing(pelatihan) && startEdit(pelatihan)"
+                                class="hover:bg-gray-50 cursor-pointer">
+
+                                <!-- Pegawai Column -->
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap"
+                                    :class="{ 'editable-cell': isEditing(pelatihan) }">
+                                    <div v-if="!isEditing(pelatihan)">
+                                        <div class="text-sm font-medium text-gray-900">{{ pelatihan.pegawai.nama_lengkap
+                                            }}</div>
+                                        <div class="text-xs text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP'
+                                            }}</div>
                                     </div>
-                                    <div class="text-xs text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP' }}
+                                    <v-combobox v-else v-model="pelatihan.pegawai_id" :items="pegawaiOptions"
+                                        item-title="nama_lengkap" item-value="id" density="compact" variant="outlined"
+                                        hide-details clearable class="mini-combobox">
+                                    </v-combobox>
+                                </td>
+
+                                <!-- Pelatihan Column -->
+                                <td class="px-2 py-2 sm:px-3 sm:py-2"
+                                    :class="{ 'editable-cell': isEditing(pelatihan) }">
+                                    <div v-if="!isEditing(pelatihan)">
+                                        <div class="text-xs font-medium text-gray-900">{{ pelatihan.nama_pelatihan }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">{{ pelatihan.penyelenggara }}</div>
+                                    </div>
+                                    <div v-else>
+                                        <input v-model="pelatihan.nama_pelatihan"
+                                            class="text-xs border rounded px-1 py-1 w-full mb-1" />
+                                        <input v-model="pelatihan.penyelenggara"
+                                            class="text-xs border rounded px-1 py-1 w-full" />
                                     </div>
                                 </td>
-                                <td class="px-2 py-2 sm:px-3 sm:py-2">
-                                    <div class="text-xs font-medium text-gray-900">{{ pelatihan.nama_pelatihan }}</div>
-                                    <div class="text-xs text-gray-500">{{ pelatihan.penyelenggara }}</div>
-                                </td>
-                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+
+                                <!-- Jenis Column -->
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap"
+                                    :class="{ 'editable-cell': isEditing(pelatihan) }">
+                                    <span v-if="!isEditing(pelatihan)"
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                                         :class="getJenisColor(pelatihan.jenis_pelatihan.nama)">
                                         {{ pelatihan.jenis_pelatihan.nama }}
                                     </span>
+                                    <v-combobox v-else v-model="pelatihan.jenis_pelatihan_id" :items="jenisPelatihan"
+                                        item-title="nama" item-value="id" density="compact" variant="outlined"
+                                        hide-details clearable class="mini-combobox">
+                                    </v-combobox>
                                 </td>
+
+                                <!-- Tanggal Column -->
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 editable-cell date-jp-container"
+                                    :class="{ 'editable-cell': isEditing(pelatihan) }">
+                                    <div v-if="!isEditing(pelatihan)" class="text-xs text-gray-500">
+                                        {{ formatDate(pelatihan.tanggal_mulai) }} - {{
+                                            formatDate(pelatihan.tanggal_selesai) }}
+                                    </div>
+                                    <div v-else class="flex gap-1">
+                                        <div class="date-inputs flex-1">
+                                            <input v-model="pelatihan.tanggal_mulai" type="date"
+                                                class="text-xs border rounded px-1 py-1 w-full mb-1" />
+                                            <input v-model="pelatihan.tanggal_selesai" type="date"
+                                                class="text-xs border rounded px-1 py-1 w-full" />
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- JP Column -->
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-900 font-semibold"
+                                    :class="{ 'editable-cell': isEditing(pelatihan) }">
+                                    <span v-if="!isEditing(pelatihan)">{{ pelatihan.jp }}</span>
+                                    <input v-else v-model="pelatihan.jp" type="number"
+                                        class="text-xs border rounded px-1 py-1 w-full" />
+                                </td>
+
+                                <!-- Sertifikat Column -->
                                 <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-500">
-                                    {{ formatDate(pelatihan.tanggal_mulai) }} - {{ formatDate(pelatihan.tanggal_selesai)
-                                    }}
+                                    <div v-if="!isEditing(pelatihan)">
+                                        <a v-if="pelatihan.sertifikat_path"
+                                            :href="`/storage/${pelatihan.sertifikat_path}`" target="_blank"
+                                            class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                        <span v-else class="text-gray-400">Tidak ada</span>
+                                    </div>
+                                    <div v-else
+                                        class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
+                                        @dragover.prevent @drop.prevent="handleFileDrop($event, pelatihan.id)"
+                                        @click="$refs[`fileInput${pelatihan.id}`][0].click()">
+                                        <span v-if="!editingFiles[pelatihan.id]" class="text-xs text-gray-500">
+                                            <i class="fas fa-cloud-upload"></i> Drop
+                                        </span>
+                                        <span v-else class="text-xs text-green-600">
+                                            <i class="fas fa-file-pdf"></i> {{ editingFiles[pelatihan.id].name }}
+                                        </span>
+                                        <input :ref="`fileInput${pelatihan.id}`" type="file"
+                                            @change="handleFileSelect($event, pelatihan.id)"
+                                            accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                                    </div>
                                 </td>
-                                <td
-                                    class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-900 font-semibold">
-                                    {{ pelatihan.jp }}
-                                </td>
-                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-500">
-                                    <a v-if="pelatihan.sertifikat_path" :href="`/storage/${pelatihan.sertifikat_path}`"
-                                        target="_blank" class="text-blue-600 hover:text-blue-800">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </a>
-                                    <span v-else class="text-gray-400">Tidak ada</span>
-                                </td>
+
+                                <!-- Action Column -->
                                 <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
-                                    <div class="flex items-center space-x-2">
-                                        <Link :href="route('pelatihan.show', pelatihan.id)"
-                                            class="text-blue-600 hover:text-blue-800 p-1">
-                                        <i class="fas fa-eye"></i>
-                                        </Link>
-                                        <Link :href="route('pelatihan.edit', pelatihan.id)"
-                                            class="text-yellow-600 hover:text-yellow-800 p-1">
-                                        <i class="fas fa-edit"></i>
-                                        </Link>
+                                    <div v-if="!isEditing(pelatihan)" class="action-buttons">
+                                        <button @click="startEdit(pelatihan)"
+                                            class="text-yellow-600 hover:text-yellow-800 p-1" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
                                         <button @click="deleteItem(pelatihan.id)"
-                                            class="text-red-600 hover:text-red-800 p-1">
+                                            class="text-red-600 hover:text-red-800 p-1" title="Hapus">
                                             <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div v-else class="action-buttons">
+                                        <button @click="saveEdit(pelatihan)"
+                                            class="text-green-600 hover:text-green-800 p-1" title="Simpan">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                        <button @click="cancelEdit(pelatihan)"
+                                            class="text-red-600 hover:text-red-800 p-1" title="Batal">
+                                            <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -165,21 +306,40 @@ export default {
     props: {
         pelatihans: Object,
         jenisPelatihan: Array,
+        pegawais: Array,
     },
     data() {
         return {
             filters: {
                 search: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('search') || '' : '',
                 jenis: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('jenis') || '' : '',
-            }
-            ,
-            searchTimer: null
+            },
+            searchTimer: null,
+            editingRows: {},
+            isAddingNew: false,
+            newRow: {
+                pegawai_id: '',
+                nama_pelatihan: '',
+                jenis_pelatihan_id: '',
+                penyelenggara: '',
+                tanggal_mulai: '',
+                tanggal_selesai: '',
+                jp: '',
+                sertifikat: null
+            },
+            originalData: {},
+            newRowPegawai: null,
+            newRowJenis: null,
+            editingFiles: {}
         };
     },
     computed: {
         jenisPelatihanItems() {
             const items = this.jenisPelatihan.map(jenis => jenis.nama);
             return ['Semua Jenis', ...items];
+        },
+        pegawaiOptions() {
+            return this.pegawais || [];
         }
     },
     methods: {
@@ -221,9 +381,164 @@ export default {
             if (confirm('Yakin ingin menghapus?')) {
                 router.delete(route('pelatihan.destroy', id));
             }
+        },
+
+        // Inline editing methods
+        startEdit(pelatihan) {
+            this.editingRows = { ...this.editingRows, [pelatihan.id]: true };
+            this.originalData = { ...this.originalData, [pelatihan.id]: { ...pelatihan } };
+        },
+
+        cancelEdit(pelatihan) {
+            const { [pelatihan.id]: removed, ...remaining } = this.editingRows;
+            this.editingRows = remaining;
+
+            // Reset data to original
+            if (this.originalData[pelatihan.id]) {
+                Object.assign(pelatihan, this.originalData[pelatihan.id]);
+                const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
+                this.originalData = remainingData;
+            }
+        },
+
+        async saveEdit(pelatihan) {
+            try {
+                const formData = new FormData();
+
+                // Add form fields
+                formData.append('pegawai_id', pelatihan.pegawai_id);
+                formData.append('nama_pelatihan', pelatihan.nama_pelatihan);
+                formData.append('jenis_pelatihan_id', this.getJenisId(pelatihan.jenis_pelatihan?.nama || pelatihan.jenis_pelatihan_id));
+                formData.append('penyelenggara', pelatihan.penyelenggara);
+                formData.append('tanggal_mulai', pelatihan.tanggal_mulai);
+                formData.append('tanggal_selesai', pelatihan.tanggal_selesai);
+                formData.append('jp', pelatihan.jp);
+                formData.append('_method', 'PUT'); // Laravel method spoofing
+
+                // Add file if selected
+                if (this.editingFiles[pelatihan.id]) {
+                    formData.append('sertifikat', this.editingFiles[pelatihan.id]);
+                }
+
+                await router.post(route('pelatihan.update', pelatihan.id), formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    preserveState: true,
+                    onSuccess: () => {
+                        const { [pelatihan.id]: removed, ...remaining } = this.editingRows;
+                        this.editingRows = remaining;
+                        const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
+                        this.originalData = remainingData;
+                        // Remove file from editing files
+                        const { [pelatihan.id]: removedFile, ...remainingFiles } = this.editingFiles;
+                        this.editingFiles = remainingFiles;
+                    }
+                });
+            } catch (error) {
+                console.error('Save failed:', error);
+            }
+        },
+
+        startAddNew() {
+            this.isAddingNew = true;
+            this.newRow = {
+                pegawai_id: '',
+                nama_pelatihan: '',
+                jenis_pelatihan_id: '',
+                penyelenggara: '',
+                tanggal_mulai: '',
+                tanggal_selesai: '',
+                jp: '',
+                sertifikat_path: ''
+            };
+        },
+
+        cancelAddNew() {
+            this.isAddingNew = false;
+        },
+
+        async saveNew() {
+            try {
+                const formData = new FormData();
+
+                // Add form fields
+                formData.append('pegawai_id', this.newRow.pegawai_id);
+                formData.append('nama_pelatihan', this.newRow.nama_pelatihan);
+                formData.append('jenis_pelatihan_id', this.getJenisId(this.newRow.jenis_pelatihan_id));
+                formData.append('penyelenggara', this.newRow.penyelenggara);
+                formData.append('tanggal_mulai', this.newRow.tanggal_mulai);
+                formData.append('tanggal_selesai', this.newRow.tanggal_selesai);
+                formData.append('jp', this.newRow.jp);
+
+                // Add file if selected
+                if (this.newRow.sertifikat) {
+                    formData.append('sertifikat', this.newRow.sertifikat);
+                }
+
+                await router.post(route('pelatihan.store'), formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    preserveState: true,
+                    onSuccess: () => {
+                        this.isAddingNew = false;
+                        this.resetNewRow();
+                    }
+                });
+            } catch (error) {
+                console.error('Save failed:', error);
+            }
+        },
+
+        getJenisId(jenisName) {
+            if (typeof jenisName === 'number') return jenisName;
+            const jenis = this.jenisPelatihan.find(j => j.nama === jenisName);
+            return jenis ? jenis.id : jenisName;
+        },
+
+        isEditing(pelatihan) {
+            return this.editingRows[pelatihan.id] === true;
+        },
+
+        // File handling methods
+        handleFileSelect(event, rowId) {
+            const file = event.target.files[0];
+            if (file) {
+                if (rowId === 'new') {
+                    this.newRow.sertifikat = file;
+                } else {
+                    this.editingFiles = { ...this.editingFiles, [rowId]: file };
+                }
+            }
+        },
+
+        handleFileDrop(event, rowId) {
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                if (rowId === 'new') {
+                    this.newRow.sertifikat = file;
+                } else {
+                    this.editingFiles = { ...this.editingFiles, [rowId]: file };
+                }
+            }
+        },
+
+        resetNewRow() {
+            this.newRow = {
+                pegawai_id: '',
+                nama_pelatihan: '',
+                jenis_pelatihan_id: '',
+                penyelenggara: '',
+                tanggal_mulai: '',
+                tanggal_selesai: '',
+                jp: '',
+                sertifikat: null
+            };
+            this.newRowPegawai = null;
+            this.newRowJenis = null;
         }
-    }
-    ,
+    },
     watch: {
         'filters.search'(newVal, oldVal) {
             if (this.searchTimer) clearTimeout(this.searchTimer);
@@ -231,6 +546,12 @@ export default {
             this.searchTimer = setTimeout(() => {
                 this.submitFilter();
             }, 500);
+        },
+        newRowPegawai(value) {
+            this.newRow.pegawai_id = value ? value.id : '';
+        },
+        newRowJenis(value) {
+            this.newRow.jenis_pelatihan_id = value ? value.id : '';
         }
     },
     beforeUnmount() {
@@ -273,5 +594,83 @@ export default {
 :deep(.v-field--focused .v-field__outline__end) {
     border-color: #3B82F6;
     border-width: 1px;
+}
+
+/* Inline editing styles */
+.editing-row {
+    background-color: #fef3cd !important;
+    border: 2px solid #fbbf24 !important;
+}
+
+.adding-row {
+    background-color: #dbeafe !important;
+    border: 2px solid #3b82f6 !important;
+}
+
+.editable-cell input,
+.editable-cell select {
+    font-size: 11px;
+    padding: 2px 4px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    width: 100%;
+    min-width: 60px;
+}
+
+.editable-cell input:focus,
+.editable-cell select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+tr:hover:not(.editing-row):not(.adding-row) {
+    background-color: #f9fafb;
+    cursor: pointer;
+}
+
+/* File upload styles */
+.upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9fafb;
+    transition: all 0.2s;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.upload-area:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+    color: #3b82f6;
+}
+
+.upload-area.drag-over {
+    border-color: #10b981;
+    background-color: #ecfdf5;
+    color: #10b981;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.action-buttons button {
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.action-buttons button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 </style>

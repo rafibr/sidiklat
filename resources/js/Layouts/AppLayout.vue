@@ -21,7 +21,7 @@
 
                 <!-- Navigation Tabs -->
                 <div class="bg-white/95 backdrop-blur-sm p-1 sm:p-2 rounded-lg shadow-lg mb-3 md:mb-6 overflow-x-auto">
-                    <div class="flex gap-1 sm:gap-2 justify-start sm:justify-center min-w-max sm:min-w-0 px-2 sm:px-0">
+                    <div class="flex gap-1 sm:gap-2 justify-center px-2 sm:px-0">
                         <Link :href="route('dashboard')"
                             class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
                             :class="{ 'active': $page.component === 'Dashboard/Index' }">

@@ -100,10 +100,13 @@ class PelatihanController extends Controller
 		$pelatihans = $query->latest()->paginate(10);
 		// Provide jenis list from DB (id + nama) for filters/forms
 		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
+		// Provide pegawai list for inline editing
+		$pegawais = Pegawai::select('id', 'nama_lengkap')->orderBy('nama_lengkap')->get();
 
 		return Inertia::render('Pelatihan/Index', [
 			'pelatihans' => $pelatihans,
 			'jenisPelatihan' => $jenisPelatihan,
+			'pegawais' => $pegawais,
 		]);
 	}
 
@@ -129,10 +132,15 @@ class PelatihanController extends Controller
 			'tanggal_mulai' => 'required|date',
 			'tanggal_selesai' => 'required|date',
 			'jp' => 'required|integer|min:1',
-			'status' => 'required|in:selesai,sedang_berjalan,akan_datang',
+			'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
 			'deskripsi' => 'nullable|string',
 			'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
 		]);
+
+		// Set default status if not provided
+		if (!isset($validated['status'])) {
+			$validated['status'] = 'selesai';
+		}
 
 		if ($request->hasFile('sertifikat')) {
 			$path = $request->file('sertifikat')->store('sertifikat', 'public');
@@ -181,13 +189,18 @@ class PelatihanController extends Controller
 			'tanggal_mulai' => 'required|date',
 			'tanggal_selesai' => 'required|date',
 			'jp' => 'required|integer|min:1',
-			'status' => 'required|in:selesai,sedang_berjalan,akan_datang',
+			'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
 			'deskripsi' => 'nullable|string',
 			'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
 		]);
 
 		$oldJp = $pelatihan->jp;
 		$oldStatus = $pelatihan->status;
+
+		// Set default status if not provided
+		if (!isset($validated['status'])) {
+			$validated['status'] = $pelatihan->status ?? 'selesai';
+		}
 
 		if ($request->hasFile('sertifikat')) {
 			// Delete old certificate

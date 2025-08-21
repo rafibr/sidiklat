@@ -21,7 +21,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Pelatihan</label>
-                        <select v-model="filters.jenis"
+                        <select v-model="filters.jenis" @change="submitFilter"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Semua Jenis</option>
                             <option v-for="jenis in jenisPelatihan" :key="jenis.id" :value="jenis.nama">
@@ -31,16 +31,13 @@
                     </div>
 
                     <div class="flex items-end gap-2">
-                        <button type="submit"
-                            class="flex-1 sm:flex-none bg-blue-600 text-white px-3 sm:px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-search mr-1 sm:mr-2"></i>
-                            <span class="hidden sm:inline">Filter</span>
-                            <span class="sm:hidden">Cari</span>
-                        </button>
-                        <button type="button" @click="resetFilter"
-                            class="flex-1 sm:flex-none bg-gray-500 text-white px-3 sm:px-4 py-2 text-sm rounded-md hover:bg-gray-600 transition-colors text-center">
-                            Reset
-                        </button>
+                        <!-- Filter button removed: search & jenis auto-apply -->
+                        <div class="flex-1">
+                            <button type="button" @click="resetFilter"
+                                class="w-full bg-gray-500 text-white px-3 sm:px-4 py-2 text-sm rounded-md hover:bg-gray-600 transition-colors text-center">
+                                Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -179,6 +176,8 @@ export default {
                 search: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('search') || '' : '',
                 jenis: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('jenis') || '' : '',
             }
+            ,
+            searchTimer: null
         };
     },
     methods: {
@@ -221,6 +220,19 @@ export default {
                 router.delete(route('pelatihan.destroy', id));
             }
         }
+    }
+    ,
+    watch: {
+        'filters.search'(newVal, oldVal) {
+            if (this.searchTimer) clearTimeout(this.searchTimer);
+            // debounce 500ms
+            this.searchTimer = setTimeout(() => {
+                this.submitFilter();
+            }, 500);
+        }
+    },
+    beforeUnmount() {
+        if (this.searchTimer) clearTimeout(this.searchTimer);
     }
 };
 </script>

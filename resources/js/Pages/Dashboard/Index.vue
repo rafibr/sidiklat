@@ -119,12 +119,17 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="pegawai in progressPegawai" :key="pegawai.id" class="hover:bg-gray-50">
+                            <tr v-for="pegawai in progressPegawai" :key="pegawai.id"
+                                class="hover:bg-gray-50 cursor-pointer" @click="goToPegawai(pegawai.id)" tabindex="0"
+                                @keydown.enter="goToPegawai(pegawai.id)">
                                 <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ pegawai.nama_lengkap }}</div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        <Link :href="route('pegawai.show', { pegawai: pegawai.id })" @click.stop>{{
+                                            pegawai.nama_lengkap }}</Link>
+                                    </div>
                                     <div class="text-xs mt-1 sm:hidden">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </td>
                                 <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap hidden sm:table-cell">
@@ -160,12 +165,13 @@
 </template>
 
 <script>
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 export default {
     components: {
         AppLayout,
+        Link,
     },
     props: {
         stats: Object,
@@ -233,6 +239,12 @@ export default {
         changeYear(event) {
             const year = parseInt(event.target.value);
             router.get(route('dashboard'), { year: year }, { preserveState: true });
+        },
+
+        goToPegawai(id) {
+            if (!id) return;
+            // use Inertia router to navigate to pegawai detail
+            router.get(route('pegawai.show', { pegawai: id }));
         },
         // Generic helpers adapted from Chart.js docs
         addData(chart, label, newData) {
@@ -323,8 +335,8 @@ export default {
                             display: true,
                             text: `Distribusi Pelatihan — ${this.selectedYear}`
                         },
-                        legend: { display: false },
-                        tooltip: { enabled: false }
+                        legend: { display: true, position: 'bottom' },
+                        tooltip: { enabled: true }
                     }
                 }
             });
@@ -361,13 +373,14 @@ export default {
                     animation: false,
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
                         title: {
                             display: true,
                             text: `Progress JP — ${this.selectedYear}`
                         },
-                        legend: { display: false },
-                        tooltip: { enabled: false }
+                        legend: { display: true, position: 'top' },
+                        tooltip: { enabled: true }
                     },
                     scales: {
                         y: {

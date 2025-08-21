@@ -174,8 +174,35 @@ export default {
         availableYears: Array,
         selectedYear: Number,
     },
+    data() {
+        return {
+            jenisChart: null,
+            progressChart: null,
+        };
+    },
     mounted() {
-        this.initCharts();
+        // ensure DOM refs are ready before creating charts
+        this.$nextTick(() => this.initCharts());
+    },
+    beforeUnmount() {
+        // clean up Chart instances to avoid Chart.js trying to draw on removed canvas
+        if (this.jenisChart) {
+            try { this.jenisChart.destroy(); } catch (e) { }
+            this.jenisChart = null;
+        }
+        if (this.progressChart) {
+            try { this.progressChart.destroy(); } catch (e) { }
+            this.progressChart = null;
+        }
+    },
+    watch: {
+        pelatihanByJenis() {
+            // when props change from Inertia, update without animation to avoid flicker
+            this.updateCharts(false);
+        },
+        progressPegawai() {
+            this.updateCharts(false);
+        }
     },
     methods: {
         formatNumber(num) {
@@ -207,13 +234,69 @@ export default {
             const year = parseInt(event.target.value);
             router.get(route('dashboard'), { year: year }, { preserveState: true });
         },
+        // Generic helpers adapted from Chart.js docs
+        addData(chart, label, newData) {
+            if (!chart || !chart.ctx) return;
+            chart.data.labels.push(label);
+            chart.data.datasets.forEach((dataset, idx) => {
+                // if newData is array, use element per dataset, otherwise use same value
+                if (Array.isArray(newData)) dataset.data.push(newData[idx] || 0);
+                else dataset.data.push(newData);
+            });
+            chart.update();
+        },
+        removeData(chart) {
+            if (!chart || !chart.ctx) return;
+            chart.data.labels.pop();
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.pop();
+            });
+            chart.update();
+        },
+        updateConfigByMutating(chart, title) {
+            if (!chart || !chart.ctx) return;
+            chart.options.plugins = chart.options.plugins || {};
+            chart.options.plugins.title = chart.options.plugins.title || { display: true, text: '' };
+            chart.options.plugins.title.text = title;
+            chart.update();
+        },
+        updateConfigAsNewObject(chart, options) {
+            if (!chart || !chart.ctx) return;
+            chart.options = options;
+            chart.update();
+        },
+        updateScales(chart, scalesObj) {
+            if (!chart || !chart.ctx) return;
+            chart.options.scales = scalesObj;
+            chart.update();
+        },
         async initCharts() {
             // Import Chart.js dynamically to avoid SSR issues
             const Chart = (await import('chart.js/auto')).default;
 
+            // destroy previous if exist
+            if (this.jenisChart) {
+                try { this.jenisChart.destroy(); } catch (e) { }
+                this.jenisChart = null;
+            }
+            if (this.progressChart) {
+                try { this.progressChart.destroy(); } catch (e) { }
+                this.progressChart = null;
+            }
+
             // Jenis Chart
-            const jenisCtx = this.$refs.jenisChart.getContext('2d');
-            new Chart(jenisCtx, {
+            if (!this.$refs.jenisChart || typeof this.$refs.jenisChart.getContext !== 'function') {
+                // refs not available yet; try again on next tick
+                this.$nextTick(() => this.initCharts());
+                return;
+            }
+            // pass the canvas element itself to Chart constructor (matches provided format)
+            const jenisCanvas = this.$refs.jenisChart;
+            if (!jenisCanvas) {
+                this.$nextTick(() => this.initCharts());
+                return;
+            }
+            this.jenisChart = new Chart(jenisCanvas, {
                 type: 'pie',
                 data: {
                     labels: this.pelatihanByJenis.map(item => item.jenis_pelatihan || 'Lainnya'),
@@ -232,19 +315,31 @@ export default {
                     }]
                 },
                 options: {
+                    animation: false,
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+                        title: {
+                            display: true,
+                            text: `Distribusi Pelatihan — ${this.selectedYear}`
+                        },
+                        legend: { display: false },
+                        tooltip: { enabled: false }
                     }
                 }
             });
 
             // Progress Chart
-            const progressCtx = this.$refs.progressChart.getContext('2d');
-            new Chart(progressCtx, {
+            if (!this.$refs.progressChart || typeof this.$refs.progressChart.getContext !== 'function') {
+                this.$nextTick(() => this.initCharts());
+                return;
+            }
+            const progressCanvas = this.$refs.progressChart;
+            if (!progressCanvas) {
+                this.$nextTick(() => this.initCharts());
+                return;
+            }
+            this.progressChart = new Chart(progressCanvas, {
                 type: 'bar',
                 data: {
                     labels: this.progressPegawai.map(item =>
@@ -252,23 +347,27 @@ export default {
                     ),
                     datasets: [{
                         label: 'JP Tercapai',
-                        data: this.progressPegawai.map(item => item.jp_tercapai_filtered || item.jp_tercapai || 0),
+                        data: this.progressPegawai.map(item => Number(item.jp_tercapai_filtered || item.jp_tercapai || 0)),
                         backgroundColor: '#3B82F6',
                         borderRadius: 4,
                     }, {
                         label: 'JP Target',
-                        data: this.progressPegawai.map(item => item.jp_target),
+                        data: this.progressPegawai.map(item => Number(item.jp_target || 0)),
                         backgroundColor: '#E5E7EB',
                         borderRadius: 4,
                     }]
                 },
                 options: {
+                    animation: false,
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'top'
-                        }
+                        title: {
+                            display: true,
+                            text: `Progress JP — ${this.selectedYear}`
+                        },
+                        legend: { display: false },
+                        tooltip: { enabled: false }
                     },
                     scales: {
                         y: {
@@ -280,7 +379,42 @@ export default {
                     }
                 }
             });
-        }
+        },
+
+        updateCharts(animate = true) {
+            // Update pie
+            try {
+                // if chart instance is missing or its drawing context is gone, recreate
+                if (!this.jenisChart || !this.jenisChart.ctx) return this.initCharts();
+                this.jenisChart.data.labels = this.pelatihanByJenis.map(item => item.jenis_pelatihan || 'Lainnya');
+                this.jenisChart.data.datasets[0].data = this.pelatihanByJenis.map(item => Number(item.total) || 0);
+                // safe mutate title
+                this.jenisChart.options.plugins = this.jenisChart.options.plugins || {};
+                this.jenisChart.options.plugins.title = this.jenisChart.options.plugins.title || { display: true, text: '' };
+                this.jenisChart.options.plugins.title.text = `Distribusi Pelatihan — ${this.selectedYear}`;
+                this.jenisChart.update(animate ? undefined : 'none');
+            } catch (e) {
+                // recreate if anything wrong
+                this.initCharts();
+            }
+
+            // Update progress bar chart
+            try {
+                if (!this.progressChart || !this.progressChart.ctx) return this.initCharts();
+                this.progressChart.data.labels = this.progressPegawai.map(item =>
+                    item.nama_lengkap.length > 15 ? item.nama_lengkap.substring(0, 15) + '...' : item.nama_lengkap
+                );
+                this.progressChart.data.datasets[0].data = this.progressPegawai.map(item => Number(item.jp_tercapai_filtered || item.jp_tercapai || 0));
+                this.progressChart.data.datasets[1].data = this.progressPegawai.map(item => Number(item.jp_target || 0));
+                // safe mutate title
+                this.progressChart.options.plugins = this.progressChart.options.plugins || {};
+                this.progressChart.options.plugins.title = this.progressChart.options.plugins.title || { display: true, text: '' };
+                this.progressChart.options.plugins.title.text = `Progress JP — ${this.selectedYear}`;
+                this.progressChart.update(animate ? undefined : 'none');
+            } catch (e) {
+                this.initCharts();
+            }
+        },
     }
 };
 </script>

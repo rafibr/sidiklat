@@ -21,13 +21,9 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Pelatihan</label>
-                        <select v-model="filters.jenis" @change="submitFilter"
-                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Semua Jenis</option>
-                            <option v-for="jenis in jenisPelatihan" :key="jenis.id" :value="jenis.nama">
-                                {{ jenis.nama }}
-                            </option>
-                        </select>
+                        <v-combobox v-model="filters.jenis" :items="jenisPelatihanItems"
+                            @update:model-value="submitFilter" placeholder="Pilih atau ketik jenis..." clearable
+                            density="compact" variant="outlined" hide-details class="vuetify-input"></v-combobox>
                     </div>
 
                     <div class="flex items-end gap-2">
@@ -180,6 +176,12 @@ export default {
             searchTimer: null
         };
     },
+    computed: {
+        jenisPelatihanItems() {
+            const items = this.jenisPelatihan.map(jenis => jenis.nama);
+            return ['Semua Jenis', ...items];
+        }
+    },
     methods: {
         getJenisColor(jenis) {
             const colorMap = {
@@ -236,3 +238,40 @@ export default {
     }
 };
 </script>
+
+<style scoped>
+.vuetify-input {
+    height: 42px;
+}
+
+/* Override Vuetify styling to match Tailwind */
+:deep(.v-field) {
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+:deep(.v-field--focused) {
+    box-shadow: 0 0 0 2px #3B82F6;
+}
+
+:deep(.v-field__outline) {
+    --v-field-border-width: 1px;
+    --v-field-border-opacity: 1;
+}
+
+:deep(.v-field__outline__start),
+:deep(.v-field__outline__notch):after,
+:deep(.v-field__outline__notch):before,
+:deep(.v-field__outline__end) {
+    border-color: #d1d5db;
+    border-width: 1px;
+}
+
+:deep(.v-field--focused .v-field__outline__start),
+:deep(.v-field--focused .v-field__outline__notch):after,
+:deep(.v-field--focused .v-field__outline__notch):before,
+:deep(.v-field--focused .v-field__outline__end) {
+    border-color: #3B82F6;
+    border-width: 1px;
+}
+</style>

@@ -1,6 +1,10 @@
 <template>
     <AppLayout>
-        <div class="p-3 sm:p-4 md:p-6">
+        <div class="relative p-3 sm:p-4 md:p-6">
+            <!-- Loading overlay -->
+            <div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
+                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
             <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Perbandingan Data Pelatihan
             </h2>
 
@@ -151,7 +155,7 @@ export default {
             yearToAdd: '',
             chartComparison: null,
             chartTrend: null,
-            ChartModule: null,
+            loading: false,
         };
     },
     computed: {
@@ -168,17 +172,36 @@ export default {
         }
     },
     mounted() {
-        this.initCharts();
+        // ensure DOM refs are ready before creating charts
+        this.loading = true;
+        this.$nextTick(() => this.initCharts());
+    },
+    beforeUnmount() {
+        // clean up Chart instances to avoid Chart.js trying to draw on removed canvas
+        if (this.chartComparison) {
+            try { this.chartComparison.destroy(); } catch (e) { }
+            this.chartComparison = null;
+        }
+        if (this.chartTrend) {
+            try { this.chartTrend.destroy(); } catch (e) { }
+            this.chartTrend = null;
+        }
     },
     watch: {
         selectedYears() {
+            this.loading = true;
             this.initCharts();
+            this.$nextTick(() => { this.loading = false; });
         },
         comparisonData() {
+            this.loading = true;
             this.initCharts();
+            this.$nextTick(() => { this.loading = false; });
         },
         monthlyData() {
+            this.loading = true;
             this.initCharts();
+            this.$nextTick(() => { this.loading = false; });
         }
     },
     methods: {
@@ -197,6 +220,7 @@ export default {
             const yearsToCompare = years || this.selectedYears;
             if (yearsToCompare.length === 0) return;
 
+            this.loading = true;
             router.get(route('pelatihan.comparison'), {
                 years: yearsToCompare,
             }, { preserveState: true });
@@ -236,127 +260,114 @@ export default {
         },
         async initCharts() {
             // Import Chart.js dynamically to avoid SSR issues
-            try {
-                const mod = await import('chart.js/auto');
-                const Chart = mod && (mod.default || mod.Chart) ? (mod.default || mod.Chart) : mod;
+            const Chart = (await import('chart.js/auto')).default;
 
-                // Always destroy existing chart instances first to avoid drawing into removed canvases
-                if (this.chartComparison) {
-                    try { this.chartComparison.destroy(); } catch (e) { /* ignore */ }
-                    this.chartComparison = null;
-                }
-                if (this.chartTrend) {
-                    try { this.chartTrend.destroy(); } catch (e) { /* ignore */ }
-                    this.chartTrend = null;
-                }
+            // destroy previous if exist
+            if (this.chartComparison) {
+                try { this.chartComparison.destroy(); } catch (e) { }
+                this.chartComparison = null;
+            }
+            if (this.chartTrend) {
+                try { this.chartTrend.destroy(); } catch (e) { }
+                this.chartTrend = null;
+            }
 
-                // Wait for DOM to update
-                await this.$nextTick();
+            // Comparison Chart
+            if (this.hasComparisonData && this.$refs.comparisonChart && typeof this.$refs.comparisonChart.getContext === 'function') {
+                const comparisonCanvas = this.$refs.comparisonChart;
+                if (comparisonCanvas) {
+                    const labels = this.comparisonData.map(item => item.jenis);
+                    
+                    const jenisColors = labels.map(j => {
+                        const colorMap = {
+                            'Diklat Struktural': 'rgba(59,130,246,0.85)',
+                            'Diklat Fungsional': 'rgba(16,185,129,0.85)',
+                            'Diklat Teknis': 'rgba(139,92,246,0.85)',
+                            'Workshop': 'rgba(245,158,11,0.85)',
+                            'Seminar': 'rgba(239,68,68,0.85)',
+                            'Pelatihan Jarak Jauh': 'rgba(99,102,241,0.85)',
+                            'E-Learning': 'rgba(6,182,212,0.85)'
+                        };
+                        if (colorMap[j]) return colorMap[j];
+                        let hash = 0;
+                        for (let i = 0; i < j.length; i++) {
+                            hash = ((hash << 5) - hash) + j.charCodeAt(i);
+                            hash |= 0;
+                        }
+                        const hue = Math.abs(hash) % 360;
+                        return `hsla(${hue},70%,50%,0.85)`;
+                    });
 
-                // defensive helpers
-                const getCanvasCtx = (refName) => {
-                    const ref = this.$refs && this.$refs[refName];
-                    if (!ref || typeof ref.getContext !== 'function') return null;
-                    try {
-                        return ref.getContext('2d');
-                    } catch (err) {
-                        return null;
-                    }
-                };
-
-                const labels = Array.isArray(this.comparisonData) ? this.comparisonData.map(i => i.jenis) : [];
-
-                // compute color arrays aligned to labels
-                const computeHsl = (key, sat = '70%', light = '50%') => {
-                    let h = 0;
-                    const s = String(key || '');
-                    for (let i = 0; i < s.length; i++) {
-                        h = ((h << 5) - h) + s.charCodeAt(i);
-                        h |= 0;
-                    }
-                    return Math.abs(h) % 360;
-                };
-
-                const jenisColors = labels.map(j => {
-                    // prefer known mapping for stability
-                    const map = {
-                        'Diklat Struktural': 'rgba(59,130,246,0.85)',
-                        'Diklat Fungsional': 'rgba(16,185,129,0.85)',
-                        'Diklat Teknis': 'rgba(139,92,246,0.85)',
-                        'Workshop': 'rgba(245,158,11,0.85)',
-                        'Seminar': 'rgba(239,68,68,0.85)',
-                        'Pelatihan Jarak Jauh': 'rgba(99,102,241,0.85)',
-                        'E-Learning': 'rgba(6,182,212,0.85)'
-                    };
-                    if (map[j]) return map[j];
-                    const h = computeHsl(j);
-                    return `hsla(${h},70%,50%,0.85)`;
-                });
-
-                const jenisBorderColors = labels.map(j => {
-                    const h = computeHsl(j);
-                    return `hsla(${h},70%,35%,1)`;
-                });
-
-                // Comparison chart
-                const comparisonCtx = getCanvasCtx('comparisonChart');
-                if (this.hasComparisonData && comparisonCtx && labels.length > 0) {
-                    const datasets = (Array.isArray(this.selectedYears) ? this.selectedYears : []).map(year => ({
+                    const datasets = this.selectedYears.map(year => ({
                         label: String(year),
-                        data: (this.comparisonData || []).map(item => item[year] || 0),
-                        backgroundColor: jenisColors.slice(),
-                        borderColor: jenisBorderColors.slice(),
+                        data: this.comparisonData.map(item => item[year] || 0),
+                        backgroundColor: jenisColors,
+                        borderColor: jenisColors.map(color => color.replace('0.85', '1')),
                         borderWidth: 1
                     }));
 
-                    if (datasets.length > 0) {
-                        this.chartComparison = new Chart(comparisonCtx, {
-                            type: 'bar',
-                            data: { labels, datasets },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { position: 'top' } },
-                                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { maxRotation: 45, minRotation: 45 } } }
+                    this.chartComparison = new Chart(comparisonCanvas, {
+                        type: 'bar',
+                        data: { labels, datasets },
+                        options: {
+                            animation: false,
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { 
+                                legend: { position: 'top' },
+                                title: {
+                                    display: true,
+                                    text: 'Perbandingan Per Jenis Pelatihan'
+                                }
+                            },
+                            scales: { 
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } }, 
+                                x: { ticks: { maxRotation: 45, minRotation: 45 } } 
                             }
-                        });
-                    }
+                        }
+                    });
                 }
+            }
 
-                // Trend chart
-                const trendCtx = getCanvasCtx('trendChart');
-                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
-
-                if (this.hasMonthlyData && trendCtx) {
-                    const trendYears = (Array.isArray(this.selectedYears) ? this.selectedYears : []).slice(0, 2);
+            // Trend Chart
+            if (this.hasMonthlyData && this.$refs.trendChart && typeof this.$refs.trendChart.getContext === 'function') {
+                const trendCanvas = this.$refs.trendChart;
+                if (trendCanvas) {
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+                    const trendYears = this.selectedYears.slice(0, 2);
                     const trendColors = ['rgb(59,130,246)', 'rgb(139,92,246)'];
 
                     const datasets = trendYears.map((year, idx) => ({
                         label: String(year),
-                        data: (this.monthlyData || []).map(item => item[year] || 0),
+                        data: this.monthlyData.map(item => item[year] || 0),
                         borderColor: trendColors[idx % trendColors.length],
                         backgroundColor: trendColors[idx % trendColors.length].replace('rgb', 'rgba').replace(')', ', 0.12)'),
                         tension: 0.4,
                         fill: true
                     }));
 
-                    if (datasets.length > 0) {
-                        this.chartTrend = new Chart(trendCtx, {
-                            type: 'line',
-                            data: { labels: monthNames, datasets },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { position: 'top' } },
-                                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                            }
-                        });
-                    }
+                    this.chartTrend = new Chart(trendCanvas, {
+                        type: 'line',
+                        data: { labels: monthNames, datasets },
+                        options: {
+                            animation: false,
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { 
+                                legend: { position: 'top' },
+                                title: {
+                                    display: true,
+                                    text: 'Tren Bulanan'
+                                }
+                            },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                        }
+                    });
                 }
-
-            } catch (e) {
-                console.error('Gagal inisialisasi Chart.js', e);
             }
+
+            // finished initializing charts
+            this.loading = false;
         }
     }
 };

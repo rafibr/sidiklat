@@ -165,12 +165,16 @@
                                         <div class="text-xs text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP'
                                             }}</div>
                                     </div>
-                                    <v-combobox v-else v-model="pelatihan.pegawai_id" :items="pegawaiOptions"
-                                        item-title="nama_lengkap" item-value="id" density="compact" variant="outlined"
-                                        hide-details clearable class="mini-combobox">
+                                    <v-combobox v-else
+                                        :model-value="pegawaiOptions.find(p => p.id === pelatihan.pegawai_id)"
+                                        @update:model-value="pelatihan.pegawai_id = $event ? $event.id : null"
+                                        :items="pegawaiOptions" item-title="nama_lengkap" item-value="id"
+                                        density="compact" variant="outlined" hide-details clearable
+                                        class="mini-combobox">
                                     </v-combobox>
                                 </td>
 
+                                <!-- Pelatihan Column -->
                                 <!-- Pelatihan Column -->
                                 <td class="px-2 py-2 sm:px-3 sm:py-2"
                                     :class="{ 'editable-cell': isEditing(pelatihan) }">
@@ -195,12 +199,15 @@
                                         :class="getJenisColor(pelatihan.jenis_pelatihan.nama)">
                                         {{ pelatihan.jenis_pelatihan.nama }}
                                     </span>
-                                    <v-combobox v-else v-model="pelatihan.jenis_pelatihan_id" :items="jenisPelatihan"
-                                        item-title="nama" item-value="id" density="compact" variant="outlined"
-                                        hide-details clearable class="mini-combobox">
+                                    <v-combobox v-else
+                                        :model-value="jenisPelatihan.find(j => j.id === pelatihan.jenis_pelatihan_id)"
+                                        @update:model-value="pelatihan.jenis_pelatihan_id = $event ? $event.id : null"
+                                        :items="jenisPelatihan" item-title="nama" item-value="id" density="compact"
+                                        variant="outlined" hide-details clearable class="mini-combobox">
                                     </v-combobox>
                                 </td>
 
+                                <!-- Tanggal Column -->
                                 <!-- Tanggal Column -->
                                 <td class="px-2 py-2 sm:px-3 sm:py-2 editable-cell date-jp-container"
                                     :class="{ 'editable-cell': isEditing(pelatihan) }">
@@ -216,9 +223,7 @@
                                                 class="text-xs border rounded px-1 py-1 w-full" />
                                         </div>
                                     </div>
-                                </td>
-
-                                <!-- JP Column -->
+                                </td> <!-- JP Column -->
                                 <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-900 font-semibold"
                                     :class="{ 'editable-cell': isEditing(pelatihan) }">
                                     <span v-if="!isEditing(pelatihan)">{{ pelatihan.jp }}</span>
@@ -343,6 +348,11 @@ export default {
         }
     },
     methods: {
+        getCsrfToken() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        },
+
         getJenisColor(jenis) {
             const colorMap = {
                 'Diklat Struktural': 'bg-blue-100 text-blue-800',
@@ -377,9 +387,30 @@ export default {
                 router.visit(url);
             }
         },
-        deleteItem(id) {
+        async deleteItem(id) {
             if (confirm('Yakin ingin menghapus?')) {
-                router.delete(route('pelatihan.destroy', id));
+                try {
+                    const response = await fetch(route('pelatihan.destroy', id), {
+                        method: 'DELETE',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': this.getCsrfToken(),
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Success - reload page data
+                        router.reload({
+                            only: ['pelatihans']
+                        });
+                    } else {
+                        const errorData = await response.json();
+                        console.error('Delete failed:', errorData);
+                    }
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                }
             }
         },
 
@@ -387,6 +418,11 @@ export default {
         startEdit(pelatihan) {
             this.editingRows = { ...this.editingRows, [pelatihan.id]: true };
             this.originalData = { ...this.originalData, [pelatihan.id]: { ...pelatihan } };
+
+            // Ensure proper data mapping for editing
+            console.log('Starting edit for:', pelatihan);
+            console.log('Current jenis_pelatihan_id:', pelatihan.jenis_pelatihan_id);
+            console.log('Current pegawai_id:', pelatihan.pegawai_id);
         },
 
         cancelEdit(pelatihan) {
@@ -403,40 +439,76 @@ export default {
 
         async saveEdit(pelatihan) {
             try {
+                // Validate required fields first
+                if (!pelatihan.pegawai_id || !pelatihan.nama_pelatihan || !pelatihan.jenis_pelatihan_id ||
+                    !pelatihan.penyelenggara || !pelatihan.tanggal_mulai || !pelatihan.tanggal_selesai || !pelatihan.jp) {
+                    alert('Harap lengkapi semua field yang wajib diisi!');
+                    return;
+                }
+
                 const formData = new FormData();
 
                 // Add form fields
                 formData.append('pegawai_id', pelatihan.pegawai_id);
                 formData.append('nama_pelatihan', pelatihan.nama_pelatihan);
-                formData.append('jenis_pelatihan_id', this.getJenisId(pelatihan.jenis_pelatihan?.nama || pelatihan.jenis_pelatihan_id));
+                formData.append('jenis_pelatihan_id', pelatihan.jenis_pelatihan_id);
                 formData.append('penyelenggara', pelatihan.penyelenggara);
                 formData.append('tanggal_mulai', pelatihan.tanggal_mulai);
                 formData.append('tanggal_selesai', pelatihan.tanggal_selesai);
                 formData.append('jp', pelatihan.jp);
-                formData.append('_method', 'PUT'); // Laravel method spoofing
+                formData.append('_method', 'PUT');
 
                 // Add file if selected
                 if (this.editingFiles[pelatihan.id]) {
                     formData.append('sertifikat', this.editingFiles[pelatihan.id]);
                 }
 
-                await router.post(route('pelatihan.update', pelatihan.id), formData, {
+                console.log('Saving edit with data:', {
+                    id: pelatihan.id,
+                    pegawai_id: pelatihan.pegawai_id,
+                    nama_pelatihan: pelatihan.nama_pelatihan,
+                    jenis_pelatihan_id: pelatihan.jenis_pelatihan_id,
+                    penyelenggara: pelatihan.penyelenggara,
+                    tanggal_mulai: pelatihan.tanggal_mulai,
+                    tanggal_selesai: pelatihan.tanggal_selesai,
+                    jp: pelatihan.jp
+                });
+
+                // Use fetch API for file uploads with method spoofing
+                const response = await fetch(route('pelatihan.update', pelatihan.id), {
+                    method: 'POST',
+                    body: formData,
                     headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    preserveState: true,
-                    onSuccess: () => {
-                        const { [pelatihan.id]: removed, ...remaining } = this.editingRows;
-                        this.editingRows = remaining;
-                        const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
-                        this.originalData = remainingData;
-                        // Remove file from editing files
-                        const { [pelatihan.id]: removedFile, ...remainingFiles } = this.editingFiles;
-                        this.editingFiles = remainingFiles;
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': this.getCsrfToken()
                     }
                 });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Update successful:', result);
+
+                    // Success - reload page data
+                    router.reload({
+                        only: ['pelatihans'],
+                        onSuccess: () => {
+                            const { [pelatihan.id]: removed, ...remaining } = this.editingRows;
+                            this.editingRows = remaining;
+                            const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
+                            this.originalData = remainingData;
+                            // Remove file from editing files
+                            const { [pelatihan.id]: removedFile, ...remainingFiles } = this.editingFiles;
+                            this.editingFiles = remainingFiles;
+                        }
+                    });
+                } else {
+                    const errorData = await response.json();
+                    console.error('Save failed:', errorData);
+                    alert('Gagal menyimpan data: ' + (errorData.message || 'Unknown error'));
+                }
             } catch (error) {
                 console.error('Save failed:', error);
+                alert('Terjadi kesalahan: ' + error.message);
             }
         },
 
@@ -460,12 +532,19 @@ export default {
 
         async saveNew() {
             try {
+                // Validate required fields first
+                if (!this.newRow.pegawai_id || !this.newRow.nama_pelatihan || !this.newRow.jenis_pelatihan_id ||
+                    !this.newRow.penyelenggara || !this.newRow.tanggal_mulai || !this.newRow.tanggal_selesai || !this.newRow.jp) {
+                    alert('Harap lengkapi semua field yang wajib diisi!');
+                    return;
+                }
+
                 const formData = new FormData();
 
                 // Add form fields
                 formData.append('pegawai_id', this.newRow.pegawai_id);
                 formData.append('nama_pelatihan', this.newRow.nama_pelatihan);
-                formData.append('jenis_pelatihan_id', this.getJenisId(this.newRow.jenis_pelatihan_id));
+                formData.append('jenis_pelatihan_id', this.newRow.jenis_pelatihan_id);
                 formData.append('penyelenggara', this.newRow.penyelenggara);
                 formData.append('tanggal_mulai', this.newRow.tanggal_mulai);
                 formData.append('tanggal_selesai', this.newRow.tanggal_selesai);
@@ -476,18 +555,46 @@ export default {
                     formData.append('sertifikat', this.newRow.sertifikat);
                 }
 
-                await router.post(route('pelatihan.store'), formData, {
+                console.log('Saving new row with data:', {
+                    pegawai_id: this.newRow.pegawai_id,
+                    nama_pelatihan: this.newRow.nama_pelatihan,
+                    jenis_pelatihan_id: this.newRow.jenis_pelatihan_id,
+                    penyelenggara: this.newRow.penyelenggara,
+                    tanggal_mulai: this.newRow.tanggal_mulai,
+                    tanggal_selesai: this.newRow.tanggal_selesai,
+                    jp: this.newRow.jp
+                });
+
+                // Use fetch API for file uploads
+                const response = await fetch(route('pelatihan.store'), {
+                    method: 'POST',
+                    body: formData,
                     headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    preserveState: true,
-                    onSuccess: () => {
-                        this.isAddingNew = false;
-                        this.resetNewRow();
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': this.getCsrfToken()
                     }
                 });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Save successful:', result);
+
+                    // Success - reload page data
+                    router.reload({
+                        only: ['pelatihans'],
+                        onSuccess: () => {
+                            this.isAddingNew = false;
+                            this.resetNewRow();
+                        }
+                    });
+                } else {
+                    const errorData = await response.json();
+                    console.error('Save failed:', errorData);
+                    alert('Gagal menyimpan data: ' + (errorData.message || 'Unknown error'));
+                }
             } catch (error) {
                 console.error('Save failed:', error);
+                alert('Terjadi kesalahan: ' + error.message);
             }
         },
 
@@ -548,9 +655,11 @@ export default {
             }, 500);
         },
         newRowPegawai(value) {
+            console.log('newRowPegawai changed:', value);
             this.newRow.pegawai_id = value ? value.id : '';
         },
         newRowJenis(value) {
+            console.log('newRowJenis changed:', value);
             this.newRow.jenis_pelatihan_id = value ? value.id : '';
         }
     },
@@ -656,6 +765,31 @@ tr:hover:not(.editing-row):not(.adding-row) {
     border-color: #10b981;
     background-color: #ecfdf5;
     color: #10b981;
+}
+
+/* Mini combobox styles */
+.mini-combobox :deep(.v-field) {
+    font-size: 11px !important;
+    min-height: 28px !important;
+}
+
+.mini-combobox :deep(.v-field__input) {
+    padding: 2px 4px !important;
+    min-height: 24px !important;
+}
+
+.mini-combobox :deep(.v-field--variant-outlined .v-field__outline__notch) {
+    border-color: #d1d5db !important;
+}
+
+.date-jp-container {
+    min-width: 120px;
+}
+
+.date-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .action-buttons {

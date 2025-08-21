@@ -7,246 +7,278 @@ use App\Models\Pegawai;
 use App\Models\JenisPelatihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
 class PelatihanController extends Controller
 {
-	public function comparison(Request $request)
-	{
-		// Get available years from tanggal_mulai using YEAR()
-		$availableYears = Pelatihan::selectRaw('YEAR(tanggal_mulai) as year')
-			->groupBy('year')
-			->orderBy('year', 'desc')
-			->pluck('year')
-			->filter()
-			->values();
+    public function comparison(Request $request)
+    {
+        // Get available years from tanggal_mulai using YEAR()
+        $availableYears = Pelatihan::selectRaw('YEAR(tanggal_mulai) as year')
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->filter()
+            ->values();
 
-		// Get selected years from request or use default (current and last year)
-		$selectedYears = $request->get('years', [date('Y'), date('Y') - 1]);
-		if (!is_array($selectedYears)) {
-			$selectedYears = explode(',', $selectedYears);
-		}
-		$selectedYears = array_filter($selectedYears); // Remove empty values
+        // Get selected years from request or use default (current and last year)
+        $selectedYears = $request->get('years', [date('Y'), date('Y') - 1]);
+        if (!is_array($selectedYears)) {
+            $selectedYears = explode(',', $selectedYears);
+        }
+        $selectedYears = array_filter($selectedYears); // Remove empty values
 
-		// Get counts for each selected year using whereYear
-		$yearlyData = [];
-		foreach ($selectedYears as $year) {
-			$yearlyData[$year] = Pelatihan::whereYear('tanggal_mulai', $year)->count();
-		}
+        // Get counts for each selected year using whereYear
+        $yearlyData = [];
+        foreach ($selectedYears as $year) {
+            $yearlyData[$year] = Pelatihan::whereYear('tanggal_mulai', $year)->count();
+        }
 
-		// Data untuk chart perbandingan per jenis
-		// Build comparison data grouped by jenis_pelatihans table
-		$jenisList = \App\Models\JenisPelatihan::pluck('nama', 'id')->toArray();
-		$comparisonData = [];
-		foreach ($jenisList as $id => $nama) {
-			$jenisData = ['jenis' => $nama];
-			foreach ($selectedYears as $year) {
-				$count = Pelatihan::where('jenis_pelatihan_id', $id)
-					->whereYear('tanggal_mulai', $year)
-					->count();
-				$jenisData[$year] = $count;
-			}
-			$comparisonData[] = $jenisData;
-		}
+        // Data untuk chart perbandingan per jenis
+        // Build comparison data grouped by jenis_pelatihans table
+        $jenisList = \App\Models\JenisPelatihan::pluck('nama', 'id')->toArray();
+        $comparisonData = [];
+        foreach ($jenisList as $id => $nama) {
+            $jenisData = ['jenis' => $nama];
+            foreach ($selectedYears as $year) {
+                $count = Pelatihan::where('jenis_pelatihan_id', $id)
+                    ->whereYear('tanggal_mulai', $year)
+                    ->count();
+                $jenisData[$year] = $count;
+            }
+            $comparisonData[] = $jenisData;
+        }
 
-		// Data bulanan untuk trend (hanya untuk 2 tahun pertama untuk clarity)
-		$monthlyData = [];
-		$trendYears = array_slice($selectedYears, 0, 2); // Limit to 2 years for trend chart
-		for ($i = 1; $i <= 12; $i++) {
-			$monthNum = $i;
-			$monthData = ['month' => $i];
-			foreach ($trendYears as $year) {
-				$count = Pelatihan::whereYear('tanggal_mulai', $year)
-					->whereMonth('tanggal_mulai', $monthNum)
-					->count();
-				$monthData[$year] = $count;
-			}
-			$monthlyData[] = $monthData;
-		}
+        // Data bulanan untuk trend (hanya untuk 2 tahun pertama untuk clarity)
+        $monthlyData = [];
+        $trendYears = array_slice($selectedYears, 0, 2); // Limit to 2 years for trend chart
+        for ($i = 1; $i <= 12; $i++) {
+            $monthNum = $i;
+            $monthData = ['month' => $i];
+            foreach ($trendYears as $year) {
+                $count = Pelatihan::whereYear('tanggal_mulai', $year)
+                    ->whereMonth('tanggal_mulai', $monthNum)
+                    ->count();
+                $monthData[$year] = $count;
+            }
+            $monthlyData[] = $monthData;
+        }
 
-		return Inertia::render('Pelatihan/Comparison', [
-			'selectedYears' => $selectedYears,
-			'yearlyData' => $yearlyData,
-			'comparisonData' => $comparisonData,
-			'monthlyData' => $monthlyData,
-			'availableYears' => $availableYears,
-		]);
-	}
+        return Inertia::render('Pelatihan/Comparison', [
+            'selectedYears' => $selectedYears,
+            'yearlyData' => $yearlyData,
+            'comparisonData' => $comparisonData,
+            'monthlyData' => $monthlyData,
+            'availableYears' => $availableYears,
+        ]);
+    }
 
-	public function index(Request $request)
-	{
-		$query = Pelatihan::with(['pegawai', 'jenisPelatihan']);
+    public function index(Request $request)
+    {
+        $query = Pelatihan::with(['pegawai', 'jenisPelatihan']);
 
-		// Filter by jenis pelatihan
-		if ($request->filled('jenis')) {
-			// Accept jenis nama (string) and find corresponding ID
-			$jenisId = JenisPelatihan::where('nama', $request->jenis)->value('id');
-			if ($jenisId) {
-				$query->where('jenis_pelatihan_id', $jenisId);
-			}
-		}
+        // Filter by jenis pelatihan
+        if ($request->filled('jenis')) {
+            // Accept jenis nama (string) and find corresponding ID
+            $jenisId = JenisPelatihan::where('nama', $request->jenis)->value('id');
+            if ($jenisId) {
+                $query->where('jenis_pelatihan_id', $jenisId);
+            }
+        }
 
-		// Search
-		if ($request->filled('search')) {
-			$query->where(function ($q) use ($request) {
-				$q->where('nama_pelatihan', 'like', '%' . $request->search . '%')
-					->orWhereHas('pegawai', function ($subQ) use ($request) {
-						$subQ->where('nama_lengkap', 'like', '%' . $request->search . '%');
-					});
-			});
-		}
+        // Search
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_pelatihan', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('pegawai', function ($subQ) use ($request) {
+                        $subQ->where('nama_lengkap', 'like', '%' . $request->search . '%');
+                    });
+            });
+        }
 
-		$pelatihans = $query->latest()->paginate(10);
-		// Provide jenis list from DB (id + nama) for filters/forms
-		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
-		// Provide pegawai list for inline editing
-		$pegawais = Pegawai::select('id', 'nama_lengkap')->orderBy('nama_lengkap')->get();
+        $pelatihans = $query->latest()->paginate(10);
+        // Provide jenis list from DB (id + nama) for filters/forms
+        $jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
+        // Provide pegawai list for inline editing
+        $pegawais = Pegawai::select('id', 'nama_lengkap')->orderBy('nama_lengkap')->get();
 
-		return Inertia::render('Pelatihan/Index', [
-			'pelatihans' => $pelatihans,
-			'jenisPelatihan' => $jenisPelatihan,
-			'pegawais' => $pegawais,
-		]);
-	}
+        return Inertia::render('Pelatihan/Index', [
+            'pelatihans' => $pelatihans,
+            'jenisPelatihan' => $jenisPelatihan,
+            'pegawais' => $pegawais,
+        ]);
+    }
 
-	public function create()
-	{
-		$pegawais = Pegawai::orderBy('nama_lengkap')->get();
-		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
+    public function create()
+    {
+        $pegawais = Pegawai::orderBy('nama_lengkap')->get();
+        $jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
 
-		return Inertia::render('Pelatihan/Create', [
-			'pegawais' => $pegawais,
-			'jenisPelatihan' => $jenisPelatihan,
-		]);
-	}
+        return Inertia::render('Pelatihan/Create', [
+            'pegawais' => $pegawais,
+            'jenisPelatihan' => $jenisPelatihan,
+        ]);
+    }
 
-	public function store(Request $request)
-	{
-		$validated = $request->validate([
-			'pegawai_id' => 'required|exists:pegawais,id',
-			'nama_pelatihan' => 'required|string|max:255',
-			'jenis_pelatihan_id' => 'required|exists:jenis_pelatihans,id',
-			'penyelenggara' => 'required|string|max:255',
-			'tempat' => 'nullable|string|max:255',
-			'tanggal_mulai' => 'required|date',
-			'tanggal_selesai' => 'required|date',
-			'jp' => 'required|integer|min:1',
-			'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
-			'deskripsi' => 'nullable|string',
-			'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
-		]);
+    public function store(Request $request)
+    {
+        // Debug request data
+        Log::info('Store request data:', $request->all());
 
-		// Set default status if not provided
-		if (!isset($validated['status'])) {
-			$validated['status'] = 'selesai';
-		}
+        $validated = $request->validate([
+            'pegawai_id' => 'required|exists:pegawais,id',
+            'nama_pelatihan' => 'required|string|max:255',
+            'jenis_pelatihan_id' => 'required|exists:jenis_pelatihans,id',
+            'penyelenggara' => 'required|string|max:255',
+            'tempat' => 'nullable|string|max:255',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
+            'jp' => 'required|integer|min:1',
+            'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
+            'deskripsi' => 'nullable|string',
+            'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
+        ]);
 
-		if ($request->hasFile('sertifikat')) {
-			$path = $request->file('sertifikat')->store('sertifikat', 'public');
-			$validated['sertifikat_path'] = $path;
-		}
+        // Set default status if not provided
+        if (!isset($validated['status'])) {
+            $validated['status'] = 'selesai';
+        }
 
-		$pelatihan = Pelatihan::create($validated);
+        if ($request->hasFile('sertifikat')) {
+            $path = $request->file('sertifikat')->store('sertifikat', 'public');
+            $validated['sertifikat_path'] = $path;
+        }
 
-		// Update JP pegawai jika status selesai
-		if ($pelatihan->status == 'selesai') {
-			$pegawai = $pelatihan->pegawai;
-			$pegawai->jp_tercapai += $pelatihan->jp;
-			$pegawai->save();
-		}
+        Log::info('Validated data:', $validated);
 
-		return redirect()->route('pelatihan.index')->with('success', 'Data pelatihan berhasil ditambahkan.');
-	}
+        $pelatihan = Pelatihan::create($validated);
 
-	public function show(Pelatihan $pelatihan)
-	{
-		return Inertia::render('Pelatihan/Show', [
-			'pelatihan' => $pelatihan,
-		]);
-	}
+        // Update JP pegawai jika status selesai
+        if ($pelatihan->status == 'selesai') {
+            $pegawai = $pelatihan->pegawai;
+            $pegawai->jp_tercapai += $pelatihan->jp;
+            $pegawai->save();
+        }
 
-	public function edit(Pelatihan $pelatihan)
-	{
-		$pegawais = Pegawai::orderBy('nama_lengkap')->get();
-		$jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
+        // For AJAX requests, return JSON response
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data pelatihan berhasil ditambahkan.',
+                'data' => $pelatihan->load(['pegawai', 'jenisPelatihan'])
+            ]);
+        }
 
-		return Inertia::render('Pelatihan/Edit', [
-			'pelatihan' => $pelatihan,
-			'pegawais' => $pegawais,
-			'jenisPelatihan' => $jenisPelatihan,
-		]);
-	}
+        return redirect()->route('pelatihan.index')->with('success', 'Data pelatihan berhasil ditambahkan.');
+    }
 
-	public function update(Request $request, Pelatihan $pelatihan)
-	{
-		$validated = $request->validate([
-			'pegawai_id' => 'required|exists:pegawais,id',
-			'nama_pelatihan' => 'required|string|max:255',
-			'jenis_pelatihan_id' => 'required|exists:jenis_pelatihans,id',
-			'penyelenggara' => 'required|string|max:255',
-			'tempat' => 'nullable|string|max:255',
-			'tanggal_mulai' => 'required|date',
-			'tanggal_selesai' => 'required|date',
-			'jp' => 'required|integer|min:1',
-			'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
-			'deskripsi' => 'nullable|string',
-			'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
-		]);
+    public function show(Pelatihan $pelatihan)
+    {
+        return Inertia::render('Pelatihan/Show', [
+            'pelatihan' => $pelatihan,
+        ]);
+    }
 
-		$oldJp = $pelatihan->jp;
-		$oldStatus = $pelatihan->status;
+    public function edit(Pelatihan $pelatihan)
+    {
+        $pegawais = Pegawai::orderBy('nama_lengkap')->get();
+        $jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
 
-		// Set default status if not provided
-		if (!isset($validated['status'])) {
-			$validated['status'] = $pelatihan->status ?? 'selesai';
-		}
+        return Inertia::render('Pelatihan/Edit', [
+            'pelatihan' => $pelatihan,
+            'pegawais' => $pegawais,
+            'jenisPelatihan' => $jenisPelatihan,
+        ]);
+    }
 
-		if ($request->hasFile('sertifikat')) {
-			// Delete old certificate
-			if ($pelatihan->sertifikat_path) {
-				Storage::disk('public')->delete($pelatihan->sertifikat_path);
-			}
-			$path = $request->file('sertifikat')->store('sertifikat', 'public');
-			$validated['sertifikat_path'] = $path;
-		}
+    public function update(Request $request, Pelatihan $pelatihan)
+    {
+        $validated = $request->validate([
+            'pegawai_id' => 'required|exists:pegawais,id',
+            'nama_pelatihan' => 'required|string|max:255',
+            'jenis_pelatihan_id' => 'required|exists:jenis_pelatihans,id',
+            'penyelenggara' => 'required|string|max:255',
+            'tempat' => 'nullable|string|max:255',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
+            'jp' => 'required|integer|min:1',
+            'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
+            'deskripsi' => 'nullable|string',
+            'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
+        ]);
 
-		$pelatihan->update($validated);
+        $oldJp = $pelatihan->jp;
+        $oldStatus = $pelatihan->status;
 
-		// Update JP pegawai
-		$pegawai = $pelatihan->pegawai;
+        // Set default status if not provided
+        if (!isset($validated['status'])) {
+            $validated['status'] = $pelatihan->status ?? 'selesai';
+        }
 
-		// Kurangi JP lama jika sebelumnya selesai
-		if ($oldStatus == 'selesai') {
-			$pegawai->jp_tercapai -= $oldJp;
-		}
+        if ($request->hasFile('sertifikat')) {
+            // Delete old certificate
+            if ($pelatihan->sertifikat_path) {
+                Storage::disk('public')->delete($pelatihan->sertifikat_path);
+            }
+            $path = $request->file('sertifikat')->store('sertifikat', 'public');
+            $validated['sertifikat_path'] = $path;
+        }
 
-		// Tambah JP baru jika sekarang selesai
-		if ($pelatihan->status == 'selesai') {
-			$pegawai->jp_tercapai += $pelatihan->jp;
-		}
+        $pelatihan->update($validated);
 
-		$pegawai->save();
+        // Update JP pegawai
+        $pegawai = $pelatihan->pegawai;
 
-		return redirect()->route('pelatihan.index')->with('success', 'Data pelatihan berhasil diperbarui.');
-	}
+        // Kurangi JP lama jika sebelumnya selesai
+        if ($oldStatus == 'selesai') {
+            $pegawai->jp_tercapai -= $oldJp;
+        }
 
-	public function destroy(Pelatihan $pelatihan)
-	{
-		// Update JP pegawai jika pelatihan selesai
-		if ($pelatihan->status == 'selesai') {
-			$pegawai = $pelatihan->pegawai;
-			$pegawai->jp_tercapai -= $pelatihan->jp;
-			$pegawai->save();
-		}
+        // Tambah JP baru jika sekarang selesai
+        if ($pelatihan->status == 'selesai') {
+            $pegawai->jp_tercapai += $pelatihan->jp;
+        }
 
-		// Delete certificate file
-		if ($pelatihan->sertifikat_path) {
-			Storage::disk('public')->delete($pelatihan->sertifikat_path);
-		}
+        $pegawai->save();
 
-		$pelatihan->delete();
+        // For AJAX requests, return JSON response
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data pelatihan berhasil diperbarui.',
+                'data' => $pelatihan->load(['pegawai', 'jenisPelatihan'])
+            ]);
+        }
 
-		return redirect()->route('pelatihan.index')->with('success', 'Data pelatihan berhasil dihapus.');
-	}
+        return redirect()->route('pelatihan.index')->with('success', 'Data pelatihan berhasil diperbarui.');
+    }
+
+    public function destroy(Request $request, Pelatihan $pelatihan)
+    {
+        // Update JP pegawai jika pelatihan selesai
+        if ($pelatihan->status == 'selesai') {
+            $pegawai = $pelatihan->pegawai;
+            $pegawai->jp_tercapai -= $pelatihan->jp;
+            $pegawai->save();
+        }
+
+        // Delete certificate file
+        if ($pelatihan->sertifikat_path) {
+            Storage::disk('public')->delete($pelatihan->sertifikat_path);
+        }
+
+        $pelatihan->delete();
+
+        // For AJAX requests, return JSON response
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data pelatihan berhasil dihapus.'
+            ]);
+        }
+
+        return redirect()->route('pelatihan.index')->with('success', 'Data pelatihan berhasil dihapus.');
+    }
 }

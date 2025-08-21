@@ -1,6 +1,10 @@
 <template>
     <AppLayout>
-        <div class="p-3 sm:p-4 md:p-6">
+        <div class="relative p-3 sm:p-4 md:p-6">
+            <!-- Loading overlay -->
+            <div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
+                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
             <!-- Year Filter -->
             <div class="mb-4 md:mb-6">
                 <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
@@ -124,13 +128,13 @@
                                     </div>
                                     <div class="text-xs mt-1 sm:hidden">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </td>
                                 <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap hidden sm:table-cell">
                                     <div class="text-sm">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </td>
                                 <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
@@ -178,10 +182,12 @@ export default {
     data() {
         return {
             jenisChart: null,
+            loading: false,
         };
     },
     mounted() {
         // ensure DOM refs are ready before creating charts
+        this.loading = true;
         this.$nextTick(() => this.initCharts());
     },
     beforeUnmount() {
@@ -194,10 +200,14 @@ export default {
     watch: {
         pelatihanByJenis() {
             // when props change from Inertia, update without animation to avoid flicker
+            this.loading = true;
             this.updateCharts(false);
+            this.$nextTick(() => { this.loading = false; });
         },
         progressPegawai() {
+            this.loading = true;
             this.updateCharts(false);
+            this.$nextTick(() => { this.loading = false; });
         }
     },
     methods: {
@@ -228,6 +238,7 @@ export default {
         },
         changeYear(event) {
             const year = parseInt(event.target.value);
+            this.loading = true;
             router.get(route('dashboard'), { year: year }, { preserveState: true });
         },
 
@@ -281,10 +292,6 @@ export default {
                 try { this.jenisChart.destroy(); } catch (e) { }
                 this.jenisChart = null;
             }
-            if (this.progressChart) {
-                try { this.progressChart.destroy(); } catch (e) { }
-                this.progressChart = null;
-            }
 
             // Jenis Chart
             if (!this.$refs.jenisChart || typeof this.$refs.jenisChart.getContext !== 'function') {
@@ -330,7 +337,9 @@ export default {
                     }
                 }
             });
-            // progressChart removed — only jenisChart is initialized here
+
+            // finished initializing charts
+            this.loading = false;
         },
 
         updateCharts(animate = true) {

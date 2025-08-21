@@ -53,90 +53,90 @@
             <!-- Table -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden border-compact card-compact">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 text-xs">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Pegawai
                                 </th>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Pelatihan
                                 </th>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Jenis
                                 </th>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tanggal
                                 </th>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     JP
                                 </th>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Sertifikat
                                 </th>
                                 <th
-                                    class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Aksi
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-if="pelatihans.data.length === 0">
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                <td colspan="7" class="px-2 py-6 sm:px-3 sm:py-6 text-center text-gray-500">
                                     <i class="fas fa-database text-4xl mb-4"></i>
                                     <p>Tidak ada data pelatihan</p>
                                 </td>
                             </tr>
                             <tr v-for="pelatihan in pelatihans.data" :key="pelatihan.id">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ pelatihan.pegawai.nama_lengkap }}
                                     </div>
-                                    <div class="text-sm text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP' }}
+                                    <div class="text-xs text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP' }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ pelatihan.nama_pelatihan }}</div>
-                                    <div class="text-sm text-gray-500">{{ pelatihan.penyelenggara }}</div>
+                                <td class="px-2 py-2 sm:px-3 sm:py-2">
+                                    <div class="text-xs font-medium text-gray-900">{{ pelatihan.nama_pelatihan }}</div>
+                                    <div class="text-xs text-gray-500">{{ pelatihan.penyelenggara }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                                         :class="getJenisColor(pelatihan.jenis_pelatihan.nama)">
                                         {{ pelatihan.jenis_pelatihan.nama }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-500">
                                     {{ formatDate(pelatihan.tanggal_mulai) }} - {{ formatDate(pelatihan.tanggal_selesai)
                                     }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                                <td
+                                    class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-900 font-semibold">
                                     {{ pelatihan.jp }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-500">
                                     <a v-if="pelatihan.sertifikat_path" :href="`/storage/${pelatihan.sertifikat_path}`"
                                         target="_blank" class="text-blue-600 hover:text-blue-800">
-                                        <i class="fas fa-file-pdf"></i> Lihat
+                                        <i class="fas fa-file-pdf"></i>
                                     </a>
                                     <span v-else class="text-gray-400">Tidak ada</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex space-x-2">
+                                <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
+                                    <div class="flex items-center space-x-2">
                                         <Link :href="route('pelatihan.show', pelatihan.id)"
-                                            class="text-blue-600 hover:text-blue-800">
+                                            class="text-blue-600 hover:text-blue-800 p-1">
                                         <i class="fas fa-eye"></i>
                                         </Link>
                                         <Link :href="route('pelatihan.edit', pelatihan.id)"
-                                            class="text-yellow-600 hover:text-yellow-800">
+                                            class="text-yellow-600 hover:text-yellow-800 p-1">
                                         <i class="fas fa-edit"></i>
                                         </Link>
                                         <button @click="deleteItem(pelatihan.id)"
-                                            class="text-red-600 hover:text-red-800">
+                                            class="text-red-600 hover:text-red-800 p-1">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>

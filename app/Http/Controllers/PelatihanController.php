@@ -76,12 +76,15 @@ class PelatihanController extends Controller
 
 	public function index(Request $request)
 	{
-		$query = Pelatihan::with('pegawai');
+		$query = Pelatihan::with(['pegawai', 'jenisPelatihan']);
 
 		// Filter by jenis pelatihan
 		if ($request->filled('jenis')) {
-			// Accept jenis id (foreign key)
-			$query->where('jenis_pelatihan_id', $request->jenis);
+			// Accept jenis nama (string) and find corresponding ID
+			$jenisId = JenisPelatihan::where('nama', $request->jenis)->value('id');
+			if ($jenisId) {
+				$query->where('jenis_pelatihan_id', $jenisId);
+			}
 		}
 
 		// Search

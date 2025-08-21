@@ -277,7 +277,7 @@ export default {
                 const comparisonCanvas = this.$refs.comparisonChart;
                 if (comparisonCanvas) {
                     const labels = this.comparisonData.map(item => item.jenis);
-                    
+
                     const jenisColors = labels.map(j => {
                         const colorMap = {
                             'Diklat Struktural': 'rgba(59,130,246,0.85)',
@@ -313,16 +313,16 @@ export default {
                             animation: false,
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { 
+                            plugins: {
                                 legend: { position: 'top' },
                                 title: {
                                     display: true,
                                     text: 'Perbandingan Per Jenis Pelatihan'
                                 }
                             },
-                            scales: { 
-                                y: { beginAtZero: true, ticks: { stepSize: 1 } }, 
-                                x: { ticks: { maxRotation: 45, minRotation: 45 } } 
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                                x: { ticks: { maxRotation: 45, minRotation: 45 } }
                             }
                         }
                     });
@@ -353,7 +353,7 @@ export default {
                             animation: false,
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { 
+                            plugins: {
                                 legend: { position: 'top' },
                                 title: {
                                     display: true,

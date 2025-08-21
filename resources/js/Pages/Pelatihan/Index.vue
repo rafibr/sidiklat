@@ -4,10 +4,13 @@
             <div
                 class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 sm:gap-0">
                 <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Data Pelatihan</h2>
-                <button @click="startAddNew" v-if="!isAddingNew"
-                    class="w-full sm:w-auto bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm">
-                    <i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Pelatihan
-                </button>
+                <div class="flex items-center gap-3">
+
+                    <button @click="startAddNew" v-if="!isAddingNew"
+                        class="w-full sm:w-auto bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm">
+                        <i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Pelatihan
+                    </button>
+                </div>
             </div>
 
             <!-- Filters -->
@@ -46,6 +49,22 @@
             <!-- Table -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden border-compact card-compact">
                 <div class="overflow-x-auto">
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm text-gray-600">Total: <strong>{{ totalPelatihans }}</strong></div>
+
+                        <div class="text-sm text-gray-600" v-if="rangeText">Menampilkan <strong>{{ rangeText }}</strong>
+                        </div>
+
+                        <label class="text-sm text-gray-600">Item per halaman:</label>
+
+                        <select v-model.number="filters.per_page" @change="submitFilter"
+                            class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                            <option :value="10">10</option>
+                            <option :value="25">25</option>
+                            <option :value="50">50</option>
+                            <option :value="100">100</option>
+                        </select>
+                    </div>
                     <table class="min-w-full divide-y divide-gray-200 text-xs">
                         <thead class="bg-gray-50">
                             <tr>
@@ -318,6 +337,7 @@ export default {
             filters: {
                 search: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('search') || '' : '',
                 jenis: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('jenis') || '' : '',
+                per_page: this.$page.props.per_page || 25,
             },
             searchTimer: null,
             editingRows: {},
@@ -345,6 +365,31 @@ export default {
         },
         pegawaiOptions() {
             return this.pegawais || [];
+        }
+        ,
+        totalPelatihans() {
+            return this.$page.props.total_pelatihans || (this.pelatihans && this.pelatihans.total) || 0;
+        }
+        ,
+        rangeText() {
+            const p = this.pelatihans;
+            if (!p || !p.meta) {
+                // Inertia pagination sometimes provides pagination info directly on the object
+                if (!p || typeof p.current_page === 'undefined') return null;
+                const current = p.current_page || 1;
+                const per = p.per_page || this.filters.per_page || 25;
+                const total = p.total || this.totalPelatihans;
+                const from = (current - 1) * per + 1;
+                const to = Math.min(current * per, total);
+                return `${from}–${to} dari ${total}`;
+            }
+
+            const current = p.meta.current_page || p.meta.current_page === 0 ? p.meta.current_page : (p.current_page || 1);
+            const per = p.meta.per_page || p.per_page || this.filters.per_page || 25;
+            const total = p.meta.total || p.total || this.totalPelatihans;
+            const from = (current - 1) * per + 1;
+            const to = Math.min(current * per, total);
+            return `${from}–${to} dari ${total}`;
         }
     },
     methods: {

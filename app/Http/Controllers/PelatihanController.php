@@ -98,7 +98,14 @@ class PelatihanController extends Controller
             });
         }
 
-        $pelatihans = $query->latest()->paginate(10);
+        // Allow client to request per-page via query param (default 25, max 200)
+        $perPage = (int) $request->get('per_page', 25);
+        if ($perPage <= 0) {
+            $perPage = 25;
+        }
+        $perPage = min($perPage, 200);
+
+        $pelatihans = $query->latest()->paginate($perPage)->withQueryString();
         // Provide jenis list from DB (id + nama) for filters/forms
         $jenisPelatihan = JenisPelatihan::select('id', 'nama')->orderBy('nama')->get();
         // Provide pegawai list for inline editing
@@ -108,6 +115,9 @@ class PelatihanController extends Controller
             'pelatihans' => $pelatihans,
             'jenisPelatihan' => $jenisPelatihan,
             'pegawais' => $pegawais,
+            // expose totals and current per-page so frontend can display them
+            'total_pelatihans' => $pelatihans->total(),
+            'per_page' => $perPage,
         ]);
     }
 

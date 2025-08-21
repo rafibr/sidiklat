@@ -6,12 +6,15 @@
                 <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
                     <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                         <label class="block text-sm font-medium text-gray-700">Filter Tahun:</label>
-                        <select :value="selectedYear" @change="changeYear($event)"
-                            class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            <option v-for="year in availableYears" :key="year" :value="year">
-                                {{ year }}
-                            </option>
-                        </select>
+                        <div class="relative w-full sm:w-auto">
+                            <select :value="selectedYear" @change="changeYear($event)"
+                                class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                                <option v-for="year in availableYears" :key="year" :value="year">
+                                    {{ year }}
+                                </option>
+                            </select>
+
+                        </div>
                         <span class="text-sm text-gray-600">Menampilkan data untuk tahun {{ selectedYear }}</span>
                     </div>
                 </div>

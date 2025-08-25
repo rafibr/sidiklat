@@ -164,23 +164,37 @@ class PelatihanController extends Controller
             ]);
         }
 
-        // CSV / XLS (simple CSV with .xls extension works in Excel)
-        $filename = 'pelatihan_' . date('Ymd_His') . '.' . ($format === 'xls' ? 'xls' : 'csv');
+        if ($format === 'xls') {
+            // Generate Excel-compatible HTML for .xls format
+            $html = view('pelatihan.export_xls', ['items' => $items])->render();
+
+            return response($html, 200, [
+                'Content-Type' => 'application/vnd.ms-excel',
+                'Content-Disposition' => "attachment; filename=\"pelatihan_" . date('Ymd_His') . ".xls\"",
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0'
+            ]);
+        }
+
+        // CSV format
+        $filename = 'pelatihan_' . date('Ymd_His') . '.csv';
 
         $headers = [
-            'Content-Type' => $format === 'xls' ? 'application/vnd.ms-excel' : 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
         $callback = function () use ($items) {
             $out = fopen('php://output', 'w');
             // Header row - menghapus kolom NIP terpisah
-            fputcsv($out, ['ID', 'Pegawai', 'Nama Pelatihan', 'Jenis', 'Penyelenggara', 'Tanggal Mulai', 'Tanggal Selesai', 'JP', 'Status', 'Sertifikat']);
+            // NOTE: omit Status and Sertifikat columns per request
+            fputcsv($out, ['ID', 'Pegawai', 'Nama Pelatihan', 'Jenis', 'Penyelenggara', 'Tanggal Mulai', 'Tanggal Selesai', 'JP']);
             foreach ($items as $it) {
-                // Gabungkan nama dan NIP dalam satu kolom
+                // Gabungkan nama dan NIP dalam satu kolom (untuk CSV, ganti newline dengan space)
                 $pegawaiInfo = optional($it->pegawai)->nama_lengkap;
                 if (optional($it->pegawai)->nip) {
-                    $pegawaiInfo .= "\n" . optional($it->pegawai)->nip;
+                    $pegawaiInfo .= " - " . optional($it->pegawai)->nip;
                 }
 
                 // Pastikan jenis pelatihan dimuat dengan benar
@@ -195,6 +209,7 @@ class PelatihanController extends Controller
                 $tanggalMulai = $it->tanggal_mulai ? date('Y-m-d', strtotime($it->tanggal_mulai)) : '';
                 $tanggalSelesai = $it->tanggal_selesai ? date('Y-m-d', strtotime($it->tanggal_selesai)) : '';
 
+                // Do not include status or sertifikat_path in CSV export
                 fputcsv($out, [
                     $it->id,
                     $pegawaiInfo,
@@ -204,8 +219,6 @@ class PelatihanController extends Controller
                     $tanggalMulai,
                     $tanggalSelesai,
                     $it->jp,
-                    $it->status ?? '',
-                    $it->sertifikat_path ?? ''
                 ]);
             }
             fclose($out);

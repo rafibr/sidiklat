@@ -69,7 +69,7 @@
                     <!-- Right Side - Training Stats -->
                     <div class="lg:w-2/3">
                         <!-- Statistics Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div class="bg-blue-50 p-4 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -92,11 +92,86 @@
                             <div class="bg-purple-50 p-4 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-purple-600">Jenis Terbanyak</p>
-                                        <p class="text-sm font-bold text-purple-900">{{ getMostFrequentType() || '-' }}
+                                        <p class="text-sm font-medium text-purple-600">Sertifikat</p>
+                                        <p class="text-2xl font-bold text-purple-900">{{ getTrainingWithCertificates()
+                                        }}</p>
+                                        <p class="text-xs text-purple-600">dari {{ getTotalPelatihan() }}</p>
+                                    </div>
+                                    <i class="fas fa-certificate text-purple-400 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-orange-600">Rata-rata JP/Tahun</p>
+                                        <p class="text-2xl font-bold text-orange-900">{{ getAverageJPPerYear() }}</p>
+                                    </div>
+                                    <i class="fas fa-chart-bar text-orange-400 text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Statistics Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-indigo-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-indigo-600">Jenis Terbanyak</p>
+                                        <p class="text-sm font-bold text-indigo-900">{{ getMostFrequentType() || '-' }}
+                                        </p>
+                                        <p class="text-xs text-indigo-600">{{ getMostFrequentTypeCount() }} pelatihan
                                         </p>
                                     </div>
-                                    <i class="fas fa-medal text-purple-400 text-2xl"></i>
+                                    <i class="fas fa-medal text-indigo-400 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-teal-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-teal-600">Tahun Teraktif</p>
+                                        <p class="text-2xl font-bold text-teal-900">{{ getMostActiveYear() || '-' }}</p>
+                                        <p class="text-xs text-teal-600">{{ getMostActiveYearCount() }} pelatihan</p>
+                                    </div>
+                                    <i class="fas fa-fire text-teal-400 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-red-600">JP Terbanyak</p>
+                                        <p class="text-2xl font-bold text-red-900">{{ getHighestJPInYear() }}</p>
+                                        <p class="text-xs text-red-600">pada {{ getHighestJPYear() }}</p>
+                                    </div>
+                                    <i class="fas fa-trophy text-red-400 text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- JP Progress per Year -->
+                        <!-- Yearly JP Achievement Overview -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Capaian JP Per Tahun</h3>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div v-for="(data, year) in filteredPelatihansByYear" :key="year"
+                                    class="bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-semibold text-gray-900">{{ year }}</h4>
+                                        <span class="text-sm font-medium"
+                                            :class="getYearProgressPercentage(data.totalJP) >= 100 ? 'text-green-600' : 'text-orange-600'">
+                                            {{ data.totalJP }} JP ({{ getYearProgressPercentage(data.totalJP) }}%)
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                        <div class="h-2 rounded-full transition-all duration-300"
+                                            :class="getYearProgressBgColor(data.totalJP)"
+                                            :style="`width: ${Math.min(getYearProgressPercentage(data.totalJP), 100)}%`">
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        {{ (data.pelatihan && data.pelatihan.length) || 0 }} pelatihan • Target: {{
+                                            pegawai.jp_target || 20 }}
+                                        JP/tahun
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -104,20 +179,44 @@
                 </div>
 
                 <div v-if="hasPelatihan">
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                         <h2 class="text-lg font-semibold text-gray-900">Riwayat Pelatihan</h2>
-                        <div class="flex items-center gap-2">
+
+                        <!-- Search and Filters -->
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                            <!-- Search Input -->
+                            <div class="relative">
+                                <input type="text" v-model="searchQuery" placeholder="Cari pelatihan, penyelenggara..."
+                                    class="w-full sm:w-64 text-sm border rounded-md px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <i
+                                    class="fas fa-search absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+
+                            <!-- Year Filter -->
                             <select v-model="selectedYear" @change="filterByYear"
-                                class="text-sm border rounded-md px-2 py-1">
+                                class="text-sm border rounded-md px-2 py-2">
                                 <option value="">Semua Tahun</option>
                                 <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
                             </select>
+
+                            <!-- View Toggle -->
                             <button @click="toggleView"
-                                class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md">
+                                class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md whitespace-nowrap">
                                 <i :class="viewMode === 'grid' ? 'fas fa-list' : 'fas fa-th-large'"></i>
                                 {{ viewMode === 'grid' ? 'List' : 'Grid' }}
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Search Results Count -->
+                    <div v-if="searchQuery" class="mb-4">
+                        <p class="text-sm text-gray-600">
+                            Menampilkan {{ searchResults.length }} pelatihan dari pencarian "<strong>{{ searchQuery
+                            }}</strong>"
+                            <button @click="clearSearch" class="text-blue-600 hover:text-blue-800 ml-2">
+                                <i class="fas fa-times"></i> Hapus filter
+                            </button>
+                        </p>
                     </div>
 
                     <!-- Grid View -->
@@ -154,11 +253,11 @@
                             <div class="border-t pt-3">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <a v-if="pel.sertifikat_path" :href="`/storage/${pel.sertifikat_path}`"
+                                        <a v-if="pel.file_sertifikat" :href="`/storage/${pel.file_sertifikat}`"
                                             target="_blank"
                                             class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 text-xs">
                                             <i class="fas fa-file-pdf"></i>
-                                            <span>{{ getFileName(pel.sertifikat_path) || 'Lihat' }}</span>
+                                            <span>{{ getFileName(pel.file_sertifikat) || 'Lihat' }}</span>
                                         </a>
                                         <span v-else class="text-xs text-gray-400">Tidak ada sertifikat</span>
                                     </div>
@@ -187,14 +286,15 @@
                     </div>
 
                     <!-- List View -->
-                    <div v-else v-for="(pelList, year) in displayedPelatihansByYear" :key="year" class="mb-6">
+                    <div v-else v-for="(data, year) in displayedPelatihansByYear" :key="year" class="mb-6">
                         <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-3">{{ year
                                 }}</span>
-                            <span class="text-sm text-gray-500">({{ pelList.length }} pelatihan)</span>
+                            <span class="text-sm text-gray-500">({{ (data.pelatihan && data.pelatihan.length) || 0 }}
+                                pelatihan)</span>
                         </h3>
                         <ul class="space-y-3">
-                            <li v-for="pel in pelList" :key="pel.id"
+                            <li v-for="pel in data.pelatihan || []" :key="pel.id"
                                 class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow"
                                 @dragover.prevent @dragenter.prevent="addDragClass($event)"
                                 @dragleave.prevent="removeDragClass($event)"
@@ -225,11 +325,11 @@
 
                                         <!-- Certificate and Upload Section -->
                                         <div class="flex items-center gap-2">
-                                            <a v-if="pel.sertifikat_path" :href="`/storage/${pel.sertifikat_path}`"
+                                            <a v-if="pel.file_sertifikat" :href="`/storage/${pel.file_sertifikat}`"
                                                 target="_blank"
                                                 class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-2 text-sm">
                                                 <i class="fas fa-file-pdf"></i>
-                                                <span>{{ getFileName(pel.sertifikat_path) || 'Lihat Sertifikat'
+                                                <span>{{ getFileName(pel.file_sertifikat) || 'Lihat Sertifikat'
                                                     }}</span>
                                             </a>
                                             <span v-else class="text-xs text-gray-400">Tidak ada sertifikat</span>
@@ -241,15 +341,15 @@
                                                 @click="$refs[`fileInput${pel.id}`] && $refs[`fileInput${pel.id}`][0] ? $refs[`fileInput${pel.id}`][0].click() : $refs[`fileInput${pel.id}`].click()">
                                                 <div v-if="!editingFiles[pel.id] && !isUploading[pel.id]"
                                                     class="text-xs text-center">
-                                                    <div v-if="pel.sertifikat_path"
+                                                    <div v-if="pel.file_sertifikat"
                                                         class="text-green-600 mb-1 truncate max-w-28">
                                                         <i class="fas fa-file-pdf mr-1"></i>
-                                                        <span class="text-sm">{{ getFileName(pel.sertifikat_path)
+                                                        <span class="text-sm">{{ getFileName(pel.file_sertifikat)
                                                             }}</span>
                                                     </div>
                                                     <div class="text-gray-500">
                                                         <i class="fas fa-cloud-upload mr-1"></i>
-                                                        <span class="text-xs">Drop/Click untuk {{ pel.sertifikat_path ?
+                                                        <span class="text-xs">Drop/Click untuk {{ pel.file_sertifikat ?
                                                             'ganti' : 'upload' }}</span>
                                                     </div>
                                                 </div>
@@ -292,8 +392,12 @@ export default {
         return {
             editingFiles: {},
             isUploading: {},
+            uploading: {},
+            dragover: {},
             selectedYear: '',
-            viewMode: 'list' // 'list' or 'grid'
+            viewMode: 'list', // 'list' or 'grid'
+            searchQuery: '',
+            searchResults: []
         };
     },
     computed: {
@@ -306,19 +410,71 @@ export default {
         },
 
         displayedPelatihansByYear() {
-            if (!this.selectedYear) return this.pelatihansByYear;
-            const filtered = {};
-            if (this.pelatihansByYear[this.selectedYear]) {
-                filtered[this.selectedYear] = this.pelatihansByYear[this.selectedYear];
-            }
-            return filtered;
+            // Normalize structure so each entry is an object: { pelatihan: [], totalJP: number }
+            const result = {};
+            const years = this.selectedYear ? [this.selectedYear] : Object.keys(this.pelatihansByYear || {});
+
+            years.forEach(year => {
+                const raw = (this.pelatihansByYear || {})[year];
+                if (!raw) return;
+
+                let pelList = [];
+                let totalJP = 0;
+
+                if (Array.isArray(raw)) {
+                    pelList = raw;
+                    totalJP = raw.reduce((s, p) => s + (p.jp || 0), 0);
+                } else {
+                    pelList = Array.isArray(raw.pelatihan) ? raw.pelatihan : [];
+                    totalJP = raw.totalJP != null ? raw.totalJP : pelList.reduce((s, p) => s + (p.jp || 0), 0);
+                }
+
+                result[year] = { pelatihan: pelList, totalJP };
+            });
+
+            return result;
         },
 
         filteredPelatihan() {
             if (!this.selectedYear) {
                 return this.getAllPelatihan();
             }
-            return this.pelatihansByYear[this.selectedYear] || [];
+            const y = this.pelatihansByYear[this.selectedYear] || {};
+            return Array.isArray(y.pelatihan) ? y.pelatihan : [];
+        },
+
+        filteredPelatihansByYear() {
+            if (!this.searchQuery) {
+                return this.displayedPelatihansByYear;
+            }
+
+            const filtered = {};
+            const query = this.searchQuery.toLowerCase();
+
+            Object.keys(this.displayedPelatihansByYear).forEach(year => {
+                const data = this.displayedPelatihansByYear[year] || { pelatihan: [] };
+                const pelList = Array.isArray(data.pelatihan) ? data.pelatihan : [];
+
+                const filteredPelatihan = pelList.filter(pelatihan => {
+                    const nama = (pelatihan.nama_pelatihan || '').toString().toLowerCase();
+                    const peny = (pelatihan.penyelenggara || '').toString().toLowerCase();
+                    const jenis = pelatihan.jenis_pelatihan && pelatihan.jenis_pelatihan.nama ? pelatihan.jenis_pelatihan.nama.toString().toLowerCase() : '';
+                    return nama.includes(query) || peny.includes(query) || jenis.includes(query);
+                });
+
+                if (filteredPelatihan.length > 0) {
+                    filtered[year] = {
+                        ...data,
+                        pelatihan: filteredPelatihan,
+                        totalJP: filteredPelatihan.reduce((sum, p) => sum + (p.jp || 0), 0)
+                    };
+                }
+            });
+
+            // Update search results
+            this.searchResults = Object.values(filtered).flatMap(data => data.pelatihan);
+
+            return filtered;
         }
     },
     methods: {
@@ -340,6 +496,18 @@ export default {
             } catch (e) {
                 return dateStr;
             }
+        },
+
+        // Alias for template compatibility (some templates call formatTanggal)
+        formatTanggal(dateStr) {
+            return this.formatDate(dateStr);
+        },
+
+        viewCertificate(filePath) {
+            if (!filePath) return;
+            // Open certificate in new window/tab
+            const url = filePath.startsWith('/storage/') ? filePath : `/storage/${filePath}`;
+            window.open(url, '_blank');
         },
 
         calculateProgress(pegawai) {
@@ -382,8 +550,16 @@ export default {
         },
 
         getJPThisByYear(year) {
-            const pelatihans = this.pelatihansByYear[year] || [];
-            return pelatihans.reduce((total, pel) => total + (pel.jp || 0), 0);
+            const yearData = this.pelatihansByYear[year];
+            if (!yearData) return 0;
+
+            // Handle both array and object structures
+            if (Array.isArray(yearData)) {
+                return yearData.reduce((total, pel) => total + (pel.jp || 0), 0);
+            } else if (yearData.pelatihan && Array.isArray(yearData.pelatihan)) {
+                return yearData.totalJP || yearData.pelatihan.reduce((total, pel) => total + (pel.jp || 0), 0);
+            }
+            return 0;
         },
 
         getMostFrequentType() {
@@ -408,10 +584,35 @@ export default {
             return mostFrequent;
         },
 
+        getMostFrequentTypeCount() {
+            const allPelatihan = this.getAllPelatihan();
+            const typeCount = {};
+
+            allPelatihan.forEach(pel => {
+                const type = pel.jenis_pelatihan ? pel.jenis_pelatihan.nama : 'Unknown';
+                typeCount[type] = (typeCount[type] || 0) + 1;
+            });
+
+            let maxCount = 0;
+
+            Object.entries(typeCount).forEach(([type, count]) => {
+                if (count > maxCount) {
+                    maxCount = count;
+                }
+            });
+
+            return maxCount;
+        },
+
         getAllPelatihan() {
             const all = [];
-            Object.values(this.pelatihansByYear || {}).forEach(yearPelatihans => {
-                all.push(...yearPelatihans);
+            Object.values(this.pelatihansByYear || {}).forEach(yearData => {
+                if (yearData.pelatihan && Array.isArray(yearData.pelatihan)) {
+                    all.push(...yearData.pelatihan);
+                } else if (Array.isArray(yearData)) {
+                    // Fallback for older data structure
+                    all.push(...yearData);
+                }
             });
             return all;
         },
@@ -422,6 +623,94 @@ export default {
 
         filterByYear() {
             // Method is handled by computed property
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            this.searchResults = [];
+        },
+
+        // Statistics methods for the enhanced cards
+        getTrainingWithCertificates() {
+            const allPelatihan = this.getAllPelatihan();
+            return allPelatihan.filter(p => p.file_sertifikat).length;
+        },
+
+        getAverageJPPerYear() {
+            const years = Object.keys(this.pelatihansByYear || {});
+            if (years.length === 0) return 0;
+
+            const totalJP = years.reduce((sum, year) => {
+                const y = this.pelatihansByYear[year] || {};
+                return sum + (y.totalJP || 0);
+            }, 0);
+
+            return Math.round(totalJP / years.length);
+        },
+
+        getMostActiveYear() {
+            let maxCount = 0;
+            let mostActiveYear = '';
+
+            Object.entries(this.pelatihansByYear || {}).forEach(([year, data]) => {
+                const list = data && Array.isArray(data.pelatihan) ? data.pelatihan : [];
+                if (list.length > maxCount) {
+                    maxCount = list.length;
+                    mostActiveYear = year;
+                }
+            });
+
+            return mostActiveYear;
+        },
+
+        getMostActiveYearCount() {
+            let maxCount = 0;
+
+            Object.entries(this.pelatihansByYear || {}).forEach(([year, data]) => {
+                const list = data && Array.isArray(data.pelatihan) ? data.pelatihan : [];
+                if (list.length > maxCount) {
+                    maxCount = list.length;
+                }
+            });
+
+            return maxCount;
+        },
+
+        getHighestJPAchievement() {
+            let maxJP = 0;
+            let year = '';
+
+            Object.entries(this.pelatihansByYear || {}).forEach(([y, data]) => {
+                if (data.totalJP > maxJP) {
+                    maxJP = data.totalJP;
+                    year = y;
+                }
+            });
+
+            return { jp: maxJP, year };
+        },
+
+        getHighestJPInYear() {
+            const result = this.getHighestJPAchievement();
+            return result.jp;
+        },
+
+        getHighestJPYear() {
+            const result = this.getHighestJPAchievement();
+            return result.year;
+        },
+
+        getYearProgressPercentage(jp) {
+            const target = this.pegawai.jp_target || 20;
+            return Math.round((jp / target) * 100);
+        },
+
+        getYearProgressBgColor(jp) {
+            const percentage = this.getYearProgressPercentage(jp);
+            if (percentage >= 100) return 'bg-green-500';
+            if (percentage >= 75) return 'bg-blue-500';
+            if (percentage >= 50) return 'bg-yellow-500';
+            return 'bg-red-500';
         },
         getCsrfToken() {
             const meta = document.querySelector('meta[name="csrf-token"]');
@@ -445,11 +734,17 @@ export default {
         },
 
         addDragClass(event) {
-            event.target.closest('.upload-area').classList.add('drag-over');
+            const uploadArea = event.target.closest('.upload-area, .upload-area-small');
+            if (uploadArea) {
+                uploadArea.classList.add('drag-over');
+            }
         },
 
         removeDragClass(event) {
-            event.target.closest('.upload-area').classList.remove('drag-over');
+            const uploadArea = event.target.closest('.upload-area, .upload-area-small');
+            if (uploadArea) {
+                uploadArea.classList.remove('drag-over');
+            }
         },
 
         async uploadFileForPel(pel, file) {
@@ -471,7 +766,8 @@ export default {
                 formData.append('status', pel.status || 'selesai');
                 formData.append('_method', 'PUT');
 
-                formData.append('sertifikat', file);
+                // Use 'file_sertifikat' as the field name to match backend expectations
+                formData.append('file_sertifikat', file);
 
                 const response = await fetch(route('pelatihan.update', pel.id), {
                     method: 'POST',

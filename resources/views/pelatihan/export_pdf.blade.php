@@ -34,7 +34,6 @@
 			<tr>
 				<th>ID</th>
 				<th>Pegawai</th>
-				<th>NIP</th>
 				<th>Nama Pelatihan</th>
 				<th>Jenis</th>
 				<th>Penyelenggara</th>
@@ -47,13 +46,23 @@
 			@foreach($items as $it)
 			<tr>
 				<td>{{ $it->id }}</td>
-				<td>{{ optional($it->pegawai)->nama_lengkap }}</td>
-				<td>{{ optional($it->pegawai)->nip }}</td>
+				<td>
+					{{ optional($it->pegawai)->nama_lengkap }}
+					@if(optional($it->pegawai)->nip)
+					<br><small>{{ optional($it->pegawai)->nip }}</small>
+					@endif
+				</td>
 				<td>{{ $it->nama_pelatihan }}</td>
-				<td>{{ optional($it->jenisPelatihan)->nama }}</td>
+				<td>
+					@if($it->jenisPelatihan)
+					{{ $it->jenisPelatihan->nama }}
+					@else
+					{{ $it->getJenisNama() }}
+					@endif
+				</td>
 				<td>{{ $it->penyelenggara }}</td>
-				<td>{{ $it->tanggal_mulai }}</td>
-				<td>{{ $it->tanggal_selesai }}</td>
+				<td>{{ $it->tanggal_mulai ? date('Y-m-d', strtotime($it->tanggal_mulai)) : '' }}</td>
+				<td>{{ $it->tanggal_selesai ? date('Y-m-d', strtotime($it->tanggal_selesai)) : '' }}</td>
 				<td>{{ $it->jp }}</td>
 			</tr>
 			@endforeach

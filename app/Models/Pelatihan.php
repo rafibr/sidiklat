@@ -43,10 +43,34 @@ class Pelatihan extends Model
 
     public function getJenisPelatihanAttribute()
     {
-        $jenis = $this->getRelationValue('jenisPelatihan');
-        if ($jenis) {
-            return $jenis->nama ?? null;
+        // Jangan gunakan relasi langsung dalam accessor untuk menghindari infinite loop
+        if ($this->jenis_pelatihan_id) {
+            static $cache = [];
+            $key = $this->jenis_pelatihan_id;
+
+            if (!isset($cache[$key])) {
+                $jenis = JenisPelatihan::find($this->jenis_pelatihan_id);
+                $cache[$key] = $jenis ? (object)['nama' => $jenis->nama] : null;
+            }
+
+            return $cache[$key];
         }
+
+        return null;
+    }
+
+    // Helper method untuk mendapatkan nama jenis pelatihan
+    public function getJenisNama()
+    {
+        if ($this->relationLoaded('jenisPelatihan') && $this->jenisPelatihan) {
+            return $this->jenisPelatihan->nama;
+        }
+
+        if ($this->jenis_pelatihan_id) {
+            $jenis = JenisPelatihan::find($this->jenis_pelatihan_id);
+            return $jenis ? $jenis->nama : null;
+        }
+
         return null;
     }
 }

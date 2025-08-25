@@ -168,27 +168,44 @@ class PelatihanController extends Controller
         $filename = 'pelatihan_' . date('Ymd_His') . '.' . ($format === 'xls' ? 'xls' : 'csv');
 
         $headers = [
-            'Content-Type' => 'text/csv',
+            'Content-Type' => $format === 'xls' ? 'application/vnd.ms-excel' : 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
         $callback = function () use ($items) {
             $out = fopen('php://output', 'w');
-            // Header row
-            fputcsv($out, ['ID', 'Pegawai', 'NIP', 'Nama Pelatihan', 'Jenis', 'Penyelenggara', 'Tanggal Mulai', 'Tanggal Selesai', 'JP', 'Status', 'Sertifikat']);
+            // Header row - menghapus kolom NIP terpisah
+            fputcsv($out, ['ID', 'Pegawai', 'Nama Pelatihan', 'Jenis', 'Penyelenggara', 'Tanggal Mulai', 'Tanggal Selesai', 'JP', 'Status', 'Sertifikat']);
             foreach ($items as $it) {
+                // Gabungkan nama dan NIP dalam satu kolom
+                $pegawaiInfo = optional($it->pegawai)->nama_lengkap;
+                if (optional($it->pegawai)->nip) {
+                    $pegawaiInfo .= "\n" . optional($it->pegawai)->nip;
+                }
+
+                // Pastikan jenis pelatihan dimuat dengan benar
+                $jenisNama = '';
+                if ($it->jenisPelatihan) {
+                    $jenisNama = $it->jenisPelatihan->nama;
+                } else {
+                    $jenisNama = $it->getJenisNama() ?: '';
+                }
+
+                // Format tanggal tanpa jam
+                $tanggalMulai = $it->tanggal_mulai ? date('Y-m-d', strtotime($it->tanggal_mulai)) : '';
+                $tanggalSelesai = $it->tanggal_selesai ? date('Y-m-d', strtotime($it->tanggal_selesai)) : '';
+
                 fputcsv($out, [
                     $it->id,
-                    optional($it->pegawai)->nama_lengkap,
-                    optional($it->pegawai)->nip,
+                    $pegawaiInfo,
                     $it->nama_pelatihan,
-                    optional($it->jenisPelatihan)->nama,
+                    $jenisNama,
                     $it->penyelenggara,
-                    $it->tanggal_mulai,
-                    $it->tanggal_selesai,
+                    $tanggalMulai,
+                    $tanggalSelesai,
                     $it->jp,
-                    $it->status,
-                    $it->sertifikat_path
+                    $it->status ?? '',
+                    $it->sertifikat_path ?? ''
                 ]);
             }
             fclose($out);

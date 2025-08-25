@@ -53,7 +53,7 @@
                         <div class="flex items-center gap-4">
                             <div class="text-sm text-gray-600">Total: <strong>{{ totalPelatihans }}</strong></div>
                             <div class="text-sm text-gray-600" v-if="rangeText">Menampilkan <strong>{{ rangeText
-                            }}</strong></div>
+                                    }}</strong></div>
                         </div>
 
                         <div class="flex items-center gap-3">
@@ -70,6 +70,14 @@
                             </div>
 
                             <div class="flex items-center gap-2">
+                                <div v-if="editingCount > 1" class="flex items-center gap-2 mr-2">
+                                    <button @click.prevent="saveAll"
+                                        class="text-xs bg-green-600 text-white hover:bg-green-700 px-3 py-1 rounded">Save
+                                        All</button>
+                                    <button @click.prevent="cancelAll"
+                                        class="text-xs bg-gray-300 text-gray-800 hover:bg-gray-400 px-3 py-1 rounded">Cancel
+                                        All</button>
+                                </div>
                                 <button @click.prevent="exportData('csv')"
                                     class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">CSV</button>
                                 <button @click.prevent="exportData('xls')"
@@ -194,9 +202,9 @@
                                     :class="{ 'editable-cell': isEditing(pelatihan) }">
                                     <div v-if="!isEditing(pelatihan)">
                                         <div class="text-sm font-medium text-gray-900">{{ pelatihan.pegawai.nama_lengkap
-                                            }}</div>
+                                        }}</div>
                                         <div class="text-xs text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP'
-                                            }}</div>
+                                        }}</div>
                                     </div>
                                     <v-combobox v-else
                                         :model-value="pegawaiOptions.find(p => p.id === pelatihan.pegawai_id)"
@@ -267,20 +275,36 @@
                                 <!-- Sertifikat Column -->
                                 <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-500">
                                     <div v-if="!isEditing(pelatihan)">
-                                        <a v-if="pelatihan.sertifikat_path"
-                                            :href="`/storage/${pelatihan.sertifikat_path}`" target="_blank"
-                                            class="text-blue-600 hover:text-blue-800">
-                                            <i class="fas fa-file-pdf"></i>
-                                        </a>
+                                        <div v-if="pelatihan.sertifikat_path" class="flex items-center gap-1">
+                                            <a :href="`/storage/${pelatihan.sertifikat_path}`" target="_blank"
+                                                rel="noopener"
+                                                class="file-link inline-flex items-center gap-2 text-blue-600 hover:text-blue-800">
+                                                <i class="fas fa-file-pdf"></i>
+                                                <span class="file-name text-xs truncate max-w-20"
+                                                    :title="getFileName(pelatihan.sertifikat_path)">
+                                                    {{ getFileName(pelatihan.sertifikat_path) }}
+                                                </span>
+                                            </a>
+                                        </div>
                                         <span v-else class="text-gray-400">Tidak ada</span>
                                     </div>
                                     <div v-else
                                         class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
                                         @dragover.prevent @drop.prevent="handleFileDrop($event, pelatihan.id)"
                                         @click="$refs[`fileInput${pelatihan.id}`][0].click()">
-                                        <span v-if="!editingFiles[pelatihan.id]" class="text-xs text-gray-500">
-                                            <i class="fas fa-cloud-upload"></i> Drop
-                                        </span>
+                                        <div v-if="!editingFiles[pelatihan.id]" class="text-xs text-center">
+                                            <div v-if="pelatihan.sertifikat_path"
+                                                class="text-green-600 mb-1 truncate max-w-28">
+                                                <i class="fas fa-file-pdf mr-1"></i>
+                                                <span class="text-sm">{{ getFileName(pelatihan.sertifikat_path)
+                                                }}</span>
+                                            </div>
+                                            <div class="text-gray-500">
+                                                <i class="fas fa-cloud-upload mr-1"></i>
+                                                <span class="text-xs">Drop/Click untuk {{ pelatihan.sertifikat_path ?
+                                                    'ganti' : 'upload' }}</span>
+                                            </div>
+                                        </div>
                                         <span v-else class="text-xs text-green-600">
                                             <i class="fas fa-file-pdf"></i> {{ editingFiles[pelatihan.id].name }}
                                         </span>
@@ -296,10 +320,6 @@
                                         <button @click="startEdit(pelatihan)"
                                             class="text-yellow-600 hover:text-yellow-800 p-1" title="Edit">
                                             <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button @click="saveEdit(pelatihan)"
-                                            class="text-green-600 hover:text-green-800 p-1" title="Simpan">
-                                            <i class="fas fa-save"></i>
                                         </button>
                                         <button @click="deleteItem(pelatihan.id)"
                                             class="text-red-600 hover:text-red-800 p-1" title="Hapus">
@@ -410,6 +430,10 @@ export default {
             const to = Math.min(current * per, total);
             return `${from}–${to} dari ${total}`;
         }
+        ,
+        editingCount() {
+            return Object.keys(this.editingRows).length;
+        }
     },
     mounted() {
         // Add click listener for auto-save when clicking outside editing row
@@ -426,25 +450,9 @@ export default {
         },
 
         handleOutsideClick(event) {
-            // Check if there are any rows in editing mode
-            const editingIds = Object.keys(this.editingRows);
-            if (editingIds.length === 0) return;
-
-            // Check if click is outside the editing row
-            const clickedElement = event.target;
-            const editingRow = clickedElement.closest('.editing-row');
-
-            // If clicked outside any editing row, auto-save all editing rows
-            if (!editingRow) {
-                this.isAutoSaving = true;
-                editingIds.forEach(async (id) => {
-                    const pelatihan = this.pelatihans.data.find(p => p.id == id);
-                    if (pelatihan) {
-                        await this.saveEdit(pelatihan, true);
-                    }
-                });
-                this.isAutoSaving = false;
-            }
+            // Tidak auto-save ketika klik di luar row
+            // User harus mengklik tombol save secara manual
+            return;
         },
 
         getJenisColor(jenis) {
@@ -540,17 +548,14 @@ export default {
                 Object.assign(pelatihan, this.originalData[pelatihan.id]);
                 const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
                 this.originalData = remainingData;
-
-                // Langsung masuk mode edit lagi (hanya jika tidak sedang auto-save)
-                if (!this.isAutoSaving) {
-                    this.$nextTick(() => {
-                        this.startEdit(pelatihan);
-                    });
-                }
             }
+
+            // Clear any editing files
+            const { [pelatihan.id]: removedFile, ...remainingFiles } = this.editingFiles;
+            this.editingFiles = remainingFiles;
         },
 
-        async saveEdit(pelatihan, isAutoSave = false) {
+        async saveEdit(pelatihan, isAutoSave = false, skipReload = false) {
             try {
                 // Validate required fields first - skip alert for auto-save
                 if (!pelatihan.pegawai_id || !pelatihan.nama_pelatihan || !pelatihan.jenis_pelatihan_id ||
@@ -573,9 +578,11 @@ export default {
                 formData.append('jp', pelatihan.jp);
                 formData.append('_method', 'PUT');
 
-                // Add file if selected
+                // Add file if selected - ini akan menggantikan file lama
                 if (this.editingFiles[pelatihan.id]) {
                     formData.append('sertifikat', this.editingFiles[pelatihan.id]);
+                    // Flag untuk menandai bahwa ini adalah file replacement
+                    formData.append('replace_file', 'true');
                 }
 
                 console.log('Saving edit with data:', {
@@ -603,7 +610,18 @@ export default {
                     const result = await response.json();
                     console.log('Update successful:', result);
 
-                    // Success - reload page data
+                    // If caller requests skipReload (batch save), just clear local edit state for this row
+                    if (skipReload) {
+                        const { [pelatihan.id]: removed, ...remaining } = this.editingRows;
+                        this.editingRows = remaining;
+                        const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
+                        this.originalData = remainingData;
+                        const { [pelatihan.id]: removedFile, ...remainingFiles } = this.editingFiles;
+                        this.editingFiles = remainingFiles;
+                        return result;
+                    }
+
+                    // Default: reload page data
                     router.reload({
                         only: ['pelatihans'],
                         onSuccess: () => {
@@ -629,6 +647,45 @@ export default {
                     alert('Terjadi kesalahan: ' + error.message);
                 }
             }
+        },
+
+        async saveAll() {
+            const ids = Object.keys(this.editingRows);
+            if (ids.length === 0) return;
+
+            // collect save promises
+            const saves = ids.map(id => {
+                const pel = this.pelatihans.data.find(p => p.id == id);
+                if (!pel) return Promise.resolve();
+                return this.saveEdit(pel, false, true);
+            });
+
+            try {
+                await Promise.all(saves);
+                // After all saved, reload once and clear editing state
+                router.reload({
+                    only: ['pelatihans'], onSuccess: () => {
+                        this.editingRows = {};
+                        this.originalData = {};
+                        this.editingFiles = {};
+                    }
+                });
+            } catch (e) {
+                console.error('Save all failed:', e);
+                alert('Beberapa penyimpanan gagal. Cek console.');
+            }
+        },
+
+        cancelAll() {
+            // Revert all edited rows
+            Object.keys(this.originalData).forEach(id => {
+                const original = this.originalData[id];
+                const pel = this.pelatihans.data.find(p => p.id == id);
+                if (pel && original) Object.assign(pel, original);
+            });
+            this.editingRows = {};
+            this.originalData = {};
+            this.editingFiles = {};
         },
 
         startAddNew() {
@@ -763,6 +820,12 @@ export default {
             };
             this.newRowPegawai = null;
             this.newRowJenis = null;
+        },
+
+        // Helper method to extract filename from path
+        getFileName(filePath) {
+            if (!filePath) return '';
+            return filePath.split('/').pop().split('\\').pop();
         }
     },
     watch: {
@@ -861,17 +924,19 @@ tr:hover:not(.editing-row):not(.adding-row) {
 .upload-area {
     border: 2px dashed #d1d5db;
     border-radius: 6px;
-    padding: 8px;
+    padding: 6px;
     text-align: center;
     cursor: pointer;
     background-color: #f9fafb;
     transition: all 0.2s;
-    min-height: 40px;
+    min-height: 36px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 10px;
     color: #6b7280;
+    line-height: 1.2;
 }
 
 .upload-area:hover {
@@ -884,6 +949,20 @@ tr:hover:not(.editing-row):not(.adding-row) {
     border-color: #10b981;
     background-color: #ecfdf5;
     color: #10b981;
+}
+
+/* File link and name styles */
+.file-link {
+    text-decoration: none;
+}
+
+.file-link .file-name {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.max-w-28 {
+    max-width: 7rem;
 }
 
 /* Mini combobox styles */
@@ -925,5 +1004,16 @@ tr:hover:not(.editing-row):not(.adding-row) {
 
 .action-buttons button:hover {
     background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* File name display styles */
+.max-w-20 {
+    max-width: 5rem;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

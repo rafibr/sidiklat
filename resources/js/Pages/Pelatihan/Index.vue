@@ -49,21 +49,35 @@
             <!-- Table -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden border-compact card-compact">
                 <div class="overflow-x-auto">
-                    <div class="flex items-center gap-4">
-                        <div class="text-sm text-gray-600">Total: <strong>{{ totalPelatihans }}</strong></div>
-
-                        <div class="text-sm text-gray-600" v-if="rangeText">Menampilkan <strong>{{ rangeText }}</strong>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm text-gray-600">Total: <strong>{{ totalPelatihans }}</strong></div>
+                            <div class="text-sm text-gray-600" v-if="rangeText">Menampilkan <strong>{{ rangeText
+                            }}</strong></div>
                         </div>
 
-                        <label class="text-sm text-gray-600">Item per halaman:</label>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm text-gray-600 hidden sm:inline">Item per halaman:</label>
+                                <select v-model.number="filters.per_page" @change="submitFilter"
+                                    class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                                    <option :value="10">10</option>
+                                    <option :value="25">25</option>
+                                    <option :value="50">50</option>
+                                    <option :value="100">100</option>
+                                    <option :value="500">500</option>
+                                </select>
+                            </div>
 
-                        <select v-model.number="filters.per_page" @change="submitFilter"
-                            class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
-                            <option :value="10">10</option>
-                            <option :value="25">25</option>
-                            <option :value="50">50</option>
-                            <option :value="100">100</option>
-                        </select>
+                            <div class="flex items-center gap-2">
+                                <button @click.prevent="exportData('csv')"
+                                    class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">CSV</button>
+                                <button @click.prevent="exportData('xls')"
+                                    class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">XLS</button>
+                                <button @click.prevent="exportData('pdf')"
+                                    class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">PDF</button>
+                            </div>
+                        </div>
                     </div>
                     <table class="min-w-full divide-y divide-gray-200 text-xs">
                         <thead class="bg-gray-50">
@@ -283,6 +297,10 @@
                                             class="text-yellow-600 hover:text-yellow-800 p-1" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
+                                        <button @click="saveEdit(pelatihan)"
+                                            class="text-green-600 hover:text-green-800 p-1" title="Simpan">
+                                            <i class="fas fa-save"></i>
+                                        </button>
                                         <button @click="deleteItem(pelatihan.id)"
                                             class="text-red-600 hover:text-red-800 p-1" title="Hapus">
                                             <i class="fas fa-trash"></i>
@@ -337,11 +355,12 @@ export default {
             filters: {
                 search: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('search') || '' : '',
                 jenis: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('jenis') || '' : '',
-                per_page: this.$page.props.per_page || 25,
+                per_page: this.$page.props.per_page || 500,
             },
             searchTimer: null,
             editingRows: {},
             isAddingNew: false,
+            isAutoSaving: false,
             newRow: {
                 pegawai_id: '',
                 nama_pelatihan: '',
@@ -392,10 +411,40 @@ export default {
             return `${from}–${to} dari ${total}`;
         }
     },
+    mounted() {
+        // Add click listener for auto-save when clicking outside editing row
+        document.addEventListener('click', this.handleOutsideClick);
+    },
+    beforeUnmount() {
+        // Remove event listener when component is destroyed
+        document.removeEventListener('click', this.handleOutsideClick);
+    },
     methods: {
         getCsrfToken() {
             const meta = document.querySelector('meta[name="csrf-token"]');
             return meta ? meta.getAttribute('content') : '';
+        },
+
+        handleOutsideClick(event) {
+            // Check if there are any rows in editing mode
+            const editingIds = Object.keys(this.editingRows);
+            if (editingIds.length === 0) return;
+
+            // Check if click is outside the editing row
+            const clickedElement = event.target;
+            const editingRow = clickedElement.closest('.editing-row');
+
+            // If clicked outside any editing row, auto-save all editing rows
+            if (!editingRow) {
+                this.isAutoSaving = true;
+                editingIds.forEach(async (id) => {
+                    const pelatihan = this.pelatihans.data.find(p => p.id == id);
+                    if (pelatihan) {
+                        await this.saveEdit(pelatihan, true);
+                    }
+                });
+                this.isAutoSaving = false;
+            }
         },
 
         getJenisColor(jenis) {
@@ -422,6 +471,18 @@ export default {
 
         submitFilter() {
             router.get(route('pelatihan.index'), this.filters, { preserveState: true });
+        },
+        exportData(format = 'csv') {
+            // Build query from filters
+            const params = new URLSearchParams();
+            if (this.filters.search) params.set('search', this.filters.search);
+            if (this.filters.jenis) params.set('jenis', this.filters.jenis);
+            if (this.filters.per_page) params.set('per_page', this.filters.per_page);
+            params.set('format', format);
+
+            const url = route('pelatihan.export') + '?' + params.toString();
+            // open in new tab to trigger download
+            window.open(url, '_blank');
         },
         resetFilter() {
             this.filters = { search: '', jenis: '' };
@@ -479,15 +540,24 @@ export default {
                 Object.assign(pelatihan, this.originalData[pelatihan.id]);
                 const { [pelatihan.id]: removedData, ...remainingData } = this.originalData;
                 this.originalData = remainingData;
+
+                // Langsung masuk mode edit lagi (hanya jika tidak sedang auto-save)
+                if (!this.isAutoSaving) {
+                    this.$nextTick(() => {
+                        this.startEdit(pelatihan);
+                    });
+                }
             }
         },
 
-        async saveEdit(pelatihan) {
+        async saveEdit(pelatihan, isAutoSave = false) {
             try {
-                // Validate required fields first
+                // Validate required fields first - skip alert for auto-save
                 if (!pelatihan.pegawai_id || !pelatihan.nama_pelatihan || !pelatihan.jenis_pelatihan_id ||
                     !pelatihan.penyelenggara || !pelatihan.tanggal_mulai || !pelatihan.tanggal_selesai || !pelatihan.jp) {
-                    alert('Harap lengkapi semua field yang wajib diisi!');
+                    if (!isAutoSave) {
+                        alert('Harap lengkapi semua field yang wajib diisi!');
+                    }
                     return;
                 }
 
@@ -549,11 +619,15 @@ export default {
                 } else {
                     const errorData = await response.json();
                     console.error('Save failed:', errorData);
-                    alert('Gagal menyimpan data: ' + (errorData.message || 'Unknown error'));
+                    if (!isAutoSave) {
+                        alert('Gagal menyimpan data: ' + (errorData.message || 'Unknown error'));
+                    }
                 }
             } catch (error) {
                 console.error('Save failed:', error);
-                alert('Terjadi kesalahan: ' + error.message);
+                if (!isAutoSave) {
+                    alert('Terjadi kesalahan: ' + error.message);
+                }
             }
         },
 

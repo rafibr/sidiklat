@@ -10,4 +10,5 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
 Route::get('/pegawai/{pegawai}', [PegawaiController::class, 'show'])->name('pegawai.show');
 Route::get('/pelatihan/comparison', [PelatihanController::class, 'comparison'])->name('pelatihan.comparison');
+Route::get('/pelatihan/export', [PelatihanController::class, 'export'])->name('pelatihan.export');
 Route::resource('pelatihan', PelatihanController::class);

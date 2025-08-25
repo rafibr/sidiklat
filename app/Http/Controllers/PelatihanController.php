@@ -121,6 +121,82 @@ class PelatihanController extends Controller
         ]);
     }
 
+    /**
+     * Export pelatihans to CSV/Excel/PDF
+     * Query params: format=csv|xls|pdf and same filters as index
+     */
+    public function export(Request $request)
+    {
+        $format = $request->get('format', 'csv');
+
+        $query = Pelatihan::with(['pegawai', 'jenisPelatihan']);
+
+        if ($request->filled('jenis')) {
+            $jenisId = JenisPelatihan::where('nama', $request->jenis)->value('id');
+            if ($jenisId) $query->where('jenis_pelatihan_id', $jenisId);
+        }
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_pelatihan', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('pegawai', function ($subQ) use ($request) {
+                        $subQ->where('nama_lengkap', 'like', '%' . $request->search . '%');
+                    });
+            });
+        }
+
+        $items = $query->latest()->get();
+
+        if ($format === 'pdf') {
+            // Try using dompdf if installed
+            if (class_exists('\Dompdf\Dompdf') || app()->bound('dompdf')) {
+                $html = view('pelatihan.export_pdf', ['items' => $items])->render();
+                $pdf = app()->make('dompdf.wrapper');
+                $pdf->loadHTML($html);
+                return $pdf->download('pelatihan_' . date('Ymd_His') . '.pdf');
+            }
+
+            // Fallback: return HTML file for printing
+            $html = view('pelatihan.export_pdf', ['items' => $items])->render();
+            return response($html, 200, [
+                'Content-Type' => 'text/html',
+                'Content-Disposition' => 'attachment; filename="pelatihan_' . date('Ymd_His') . '.html"'
+            ]);
+        }
+
+        // CSV / XLS (simple CSV with .xls extension works in Excel)
+        $filename = 'pelatihan_' . date('Ymd_His') . '.' . ($format === 'xls' ? 'xls' : 'csv');
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($items) {
+            $out = fopen('php://output', 'w');
+            // Header row
+            fputcsv($out, ['ID', 'Pegawai', 'NIP', 'Nama Pelatihan', 'Jenis', 'Penyelenggara', 'Tanggal Mulai', 'Tanggal Selesai', 'JP', 'Status', 'Sertifikat']);
+            foreach ($items as $it) {
+                fputcsv($out, [
+                    $it->id,
+                    optional($it->pegawai)->nama_lengkap,
+                    optional($it->pegawai)->nip,
+                    $it->nama_pelatihan,
+                    optional($it->jenisPelatihan)->nama,
+                    $it->penyelenggara,
+                    $it->tanggal_mulai,
+                    $it->tanggal_selesai,
+                    $it->jp,
+                    $it->status,
+                    $it->sertifikat_path
+                ]);
+            }
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create()
     {
         $pegawais = Pegawai::orderBy('nama_lengkap')->get();

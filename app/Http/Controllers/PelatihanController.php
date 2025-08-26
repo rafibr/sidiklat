@@ -271,12 +271,8 @@ class PelatihanController extends Controller
 
 		$pelatihan = Pelatihan::create($validated);
 
-		// Update JP pegawai jika status selesai
-		if ($pelatihan->status == 'selesai') {
-			$pegawai = $pelatihan->pegawai;
-			$pegawai->jp_tercapai += $pelatihan->jp;
-			$pegawai->save();
-		}
+		// Note: JP tercapai is now calculated dynamically from yearly targets
+		// No need to manually update jp_tercapai field
 
 		// For AJAX requests, return JSON response
 		if ($request->ajax() || $request->wantsJson()) {
@@ -354,20 +350,8 @@ class PelatihanController extends Controller
 
 		$pelatihan->update($validated);
 
-		// Update JP pegawai
-		$pegawai = $pelatihan->pegawai;
-
-		// Kurangi JP lama jika sebelumnya selesai
-		if ($oldStatus == 'selesai') {
-			$pegawai->jp_tercapai -= $oldJp;
-		}
-
-		// Tambah JP baru jika sekarang selesai
-		if ($pelatihan->status == 'selesai') {
-			$pegawai->jp_tercapai += $pelatihan->jp;
-		}
-
-		$pegawai->save();
+		// Note: JP tercapai is now calculated dynamically from yearly targets
+		// No need to manually update jp_tercapai field
 
 		// For AJAX requests, return JSON response
 		if ($request->ajax() || $request->wantsJson()) {
@@ -383,12 +367,8 @@ class PelatihanController extends Controller
 
 	public function destroy(Request $request, Pelatihan $pelatihan)
 	{
-		// Update JP pegawai jika pelatihan selesai
-		if ($pelatihan->status == 'selesai') {
-			$pegawai = $pelatihan->pegawai;
-			$pegawai->jp_tercapai -= $pelatihan->jp;
-			$pegawai->save();
-		}
+		// Note: JP tercapai is now calculated dynamically from yearly targets
+		// No need to manually update jp_tercapai field
 
 		// Delete certificate file
 		if ($pelatihan->sertifikat_path) {

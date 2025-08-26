@@ -36,13 +36,7 @@
                         <span class="hidden xs:inline">Progress JP</span>
                         <span class="xs:hidden">Progress</span>
                         </Link>
-                        <component :is="Link" :href="route('pegawai.index')"
-                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
-                            :class="{ 'active': $page.component.startsWith('Pegawai/') }">
-                            <i class="fas fa-users mr-1 sm:mr-2"></i>
-                            <span class="hidden sm:inline">Data Pegawai</span>
-                            <span class="sm:hidden">Pegawai</span>
-                        </component>
+
                         <Link :href="route('pelatihan.comparison')"
                             class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
                             :class="{ 'active': $page.component === 'Pelatihan/Comparison' }">
@@ -56,6 +50,13 @@
                         <i class="fas fa-database mr-1 sm:mr-2"></i>
                         <span class="hidden sm:inline">Data Pelatihan</span>
                         <span class="sm:hidden">Data</span>
+                        </Link>
+                        <Link :is="Link" :href="route('pegawai.index')"
+                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                            :class="{ 'active': $page.component.startsWith('Pegawai/') }">
+                        <i class="fas fa-users mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">List Pegawai</span>
+                        <span class="sm:hidden">Pegawai</span>
                         </Link>
                     </div>
                 </div>

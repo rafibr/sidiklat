@@ -33,6 +33,20 @@ class Pegawai extends Model
 		return $this->hasMany(Pelatihan::class);
 	}
 
+	public function jpTargets()
+	{
+		return $this->hasMany(PegawaiJpTarget::class);
+	}
+
+	/**
+	 * Get JP target for specific year
+	 */
+	public function getJpTargetForYear($year)
+	{
+		$target = PegawaiJpTarget::getOrCreateForYear($this->id, $year);
+		return $target->jp_target;
+	}
+
 	public function getPersentaseProgressAttribute()
 	{
 		if ($this->jp_target == 0) return 0;

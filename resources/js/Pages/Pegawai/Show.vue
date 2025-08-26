@@ -45,30 +45,32 @@
                                 Informasi tambahan belum tersedia
                             </div>
 
-                            <hr v-if="pegawai.jp_target || pegawai.jp_tercapai" class="my-3">
+                            <hr v-if="yearlyStats[currentYear]" class="my-3">
 
-                            <!-- JP Progress - Only show if there's target or achieved JP -->
-                            <div v-if="pegawai.jp_target || pegawai.jp_tercapai" class="space-y-2">
+                            <!-- JP Progress for Current Year - Only show if there's current year data -->
+                            <div v-if="yearlyStats[currentYear]" class="space-y-2">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Progress JP {{ currentYear }}</h4>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-medium text-gray-600">Target JP:</span>
-                                    <span class="text-sm font-semibold text-gray-900">{{ formatNumber(pegawai.jp_target
-                                        || 0) }}</span>
+                                    <span class="text-sm font-semibold text-gray-900">{{
+                                        formatNumber(yearlyStats[currentYear].jp_target || 0) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-medium text-gray-600">JP Tercapai:</span>
                                     <span class="text-sm font-semibold"
-                                        :class="getProgressColor(pegawai.jp_tercapai, pegawai.jp_target)">
-                                        {{ formatNumber(pegawai.jp_tercapai || 0) }}
+                                        :class="getProgressColor(yearlyStats[currentYear].jp_tercapai, yearlyStats[currentYear].jp_target)">
+                                        {{ formatNumber(yearlyStats[currentYear].jp_tercapai || 0) }}
                                     </span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="h-2 rounded-full transition-all duration-300"
-                                        :class="getProgressBgColor(pegawai.jp_tercapai, pegawai.jp_target)"
-                                        :style="{ width: Math.min(100, calculateProgress(pegawai)) + '%' }"></div>
+                                        :class="getProgressBgColor(yearlyStats[currentYear].jp_tercapai, yearlyStats[currentYear].jp_target)"
+                                        :style="{ width: Math.min(100, yearlyStats[currentYear].progress_percentage || 0) + '%' }">
+                                    </div>
                                 </div>
                                 <div class="text-right">
                                     <span class="text-xs text-gray-500">
-                                        {{ Math.round(calculateProgress(pegawai)) }}% tercapai
+                                        {{ Math.round(yearlyStats[currentYear].progress_percentage || 0) }}% tercapai
                                     </span>
                                 </div>
                             </div>
@@ -103,7 +105,7 @@
                                     <div>
                                         <p class="text-sm font-medium text-purple-600">Sertifikat</p>
                                         <p class="text-2xl font-bold text-purple-900">{{ getTrainingWithCertificates()
-                                        }}</p>
+                                            }}</p>
                                         <p class="text-xs text-purple-600">dari {{ getTotalPelatihan() }}</p>
                                     </div>
                                     <i class="fas fa-certificate text-purple-400 text-2xl"></i>
@@ -232,7 +234,7 @@
                     <div v-if="searchQuery" class="mb-4">
                         <p class="text-sm text-gray-600">
                             Menampilkan {{ searchResults.length }} pelatihan dari pencarian "<strong>{{ searchQuery
-                            }}</strong>"
+                                }}</strong>"
                             <button @click="clearSearch" class="text-blue-600 hover:text-blue-800 ml-2">
                                 <i class="fas fa-times"></i> Hapus filter
                             </button>
@@ -309,7 +311,7 @@
                     <div v-else v-for="(data, year) in displayedPelatihansByYear" :key="year" class="mb-6">
                         <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-3">{{ year
-                                }}</span>
+                            }}</span>
                             <span class="text-sm text-gray-500">({{ (data.pelatihan && data.pelatihan.length) || 0 }}
                                 pelatihan)</span>
                         </h3>
@@ -350,7 +352,7 @@
                                                 class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-2 text-sm">
                                                 <i class="fas fa-file-pdf"></i>
                                                 <span>{{ getFileName(pel.file_sertifikat) || 'Lihat Sertifikat'
-                                                    }}</span>
+                                                }}</span>
                                             </a>
                                             <span v-else class="text-xs text-gray-400">Tidak ada sertifikat</span>
 
@@ -365,7 +367,7 @@
                                                         class="text-green-600 mb-1 truncate max-w-28">
                                                         <i class="fas fa-file-pdf mr-1"></i>
                                                         <span class="text-sm">{{ getFileName(pel.file_sertifikat)
-                                                            }}</span>
+                                                        }}</span>
                                                     </div>
                                                     <div class="text-gray-500">
                                                         <i class="fas fa-cloud-upload mr-1"></i>
@@ -406,7 +408,10 @@ export default {
     components: { AppLayout, Link },
     props: {
         pegawai: Object,
-        pelatihansByYear: Object,
+        pelatihans: Array,
+        yearlyStats: Object,
+        availableYears: Array,
+        currentYear: Number
     },
     data() {
         return {
@@ -422,34 +427,50 @@ export default {
     },
     computed: {
         hasPelatihan() {
-            return Object.keys(this.pelatihansByYear || {}).length > 0;
+            return this.pelatihans && this.pelatihans.length > 0;
         },
 
-        availableYears() {
-            return Object.keys(this.pelatihansByYear || {}).sort((a, b) => b - a);
+        sortedAvailableYears() {
+            return [...(this.availableYears || [])].sort((a, b) => b - a);
+        },
+
+        pelatihansByYear() {
+            const result = {};
+            if (!this.pelatihans) return result;
+
+            this.pelatihans.forEach(pelatihan => {
+                const year = new Date(pelatihan.tanggal_mulai).getFullYear();
+                if (!result[year]) {
+                    result[year] = [];
+                }
+                result[year].push(pelatihan);
+            });
+
+            return result;
         },
 
         displayedPelatihansByYear() {
-            // Normalize structure so each entry is an object: { pelatihan: [], totalJP: number }
             const result = {};
-            const years = this.selectedYear ? [this.selectedYear] : Object.keys(this.pelatihansByYear || {});
+            const years = this.selectedYear ? [this.selectedYear] : this.sortedAvailableYears;
 
             years.forEach(year => {
-                const raw = (this.pelatihansByYear || {})[year];
-                if (!raw) return;
+                const pelList = this.pelatihansByYear[year] || [];
+                const stats = this.yearlyStats[year] || {
+                    jp_tercapai: 0,
+                    jp_target: 20,
+                    total_pelatihan: 0,
+                    progress_percentage: 0,
+                    is_target_reached: false
+                };
 
-                let pelList = [];
-                let totalJP = 0;
-
-                if (Array.isArray(raw)) {
-                    pelList = raw;
-                    totalJP = raw.reduce((s, p) => s + (p.jp || 0), 0);
-                } else {
-                    pelList = Array.isArray(raw.pelatihan) ? raw.pelatihan : [];
-                    totalJP = raw.totalJP != null ? raw.totalJP : pelList.reduce((s, p) => s + (p.jp || 0), 0);
-                }
-
-                result[year] = { pelatihan: pelList, totalJP };
+                result[year] = {
+                    pelatihan: pelList,
+                    totalJP: stats.jp_tercapai,
+                    targetJP: stats.jp_target,
+                    totalPelatihan: stats.total_pelatihan,
+                    progressPercentage: stats.progress_percentage,
+                    isTargetReached: stats.is_target_reached
+                };
             });
 
             return result;
@@ -566,24 +587,16 @@ export default {
         },
 
         getTotalPelatihan() {
-            return this.getAllPelatihan().length;
+            return this.pelatihans ? this.pelatihans.length : 0;
         },
 
         getJPThisByYear(year) {
-            const yearData = this.pelatihansByYear[year];
-            if (!yearData) return 0;
-
-            // Handle both array and object structures
-            if (Array.isArray(yearData)) {
-                return yearData.reduce((total, pel) => total + (pel.jp || 0), 0);
-            } else if (yearData.pelatihan && Array.isArray(yearData.pelatihan)) {
-                return yearData.totalJP || yearData.pelatihan.reduce((total, pel) => total + (pel.jp || 0), 0);
-            }
-            return 0;
+            const stats = this.yearlyStats[year];
+            return stats ? stats.jp_tercapai : 0;
         },
 
         getMostFrequentType() {
-            const allPelatihan = this.getAllPelatihan();
+            const allPelatihan = this.pelatihans || [];
             const typeCount = {};
 
             allPelatihan.forEach(pel => {
@@ -625,16 +638,7 @@ export default {
         },
 
         getAllPelatihan() {
-            const all = [];
-            Object.values(this.pelatihansByYear || {}).forEach(yearData => {
-                if (yearData.pelatihan && Array.isArray(yearData.pelatihan)) {
-                    all.push(...yearData.pelatihan);
-                } else if (Array.isArray(yearData)) {
-                    // Fallback for older data structure
-                    all.push(...yearData);
-                }
-            });
-            return all;
+            return this.pelatihans || [];
         },
 
         toggleView() {
@@ -652,17 +656,16 @@ export default {
 
         // Statistics methods for the enhanced cards
         getTrainingWithCertificates() {
-            const allPelatihan = this.getAllPelatihan();
-            return allPelatihan.filter(p => p.file_sertifikat).length;
+            return this.pelatihans ? this.pelatihans.filter(p => p.file_sertifikat).length : 0;
         },
 
         getAverageJPPerYear() {
-            const years = Object.keys(this.pelatihansByYear || {});
+            const years = this.availableYears || [];
             if (years.length === 0) return 0;
 
             const totalJP = years.reduce((sum, year) => {
-                const y = this.pelatihansByYear[year] || {};
-                return sum + (y.totalJP || 0);
+                const stats = this.yearlyStats[year];
+                return sum + (stats ? stats.jp_tercapai : 0);
             }, 0);
 
             return Math.round(totalJP / years.length);

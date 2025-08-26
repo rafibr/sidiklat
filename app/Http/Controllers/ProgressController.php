@@ -35,8 +35,11 @@ class ProgressController extends Controller
 
 		$pegawais = $query->paginate(10);
 
-		// Add pelatihan relationship data for each pegawai
+		// Add pelatihan relationship data and yearly JP target for each pegawai
 		$pegawais->getCollection()->transform(function ($pegawai) use ($year) {
+			// Get JP target for this year using the new system
+			$pegawai->jp_target = $pegawai->getJpTargetForYear($year);
+
 			$pegawai->pelatihans = Pelatihan::where('pegawai_id', $pegawai->id)
 				->whereYear('tanggal_mulai', $year)
 				->with('jenisPelatihan')
@@ -60,6 +63,12 @@ class ProgressController extends Controller
 			->orderByDesc('year')
 			->pluck('year')
 			->toArray();
+
+		// Ensure current year is in available years if not present
+		if (!in_array($year, $availableYears)) {
+			$availableYears[] = $year;
+			rsort($availableYears);
+		}
 
 		return Inertia::render('Progress/Index', [
 			'pegawais' => $pegawais,

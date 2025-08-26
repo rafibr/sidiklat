@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pegawai;
+use App\Models\PegawaiJpTarget;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,6 +12,7 @@ class PegawaiController extends Controller
     public function index(Request $request)
     {
         $query = Pegawai::query();
+        $currentYear = date('Y');
 
         // Search functionality
         if ($request->has('search') && $request->search) {
@@ -26,12 +28,28 @@ class PegawaiController extends Controller
         // Sort by created_at desc by default
         $pegawais = $query->orderBy('created_at', 'desc')->paginate(10);
 
+        // Calculate stats for each pegawai based on yearly targets
+        $pegawais->getCollection()->transform(function ($pegawai) use ($currentYear) {
+            $jpTarget = $pegawai->getJpTargetForYear($currentYear);
+            $jpTercapai = $pegawai->pelatihans()
+                ->whereYear('tanggal_mulai', $currentYear)
+                ->sum('jp');
+
+            $pegawai->jp_target_display = $jpTarget;
+            $pegawai->jp_tercapai = $jpTercapai;
+            $pegawai->progress_percentage = $jpTarget > 0 ? min(($jpTercapai / $jpTarget) * 100, 100) : 0;
+            $pegawai->is_target_reached = $jpTercapai >= $jpTarget;
+
+            return $pegawai;
+        });
+
         // Get JP default setting (you might want to store this in a settings table)
         $jpDefault = config('app.jp_default', 20); // fallback to 20
 
         return Inertia::render('Pegawai/Index', [
             'pegawais' => $pegawais,
             'jpDefault' => $jpDefault,
+            'currentYear' => $currentYear,
             'filters' => $request->only(['search'])
         ]);
     }
@@ -57,50 +75,82 @@ class PegawaiController extends Controller
             'telepon' => 'nullable|string|max:20',
         ]);
 
-        // Set default JP target if not provided
-        if (!isset($validated['jp_target']) || $validated['jp_target'] === null) {
-            $validated['jp_target'] = config('app.jp_default', 20);
-        }
+        // Remove jp_target from validated data since we'll handle it via yearly targets
+        $jpTargetValue = $validated['jp_target'] ?? config('app.jp_default', 20);
+        unset($validated['jp_target']);
 
         $pegawai = Pegawai::create($validated);
+
+        // Create JP target for current year
+        $currentYear = date('Y');
+        PegawaiJpTarget::create([
+            'pegawai_id' => $pegawai->id,
+            'tahun' => $currentYear,
+            'jp_target' => $jpTargetValue,
+            'jp_tercapai' => 0
+        ]);
 
         return redirect()->route('pegawai.index')->with('success', 'Pegawai berhasil ditambahkan.');
     }
 
     public function show(Pegawai $pegawai)
     {
-        // Load pelatihans with jenis_pelatihan relation
-        $pegawai->load(['pelatihans.jenisPelatihan']);
+        $currentYear = date('Y');
 
-        // Group pelatihans by year (try to extract year from tanggal_mulai, fallback to created_at year)
-        $pelatihansByYear = collect($pegawai->pelatihans)->groupBy(function ($pel) {
-            // tanggal_mulai stored as string; attempt to parse year
-            $year = null;
-            if (!empty($pel->tanggal_mulai)) {
-                if (preg_match('/(\d{4})/', $pel->tanggal_mulai, $m)) {
-                    $year = $m[1];
-                }
-            }
-            if (!$year && $pel->created_at) {
-                $year = $pel->created_at->format('Y');
-            }
-            return $year ?? 'Unknown';
-        })->map(function ($pelatihansInYear) {
-            $totalJP = $pelatihansInYear->sum('jp');
-            return [
-                'pelatihan' => $pelatihansInYear->values(),
-                'totalJP' => $totalJP
+        // Load pelatihans untuk pegawai ini
+        $pelatihans = $pegawai->pelatihans()
+            ->with('jenisPelatihan')
+            ->orderBy('tanggal_mulai', 'desc')
+            ->get();
+
+        // Hitung statistik berdasarkan tahun
+        $yearlyStats = [];
+        $availableYears = $pelatihans->pluck('tanggal_mulai')
+            ->map(fn($date) => date('Y', strtotime($date)))
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        // Pastikan tahun berjalan ada dalam daftar
+        if (!in_array($currentYear, $availableYears)) {
+            $availableYears[] = $currentYear;
+            sort($availableYears);
+        }
+
+        foreach ($availableYears as $year) {
+            $pelatihansTahunIni = $pelatihans->filter(function ($pelatihan) use ($year) {
+                return date('Y', strtotime($pelatihan->tanggal_mulai)) == $year;
+            });
+
+            $jpTercapai = $pelatihansTahunIni->sum('jp');
+            $jpTarget = $pegawai->getJpTargetForYear($year);
+
+            $yearlyStats[$year] = [
+                'jp_tercapai' => $jpTercapai,
+                'jp_target' => $jpTarget,
+                'progress_percentage' => $jpTarget > 0 ? min(($jpTercapai / $jpTarget) * 100, 100) : 0,
+                'is_target_reached' => $jpTercapai >= $jpTarget,
+                'total_pelatihan' => $pelatihansTahunIni->count()
             ];
-        })->sortKeysDesc();
+        }
 
         return Inertia::render('Pegawai/Show', [
             'pegawai' => $pegawai,
-            'pelatihansByYear' => $pelatihansByYear,
+            'pelatihans' => $pelatihans,
+            'yearlyStats' => $yearlyStats,
+            'availableYears' => $availableYears,
+            'currentYear' => $currentYear
         ]);
     }
 
     public function edit(Pegawai $pegawai)
     {
+        $currentYear = date('Y');
+
+        // Add current year's JP target to pegawai data
+        $pegawai->jp_target = $pegawai->getJpTargetForYear($currentYear);
+
         return Inertia::render('Pegawai/Edit', [
             'pegawai' => $pegawai
         ]);
@@ -122,7 +172,25 @@ class PegawaiController extends Controller
             'telepon' => 'nullable|string|max:20',
         ]);
 
+        // Handle JP target separately for current year
+        $jpTargetValue = $validated['jp_target'] ?? null;
+        unset($validated['jp_target']);
+
         $pegawai->update($validated);
+
+        // Update or create JP target for current year if provided
+        if ($jpTargetValue !== null) {
+            $currentYear = date('Y');
+            PegawaiJpTarget::updateOrCreate(
+                [
+                    'pegawai_id' => $pegawai->id,
+                    'tahun' => $currentYear
+                ],
+                [
+                    'jp_target' => $jpTargetValue
+                ]
+            );
+        }
 
         return redirect()->route('pegawai.index')->with('success', 'Pegawai berhasil diupdate.');
     }
@@ -143,21 +211,28 @@ class PegawaiController extends Controller
     {
         $validated = $request->validate([
             'jp_default' => 'required|integer|min:0|max:1000',
-            'apply_to_existing' => 'boolean'
+            'tahun' => 'required|integer|min:2020|max:2050'
         ]);
 
-        // Here you might want to store this in a settings table
-        // For now, we'll update config or use environment variable
-        // This is a simple implementation - in production, use a proper settings system
+        $year = $validated['tahun'];
+        $jpDefault = $validated['jp_default'];
 
-        if ($validated['apply_to_existing']) {
-            // Update all pegawais that don't have a custom jp_target
-            Pegawai::whereNull('jp_target')->orWhere('jp_target', 0)->update(['jp_target' => $validated['jp_default']]);
+        // Update JP targets for all pegawais for the specified year
+        $pegawais = Pegawai::all();
+
+        foreach ($pegawais as $pegawai) {
+            PegawaiJpTarget::updateOrCreate(
+                [
+                    'pegawai_id' => $pegawai->id,
+                    'tahun' => $year
+                ],
+                [
+                    'jp_target' => $jpDefault
+                ]
+            );
         }
 
-        // Store the new default (you might want to implement a proper settings system)
-        // For now, this would need to be handled at the application level
-
-        return redirect()->route('pegawai.index')->with('success', 'JP default berhasil diupdate.');
+        return redirect()->route('pegawai.index')
+            ->with('success', "JP target untuk tahun {$year} berhasil diupdate untuk semua pegawai.");
     }
 }

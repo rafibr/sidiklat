@@ -414,7 +414,7 @@ export default {
             uploading: {},
             dragover: {},
             selectedYear: '',
-            viewMode: 'list', // 'list' or 'grid'
+            viewMode: 'grid', // 'list' or 'grid'
             searchQuery: '',
             searchResults: []
         };

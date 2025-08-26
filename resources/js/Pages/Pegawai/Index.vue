@@ -52,11 +52,21 @@
                     <table class="min-w-full table-fixed divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="w-3/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pegawai</th>
-                                <th class="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Kerja</th>
-                                <th class="w-3/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JP Progress</th>
-                                <th class="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kontak</th>
-                                <th class="w-2/12 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                <th
+                                    class="w-3/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Pegawai</th>
+                                <th
+                                    class="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Unit Kerja</th>
+                                <th
+                                    class="w-3/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    JP Progress</th>
+                                <th
+                                    class="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Kontak</th>
+                                <th
+                                    class="w-2/12 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -69,16 +79,22 @@
                                             <i class="fas fa-user text-blue-600"></i>
                                         </div>
                                         <div>
-                                            <div class="text-sm font-medium text-gray-900 truncate max-w-[220px]">{{ pegawai.nama_lengkap }}</div>
-                                            <div class="text-sm text-gray-500 truncate max-w-[220px]">{{ pegawai.nip || 'Tidak ada NIP' }}</div>
-                                            <div v-if="pegawai.pangkat_golongan" class="text-xs text-gray-400 truncate max-w-[220px]">{{ pegawai.pangkat_golongan }}</div>
+                                            <div class="text-sm font-medium text-gray-900 truncate max-w-[220px]">{{
+                                                pegawai.nama_lengkap }}</div>
+                                            <div class="text-sm text-gray-500 truncate max-w-[220px]">{{ pegawai.nip ||
+                                                'Tidak ada NIP' }}</div>
+                                            <div v-if="pegawai.pangkat_golongan"
+                                                class="text-xs text-gray-400 truncate max-w-[220px]">{{
+                                                pegawai.pangkat_golongan }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div>
                                         <div v-if="pegawai.unit_kerja">
-                                            <span :class="getUnitPillClass(pegawai.unit_kerja) + ' inline-block max-w-[160px] truncate'" @click.stop>
+                                            <span
+                                                :class="getUnitPillClass(pegawai.unit_kerja) + ' inline-block max-w-[160px] truncate'"
+                                                @click.stop>
                                                 {{ pegawai.unit_kerja }}
                                             </span>
                                         </div>

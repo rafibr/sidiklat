@@ -1,162 +1,490 @@
 <template>
     <AppLayout>
-        <div class="relative p-3 sm:p-4 md:p-6">
-            <!-- Loading overlay -->
-            <div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
-                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-            <!-- Year Filter -->
-            <div class="mb-4 md:mb-6">
-                <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <label class="block text-sm font-medium text-gray-700">Filter Tahun:</label>
-                        <div class="relative w-full sm:w-auto">
+        <div class="relative p-4 md:p-6 lg:p-8 bg-gray-50 min-h-screen">
+            <!-- Header Section -->
+            <div class="mb-8">
+                <div class="mb-6">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard Analytics</h1>
+                    <p class="text-gray-600">Monitoring dan evaluasi pemenuhan target JP pegawai</p>
+                </div>
+
+                <!-- Loading overlay -->
+                <div v-if="loading"
+                    class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div class="bg-white p-6 rounded-xl shadow-xl">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
+                            </div>
+                            <span class="text-gray-700 font-medium">Memuat data...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Year Filter -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-blue-50 rounded-lg">
+                                <i class="fas fa-calendar-alt text-blue-600"></i>
+                            </div>
+                            <label class="text-sm font-semibold text-gray-700">Filter Tahun:</label>
+                        </div>
+                        <div class="relative">
                             <select :value="selectedYear" @change="changeYear($event)"
-                                class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                                class="px-4 py-2.5 pr-10 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white shadow-sm hover:border-gray-300 transition-colors">
                                 <option v-for="year in availableYears" :key="year" :value="year">
                                     {{ year }}
                                 </option>
                             </select>
-
+                            <i
+                                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                         </div>
-                        <span class="text-sm text-gray-600">Menampilkan data untuk tahun {{ selectedYear }}</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span class="text-sm text-gray-600 font-medium">Data aktif untuk tahun {{ selectedYear
+                                }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Pegawai Card -->
                 <div
-                    class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div class="mb-2 sm:mb-0">
-                            <p class="text-white/90 text-xs sm:text-sm font-medium">Total Pegawai</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ stats.total_pegawai }}</p>
+                    class="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                            <i class="fas fa-users text-2xl"></i>
                         </div>
-                        <div class="bg-blue-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-                            <i class="fas fa-users text-sm sm:text-lg md:text-xl text-blue-700"></i>
+                        <div class="text-right">
+                            <div class="w-2 h-2 bg-blue-200 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium mb-1">Total Pegawai</p>
+                        <p class="text-3xl font-bold mb-1">{{ stats.total_pegawai }}</p>
+                        <p class="text-blue-200 text-xs">Pegawai aktif</p>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                </div>
+
+                <!-- Total Pelatihan Card -->
+                <div
+                    class="group relative bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                            <i class="fas fa-graduation-cap text-2xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-green-100 text-sm font-medium mb-1">Total Pelatihan</p>
+                        <p class="text-3xl font-bold mb-1">{{ stats.total_pelatihan }}</p>
+                        <p class="text-green-200 text-xs">Program tersedia</p>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                </div>
+
+                <!-- Total JP Card -->
+                <div
+                    class="group relative bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                            <i class="fas fa-clock text-2xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="w-2 h-2 bg-purple-200 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium mb-1">Total JP</p>
+                        <p class="text-3xl font-bold mb-1">{{ formatNumber(stats.total_jp) }}</p>
+                        <p class="text-purple-200 text-xs">Jam pelajaran</p>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                </div>
+
+                <!-- Rata-rata Progress Card -->
+                <div
+                    class="group relative bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                            <i class="fas fa-chart-line text-2xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="w-2 h-2 bg-orange-200 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-orange-100 text-sm font-medium mb-1">Rata-rata Progress</p>
+                        <p class="text-3xl font-bold mb-1">{{ Number(stats.rata_progress || 0).toFixed(1) }}%</p>
+                        <p class="text-orange-200 text-xs">Pencapaian target</p>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                </div>
+            </div>
+
+            <!-- JP Fulfillment Dashboard -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 mb-8 border border-gray-100">
+                <!-- Header -->
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+                    <div class="mb-4 lg:mb-0">
+                        <div class="flex items-center mb-3">
+                            <div class="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl mr-4">
+                                <i class="fas fa-chart-pie text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl lg:text-3xl font-bold text-gray-900">
+                                    Pemenuhan JP {{ selectedYear }}
+                                </h3>
+                                <p class="text-gray-600 mt-1">Status pencapaian target JP seluruh pegawai</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
+                        <div class="text-center">
+                            <div
+                                class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                                {{ jpFulfillment?.totals?.overall_progress || 0 }}%
+                            </div>
+                            <div class="text-sm font-semibold text-gray-600">Progress Keseluruhan</div>
+                            <div
+                                class="mt-2 w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div
-                    class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div class="mb-2 sm:mb-0">
-                            <p class="text-white/90 text-xs sm:text-sm font-medium">Total Pelatihan</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ stats.total_pelatihan }}</p>
+                <!-- Progress Categories -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Completed -->
+                    <div
+                        class="group relative bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-bold">{{ jpFulfillment?.categories?.completed || 0 }}</div>
+                            </div>
                         </div>
-                        <div class="bg-green-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-                            <i class="fas fa-graduation-cap text-sm sm:text-lg md:text-xl text-green-700"></i>
+                        <div class="mb-3">
+                            <div class="text-green-100 text-sm font-semibold mb-1">Tercapai</div>
+                            <div class="text-xs text-green-200">≥100% target</div>
+                        </div>
+                        <div class="pt-3 border-t border-green-400/30">
+                            <div class="text-xs font-medium">
+                                {{ jpFulfillment?.percentages?.completed || 0 }}% dari total pegawai
+                            </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                    </div>
+
+                    <!-- On Track -->
+                    <div
+                        class="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                                <i class="fas fa-arrow-up text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-bold">{{ jpFulfillment?.categories?.on_track || 0 }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-blue-100 text-sm font-semibold mb-1">On Track</div>
+                            <div class="text-xs text-blue-200">75-99% target</div>
+                        </div>
+                        <div class="pt-3 border-t border-blue-400/30">
+                            <div class="text-xs font-medium">
+                                {{ jpFulfillment?.percentages?.on_track || 0 }}% dari total pegawai
+                            </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                    </div>
+
+                    <!-- Behind -->
+                    <div
+                        class="group relative bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                                <i class="fas fa-exclamation-triangle text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-bold">{{ jpFulfillment?.categories?.behind || 0 }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-yellow-100 text-sm font-semibold mb-1">Tertinggal</div>
+                            <div class="text-xs text-yellow-200">50-74% target</div>
+                        </div>
+                        <div class="pt-3 border-t border-yellow-400/30">
+                            <div class="text-xs font-medium">
+                                {{ jpFulfillment?.percentages?.behind || 0 }}% dari total pegawai
+                            </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                    </div>
+
+                    <!-- Critical -->
+                    <div
+                        class="group relative bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                                <i class="fas fa-exclamation-circle text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-bold">{{ jpFulfillment?.categories?.critical || 0 }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-red-100 text-sm font-semibold mb-1">Kritis</div>
+                            <div class="text-xs text-red-200">&lt;50% target</div>
+                        </div>
+                        <div class="pt-3 border-t border-red-400/30">
+                            <div class="text-xs font-medium">
+                                {{ jpFulfillment?.percentages?.critical || 0 }}% dari total pegawai
+                            </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
                         </div>
                     </div>
                 </div>
 
-                <div
-                    class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div class="mb-2 sm:mb-0">
-                            <p class="text-white/90 text-xs sm:text-sm font-medium">Total JP</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ formatNumber(stats.total_jp) }}</p>
+                <!-- Progress Bar Overview -->
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-8 border border-gray-200">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+                        <h4 class="font-bold text-lg text-gray-900 mb-2 sm:mb-0">Total JP Progress</h4>
+                        <div class="bg-white px-4 py-2 rounded-xl shadow-sm">
+                            <span class="text-sm font-semibold text-gray-700">
+                                {{ formatNumber(jpFulfillment?.totals?.jp_achieved || 0) }} /
+                                {{ formatNumber(jpFulfillment?.totals?.jp_target || 0) }} JP
+                            </span>
                         </div>
-                        <div class="bg-purple-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-                            <i class="fas fa-clock text-sm sm:text-lg md:text-xl text-purple-700"></i>
+                    </div>
+                    <div class="relative w-full bg-gray-300 rounded-full h-6 overflow-hidden shadow-inner">
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
+                            :style="{ width: Math.min(100, jpFulfillment?.totals?.overall_progress || 0) + '%' }">
                         </div>
+                        <div class="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-600 mt-3">
+                        <span class="font-medium">0%</span>
+                        <div class="bg-white px-3 py-1 rounded-full shadow-sm">
+                            <span class="font-bold text-gray-800">{{ jpFulfillment?.totals?.overall_progress || 0
+                                }}%</span>
+                        </div>
+                        <span class="font-medium">100%</span>
                     </div>
                 </div>
 
-                <div
-                    class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-3 sm:p-4 md:p-6 text-white border-compact card-compact">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div class="mb-2 sm:mb-0">
-                            <p class="text-white/90 text-xs sm:text-sm font-medium">Rata-rata Progress</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold">{{ Number(stats.rata_progress ||
-                                0).toFixed(1) }}%</p>
+                <!-- Top Performers & Need Attention -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Top Performers -->
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
+                        <div class="flex items-center mb-6">
+                            <div class="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl mr-3">
+                                <i class="fas fa-trophy text-white text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-900">Top Performers</h4>
                         </div>
-                        <div class="bg-orange-400 bg-opacity-50 rounded-full p-2 sm:p-3 self-end sm:self-auto">
-                            <i class="fas fa-chart-line text-sm sm:text-lg md:text-xl text-orange-700"></i>
+                        <div class="space-y-3">
+                            <div v-for="(employee, index) in jpFulfillment?.top_performers || []" :key="employee.id"
+                                class="group bg-white rounded-xl p-4 hover:shadow-md transition-all duration-200 border border-yellow-200/50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div
+                                            class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-xl flex items-center justify-center text-sm font-bold">
+                                            {{ index + 1 }}
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">{{ employee.nama }}</div>
+                                            <div class="text-sm text-gray-600">{{ employee.unit_kerja }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-lg font-bold"
+                                            :class="getProgressColorClass(employee.progress_percentage)">
+                                            {{ employee.progress_percentage }}%
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ employee.jp_achieved }}/{{ employee.jp_target }} JP
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Need Attention -->
+                    <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200">
+                        <div class="flex items-center mb-6">
+                            <div class="p-3 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl mr-3">
+                                <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-900">Perlu Perhatian</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div v-for="(employee, index) in jpFulfillment?.needs_attention || []" :key="employee.id"
+                                class="group bg-white rounded-xl p-4 hover:shadow-md transition-all duration-200 border border-red-200/50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div
+                                            class="w-8 h-8 bg-gradient-to-br from-red-400 to-pink-500 text-white rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-exclamation text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">{{ employee.nama }}</div>
+                                            <div class="text-sm text-gray-600">{{ employee.unit_kerja }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-lg font-bold"
+                                            :class="getProgressColorClass(employee.progress_percentage)">
+                                            {{ employee.progress_percentage }}%
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ employee.jp_achieved }}/{{ employee.jp_target }} JP
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1  gap-4 md:gap-6 mb-6 md:mb-8">
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 gap-6 mb-8">
                 <!-- Pie Chart -->
-                <div class="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-lg border-compact card-compact">
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Distribusi Pelatihan by
-                        Jenis</h3>
-                    <div class="flex justify-center">
-                        <canvas ref="jenisChart" class="max-h-64 sm:max-h-80 md:max-h-96"></canvas>
+                <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-4">
+                            <i class="fas fa-chart-pie text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-gray-900">Distribusi Pelatihan</h3>
+                            <p class="text-gray-600">Berdasarkan jenis pelatihan</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
+                        <canvas ref="jenisChart" class="max-h-80 lg:max-h-96"></canvas>
                     </div>
                 </div>
-
             </div>
 
             <!-- Recent Progress Table -->
-            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 border-compact card-compact">
-                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Progress Terbaru Pegawai</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-xs sm:text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    class="px-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nama</th>
-                                <th
-                                    class="px-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                                    Unit Kerja</th>
-                                <th
-                                    class="px-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    JP Tercapai</th>
-                                <th
-                                    class="px-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    JP Target</th>
-                                <th
-                                    class="px-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Progress</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="pegawai in progressPegawai" :key="pegawai.id"
-                                class="hover:bg-gray-50 cursor-pointer" @click="goToPegawai(pegawai.id)" tabindex="0"
-                                @keydown.enter="goToPegawai(pegawai.id)">
-                                <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        <Link :href="route('pegawai.show', { pegawai: pegawai.id })" @click.stop>{{
-                                            pegawai.nama_lengkap }}</Link>
-                                    </div>
-                                    <div class="text-xs mt-1 sm:hidden">
-                                        <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                            }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap hidden sm:table-cell">
-                                    <div class="text-sm">
-                                        <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                        }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ formatNumber(pegawai.jp_tercapai_filtered || pegawai.jp_tercapai || 0) }} JP
-                                </td>
-                                <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ formatNumber(pegawai.jp_target) }} JP
-                                </td>
-                                <td class="px-2 sm:px-3 md:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-1 bg-gray-200 rounded-full h-2 mr-2">
-                                            <div class="h-2 rounded-full transition-all duration-300"
-                                                :class="calculateProgress(pegawai) >= 80 ? 'bg-green-500' : calculateProgress(pegawai) >= 50 ? 'bg-yellow-500' : 'bg-red-500'"
-                                                :style="{ width: Math.min(100, calculateProgress(pegawai) || 0) + '%' }">
+            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="p-3 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl mr-4">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl lg:text-2xl font-bold text-gray-900">Progress Terbaru</h3>
+                        <p class="text-gray-600">Perkembangan pencapaian JP pegawai</p>
+                    </div>
+                </div>
+                <div class="overflow-hidden rounded-xl border border-gray-200">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                                <tr>
+                                    <th
+                                        class="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Nama Pegawai</th>
+                                    <th
+                                        class="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden sm:table-cell">
+                                        Unit Kerja</th>
+                                    <th
+                                        class="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        JP Tercapai</th>
+                                    <th
+                                        class="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        JP Target</th>
+                                    <th
+                                        class="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-for="pegawai in progressPegawai" :key="pegawai.id"
+                                    class="hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 cursor-pointer transition-all duration-200"
+                                    @click="goToPegawai(pegawai.id)" tabindex="0"
+                                    @keydown.enter="goToPegawai(pegawai.id)">
+                                    <td class="px-4 lg:px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-3">
+                                                <span class="text-white text-sm font-bold">{{
+                                                    pegawai.nama_lengkap.charAt(0) }}</span>
+                                            </div>
+                                            <div>
+                                                <Link :href="route('pegawai.show', { pegawai: pegawai.id })" @click.stop
+                                                    class="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                                {{ pegawai.nama_lengkap }}
+                                                </Link>
+                                                <div class="text-xs mt-1 sm:hidden">
+                                                    <span :class="getUnitPillClass(pegawai.unit_kerja)">{{
+                                                        pegawai.unit_kerja }}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <span class="text-xs">{{ (calculateProgress(pegawai) || 0).toFixed(1) }}%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    </td>
+                                    <td class="px-4 lg:px-6 py-4 hidden sm:table-cell">
+                                        <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
+                                            }}</span>
+                                    </td>
+                                    <td class="px-4 lg:px-6 py-4 font-semibold text-gray-900">
+                                        {{ formatNumber(pegawai.jp_tercapai_filtered || pegawai.jp_tercapai || 0) }} JP
+                                    </td>
+                                    <td class="px-4 lg:px-6 py-4 font-semibold text-gray-900">
+                                        {{ formatNumber(pegawai.jp_target) }} JP
+                                    </td>
+                                    <td class="px-4 lg:px-6 py-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex-1 bg-gray-200 rounded-full h-3 shadow-inner">
+                                                <div class="h-3 rounded-full transition-all duration-500"
+                                                    :class="calculateProgress(pegawai) >= 80 ? 'bg-gradient-to-r from-green-400 to-green-600' : calculateProgress(pegawai) >= 50 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-red-400 to-red-600'"
+                                                    :style="{ width: Math.min(100, calculateProgress(pegawai) || 0) + '%' }">
+                                                </div>
+                                            </div>
+                                            <div class="bg-gray-100 px-2 py-1 rounded-lg">
+                                                <span class="text-xs font-bold text-gray-700">{{
+                                                    (calculateProgress(pegawai) || 0).toFixed(1) }}%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -174,6 +502,7 @@ export default {
     },
     props: {
         stats: Object,
+        jpFulfillment: Object,
         pelatihanByJenis: Array,
         progressPegawai: Array,
         availableYears: Array,
@@ -366,6 +695,93 @@ export default {
                 this.initCharts();
             }
         },
+
+        getProgressColorClass(percentage) {
+            if (percentage >= 100) return 'text-green-600';
+            if (percentage >= 75) return 'text-blue-600';
+            if (percentage >= 50) return 'text-yellow-600';
+            return 'text-red-600';
+        },
     }
 };
 </script>
+
+<style scoped>
+/* Custom animations and enhancements */
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0;
+    }
+
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.shimmer {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+    background-size: 400% 100%;
+}
+
+/* Enhanced hover effects */
+.group:hover .group-hover\:scale-110 {
+    transform: scale(1.1);
+}
+
+.group:hover .group-hover\:rotate-12 {
+    transform: rotate(12deg);
+}
+
+/* Smooth progress bar animation */
+.progress-bar {
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Gradient text animation */
+@keyframes gradient {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+}
+
+/* Card lift effect */
+.card-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Pulse dot animation */
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+    }
+}
+
+.animate-pulse-dot {
+    animation: pulse-dot 2s infinite;
+}
+</style>

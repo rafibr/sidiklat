@@ -2,7 +2,8 @@
     <AppLayout>
         <div class="p-4">
             <div class="mb-4">
-                <Link :href="route('progress')" class="text-sm text-blue-600 hover:underline">&larr; Kembali ke Progress
+                <Link :href="route('pegawai.index')" class="text-sm text-blue-600 hover:underline">&larr; Kembali ke
+                Data Pegawai
                 </Link>
             </div>
 
@@ -102,7 +103,7 @@
                                     <div>
                                         <p class="text-sm font-medium text-purple-600">Sertifikat</p>
                                         <p class="text-2xl font-bold text-purple-900">{{ getTrainingWithCertificates()
-                                            }}</p>
+                                        }}</p>
                                         <p class="text-xs text-purple-600">dari {{ getTotalPelatihan() }}</p>
                                     </div>
                                     <i class="fas fa-certificate text-purple-400 text-2xl"></i>
@@ -231,7 +232,7 @@
                     <div v-if="searchQuery" class="mb-4">
                         <p class="text-sm text-gray-600">
                             Menampilkan {{ searchResults.length }} pelatihan dari pencarian "<strong>{{ searchQuery
-                                }}</strong>"
+                            }}</strong>"
                             <button @click="clearSearch" class="text-blue-600 hover:text-blue-800 ml-2">
                                 <i class="fas fa-times"></i> Hapus filter
                             </button>
@@ -308,7 +309,7 @@
                     <div v-else v-for="(data, year) in displayedPelatihansByYear" :key="year" class="mb-6">
                         <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-3">{{ year
-                            }}</span>
+                                }}</span>
                             <span class="text-sm text-gray-500">({{ (data.pelatihan && data.pelatihan.length) || 0 }}
                                 pelatihan)</span>
                         </h3>
@@ -349,7 +350,7 @@
                                                 class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-2 text-sm">
                                                 <i class="fas fa-file-pdf"></i>
                                                 <span>{{ getFileName(pel.file_sertifikat) || 'Lihat Sertifikat'
-                                                }}</span>
+                                                    }}</span>
                                             </a>
                                             <span v-else class="text-xs text-gray-400">Tidak ada sertifikat</span>
 
@@ -364,7 +365,7 @@
                                                         class="text-green-600 mb-1 truncate max-w-28">
                                                         <i class="fas fa-file-pdf mr-1"></i>
                                                         <span class="text-sm">{{ getFileName(pel.file_sertifikat)
-                                                        }}</span>
+                                                            }}</span>
                                                     </div>
                                                     <div class="text-gray-500">
                                                         <i class="fas fa-cloud-upload mr-1"></i>

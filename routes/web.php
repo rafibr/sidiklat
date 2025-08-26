@@ -10,7 +10,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
-Route::get('/pegawai/{pegawai}', [PegawaiController::class, 'show'])->name('pegawai.show');
+
+// Pegawai routes
+Route::resource('pegawai', PegawaiController::class);
+Route::post('/pegawai/update-jp-default', [PegawaiController::class, 'updateJpDefault'])->name('pegawai.update-jp-default');
+
 Route::get('/pelatihan/comparison', [PelatihanController::class, 'comparison'])->name('pelatihan.comparison');
 Route::get('/pelatihan/export', [PelatihanController::class, 'export'])->name('pelatihan.export');
 Route::resource('pelatihan', PelatihanController::class);

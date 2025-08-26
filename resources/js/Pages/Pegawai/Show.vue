@@ -21,25 +21,33 @@
                         </div>
 
                         <div class="space-y-3 bg-gray-50 p-4 rounded-lg">
-                            <div class="flex justify-between items-center">
+                            <div v-if="pegawai.pangkat_golongan" class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-gray-600">Pangkat/Golongan:</span>
-                                <span class="text-sm text-gray-900">{{ pegawai.pangkat_golongan || '-' }}</span>
+                                <span class="text-sm text-gray-900">{{ pegawai.pangkat_golongan }}</span>
                             </div>
-                            <div class="flex justify-between items-center">
+                            <div v-if="pegawai.unit_kerja" class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-gray-600">Unit Kerja:</span>
-                                <span class="text-sm text-gray-900">{{ pegawai.unit_kerja || '-' }}</span>
+                                <span class="text-sm text-gray-900">{{ pegawai.unit_kerja }}</span>
                             </div>
-                            <div class="flex justify-between items-center">
+                            <div v-if="pegawai.email" class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-gray-600">Email:</span>
-                                <span class="text-sm text-gray-900">{{ pegawai.email || '-' }}</span>
+                                <span class="text-sm text-gray-900">{{ pegawai.email }}</span>
                             </div>
-                            <div class="flex justify-between items-center">
+                            <div v-if="pegawai.telepon" class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-gray-600">Telepon:</span>
-                                <span class="text-sm text-gray-900">{{ pegawai.telepon || '-' }}</span>
+                                <span class="text-sm text-gray-900">{{ pegawai.telepon }}</span>
                             </div>
-                            <hr class="my-3">
-                            <!-- JP Progress -->
-                            <div class="space-y-2">
+
+                            <!-- Show a message if no additional info is available -->
+                            <div v-if="!pegawai.pangkat_golongan && !pegawai.unit_kerja && !pegawai.email && !pegawai.telepon"
+                                class="text-sm text-gray-500 italic text-center py-2">
+                                Informasi tambahan belum tersedia
+                            </div>
+
+                            <hr v-if="pegawai.jp_target || pegawai.jp_tercapai" class="my-3">
+
+                            <!-- JP Progress - Only show if there's target or achieved JP -->
+                            <div v-if="pegawai.jp_target || pegawai.jp_tercapai" class="space-y-2">
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-medium text-gray-600">Target JP:</span>
                                     <span class="text-sm font-semibold text-gray-900">{{ formatNumber(pegawai.jp_target
@@ -68,8 +76,8 @@
 
                     <!-- Right Side - Training Stats -->
                     <div class="lg:w-2/3">
-                        <!-- Statistics Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Statistics Cards - Only show if there are trainings -->
+                        <div v-if="hasPelatihan" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div class="bg-blue-50 p-4 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -94,7 +102,7 @@
                                     <div>
                                         <p class="text-sm font-medium text-purple-600">Sertifikat</p>
                                         <p class="text-2xl font-bold text-purple-900">{{ getTrainingWithCertificates()
-                                        }}</p>
+                                            }}</p>
                                         <p class="text-xs text-purple-600">dari {{ getTotalPelatihan() }}</p>
                                     </div>
                                     <i class="fas fa-certificate text-purple-400 text-2xl"></i>
@@ -111,31 +119,31 @@
                             </div>
                         </div>
 
-                        <!-- Additional Statistics Row -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div class="bg-indigo-50 p-4 rounded-lg">
+                        <!-- Additional Statistics Row - Only show if there are trainings with meaningful data -->
+                        <div v-if="hasPelatihan && getTotalPelatihan() > 0"
+                            class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div v-if="getMostFrequentType()" class="bg-indigo-50 p-4 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-indigo-600">Jenis Terbanyak</p>
-                                        <p class="text-sm font-bold text-indigo-900">{{ getMostFrequentType() || '-' }}
-                                        </p>
+                                        <p class="text-sm font-bold text-indigo-900">{{ getMostFrequentType() }}</p>
                                         <p class="text-xs text-indigo-600">{{ getMostFrequentTypeCount() }} pelatihan
                                         </p>
                                     </div>
                                     <i class="fas fa-medal text-indigo-400 text-2xl"></i>
                                 </div>
                             </div>
-                            <div class="bg-teal-50 p-4 rounded-lg">
+                            <div v-if="getMostActiveYear()" class="bg-teal-50 p-4 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-teal-600">Tahun Teraktif</p>
-                                        <p class="text-2xl font-bold text-teal-900">{{ getMostActiveYear() || '-' }}</p>
+                                        <p class="text-2xl font-bold text-teal-900">{{ getMostActiveYear() }}</p>
                                         <p class="text-xs text-teal-600">{{ getMostActiveYearCount() }} pelatihan</p>
                                     </div>
                                     <i class="fas fa-fire text-teal-400 text-2xl"></i>
                                 </div>
                             </div>
-                            <div class="bg-red-50 p-4 rounded-lg">
+                            <div v-if="getHighestJPInYear() > 0" class="bg-red-50 p-4 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-red-600">JP Terbanyak</p>
@@ -148,8 +156,8 @@
                         </div>
 
                         <!-- JP Progress per Year -->
-                        <!-- Yearly JP Achievement Overview -->
-                        <div class="mb-6">
+                        <!-- Yearly JP Achievement Overview - Only show if there are trainings -->
+                        <div v-if="hasPelatihan" class="mb-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Capaian JP Per Tahun</h3>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div v-for="(data, year) in filteredPelatihansByYear" :key="year"
@@ -174,6 +182,17 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Empty State when no trainings -->
+                        <div v-if="!hasPelatihan" class="text-center py-12">
+                            <div
+                                class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-graduation-cap text-gray-400 text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Data Pelatihan</h3>
+                            <p class="text-sm text-gray-500">Pegawai ini belum memiliki riwayat pelatihan yang tercatat
+                                dalam sistem.</p>
                         </div>
                     </div>
                 </div>
@@ -212,7 +231,7 @@
                     <div v-if="searchQuery" class="mb-4">
                         <p class="text-sm text-gray-600">
                             Menampilkan {{ searchResults.length }} pelatihan dari pencarian "<strong>{{ searchQuery
-                            }}</strong>"
+                                }}</strong>"
                             <button @click="clearSearch" class="text-blue-600 hover:text-blue-800 ml-2">
                                 <i class="fas fa-times"></i> Hapus filter
                             </button>
@@ -289,7 +308,7 @@
                     <div v-else v-for="(data, year) in displayedPelatihansByYear" :key="year" class="mb-6">
                         <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-3">{{ year
-                                }}</span>
+                            }}</span>
                             <span class="text-sm text-gray-500">({{ (data.pelatihan && data.pelatihan.length) || 0 }}
                                 pelatihan)</span>
                         </h3>
@@ -330,7 +349,7 @@
                                                 class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-2 text-sm">
                                                 <i class="fas fa-file-pdf"></i>
                                                 <span>{{ getFileName(pel.file_sertifikat) || 'Lihat Sertifikat'
-                                                    }}</span>
+                                                }}</span>
                                             </a>
                                             <span v-else class="text-xs text-gray-400">Tidak ada sertifikat</span>
 
@@ -345,7 +364,7 @@
                                                         class="text-green-600 mb-1 truncate max-w-28">
                                                         <i class="fas fa-file-pdf mr-1"></i>
                                                         <span class="text-sm">{{ getFileName(pel.file_sertifikat)
-                                                            }}</span>
+                                                        }}</span>
                                                     </div>
                                                     <div class="text-gray-500">
                                                         <i class="fas fa-cloud-upload mr-1"></i>

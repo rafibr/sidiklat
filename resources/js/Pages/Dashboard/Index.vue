@@ -2,7 +2,7 @@
     <AppLayout>
         <div class="relative p-4 md:p-6 lg:p-8 bg-gray-50 min-h-screen">
             <!-- Header Section -->
-            <div class="mb-8">
+            <div class="mb-8" :class="{ 'animate-slide-up': animationsReady, 'opacity-0': !animationsReady }">
                 <div class="mb-6">
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard Analytics</h1>
                     <p class="text-gray-600">Monitoring dan evaluasi pemenuhan target JP pegawai</p>
@@ -43,14 +43,15 @@
                         <div class="flex items-center space-x-2">
                             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                             <span class="text-sm text-gray-600 font-medium">Data aktif untuk tahun {{ selectedYear
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                :class="{ 'animate-slide-up delay-100': animationsReady, 'opacity-0': !animationsReady }">
                 <!-- Total Pegawai Card -->
                 <div
                     class="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
@@ -141,7 +142,8 @@
             </div>
 
             <!-- JP Fulfillment Dashboard -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 mb-8 border border-gray-100">
+            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 mb-8 border border-gray-100"
+                :class="{ 'animate-fade-scale delay-200': animationsReady, 'opacity-0': !animationsReady }">
                 <!-- Header -->
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
                     <div class="mb-4 lg:mb-0">
@@ -172,7 +174,8 @@
                 </div>
 
                 <!-- Progress Categories -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                    :class="{ 'animate-slide-up delay-300': animationsReady, 'opacity-0': !animationsReady }">
                     <!-- Completed -->
                     <div
                         class="group relative bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
@@ -278,35 +281,111 @@
                     </div>
                 </div>
 
-                <!-- Progress Bar Overview -->
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-8 border border-gray-200">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-                        <h4 class="font-bold text-lg text-gray-900 mb-2 sm:mb-0">Total JP Progress</h4>
-                        <div class="bg-white px-4 py-2 rounded-xl shadow-sm">
-                            <span class="text-sm font-semibold text-gray-700">
-                                {{ formatNumber(jpFulfillment?.totals?.jp_achieved || 0) }} /
-                                {{ formatNumber(jpFulfillment?.totals?.jp_target || 0) }} JP
-                            </span>
+                <!-- Progress Bar Overview - Glass Animation -->
+                <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 mb-8 border border-gray-100"
+                    :class="{ 'animate-slide-left delay-400': animationsReady, 'opacity-0': !animationsReady }">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                        <!-- Info Section -->
+                        <div class="flex-1">
+                            <div class="flex items-center mb-4">
+                                <div class="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-4">
+                                    <i class="fas fa-flask text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl lg:text-2xl font-bold text-gray-900">Total JP Progress</h4>
+                                    <p class="text-gray-600">Tingkat pencapaian target keseluruhan</p>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
+                                <div class="flex justify-between items-center text-sm font-semibold text-gray-700 mb-2">
+                                    <span>JP Tercapai:</span>
+                                    <span>{{ formatNumber(jpFulfillment?.totals?.jp_achieved || 0) }} JP</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm font-semibold text-gray-700 mb-2">
+                                    <span>JP Target:</span>
+                                    <span>{{ formatNumber(jpFulfillment?.totals?.jp_target || 0) }} JP</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg font-bold text-indigo-600">
+                                    <span>Progress:</span>
+                                    <span>{{ jpFulfillment?.totals?.overall_progress || 0 }}%</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="relative w-full bg-gray-300 rounded-full h-6 overflow-hidden shadow-inner">
-                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
-                            :style="{ width: Math.min(100, jpFulfillment?.totals?.overall_progress || 0) + '%' }">
+
+                        <!-- Glass Animation -->
+                        <div class="flex justify-center lg:justify-end">
+                            <div class="relative">
+                                <!-- Glass Container -->
+                                <div class="glass-container relative w-24 h-64 lg:w-28 lg:h-80">
+                                    <!-- Glass Background -->
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-b from-blue-50/30 to-blue-100/40 rounded-t-lg border-4 border-gray-300 border-b-gray-400 backdrop-blur-sm shadow-2xl">
+                                        <!-- Glass Shine Effect -->
+                                        <div class="absolute top-2 left-2 w-4 h-16 bg-white/20 rounded-full blur-sm">
+                                        </div>
+                                        <div class="absolute top-6 right-2 w-2 h-8 bg-white/30 rounded-full blur-sm">
+                                        </div>
+                                    </div>
+
+                                    <!-- Liquid (JP Progress) -->
+                                    <div class="absolute bottom-0 left-0 right-0 transition-all duration-2000 ease-out rounded-b-lg overflow-hidden"
+                                        :style="{ height: Math.min(100, jpFulfillment?.totals?.overall_progress || 0) + '%' }">
+                                        <div
+                                            class="absolute inset-0 bg-gradient-to-t from-indigo-600 via-blue-500 to-cyan-400 opacity-80">
+                                            <!-- Liquid Animation Bubbles -->
+                                            <div
+                                                class="absolute bottom-2 left-2 w-2 h-2 bg-white/40 rounded-full opacity-60">
+                                            </div>
+                                            <div
+                                                class="absolute bottom-4 right-2 w-1 h-1 bg-white/50 rounded-full opacity-70">
+                                            </div>
+                                            <div
+                                                class="absolute bottom-6 left-3 w-1.5 h-1.5 bg-white/30 rounded-full opacity-50">
+                                            </div>
+
+                                            <!-- Liquid Wave Effect -->
+                                            <div
+                                                class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-r from-cyan-300 to-blue-400 opacity-60">
+                                                <div class="wave-animation absolute inset-0"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Glass Rim -->
+                                    <div
+                                        class="absolute -top-2 -left-1 -right-1 h-4 bg-gradient-to-b from-gray-200 to-gray-300 rounded-full shadow-md border border-gray-400">
+                                    </div>
+                                </div>
+
+                                <!-- Progress Labels -->
+                                <div
+                                    class="absolute -right-16 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-medium">
+                                    <span>100%</span>
+                                    <span>75%</span>
+                                    <span>50%</span>
+                                    <span>25%</span>
+                                    <span>0%</span>
+                                </div>
+
+                                <!-- Current Progress Indicator -->
+                                <div class="absolute -left-12 flex items-center"
+                                    :style="{ top: (100 - Math.min(100, jpFulfillment?.totals?.overall_progress || 0)) + '%' }">
+                                    <div
+                                        class="bg-indigo-600 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
+                                        {{ jpFulfillment?.totals?.overall_progress || 0 }}%
+                                    </div>
+                                    <div
+                                        class="w-0 h-0 border-l-4 border-l-indigo-600 border-t-2 border-t-transparent border-b-2 border-b-transparent ml-1">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
-                    </div>
-                    <div class="flex justify-between items-center text-xs text-gray-600 mt-3">
-                        <span class="font-medium">0%</span>
-                        <div class="bg-white px-3 py-1 rounded-full shadow-sm">
-                            <span class="font-bold text-gray-800">{{ jpFulfillment?.totals?.overall_progress || 0
-                                }}%</span>
-                        </div>
-                        <span class="font-medium">100%</span>
                     </div>
                 </div>
 
                 <!-- Top Performers & Need Attention -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                    :class="{ 'animate-slide-up delay-500': animationsReady, 'opacity-0': !animationsReady }">
                     <!-- Top Performers -->
                     <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
                         <div class="flex items-center mb-6">
@@ -382,7 +461,8 @@
             </div>
 
             <!-- Charts Section -->
-            <div class="grid grid-cols-1 gap-6 mb-8">
+            <div class="grid grid-cols-1 gap-6 mb-8"
+                :class="{ 'animate-slide-right delay-600': animationsReady, 'opacity-0': !animationsReady }">
                 <!-- Pie Chart -->
                 <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100">
                     <div class="flex items-center mb-6">
@@ -401,7 +481,8 @@
             </div>
 
             <!-- Recent Progress Table -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100">
+            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100"
+                :class="{ 'animate-fade-scale delay-700': animationsReady, 'opacity-0': !animationsReady }">
                 <div class="flex items-center mb-6">
                     <div class="p-3 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl mr-4">
                         <i class="fas fa-chart-line text-white text-xl"></i>
@@ -459,7 +540,7 @@
                                     </td>
                                     <td class="px-4 lg:px-6 py-4 hidden sm:table-cell">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                            }}</span>
+                                        }}</span>
                                     </td>
                                     <td class="px-4 lg:px-6 py-4 font-semibold text-gray-900">
                                         {{ formatNumber(pegawai.jp_tercapai_filtered || pegawai.jp_tercapai || 0) }} JP
@@ -512,12 +593,19 @@ export default {
         return {
             jenisChart: null,
             loading: false,
+            animationsReady: false,
         };
     },
     mounted() {
         // ensure DOM refs are ready before creating charts
         this.loading = true;
-        this.$nextTick(() => this.initCharts());
+        this.$nextTick(() => {
+            this.initCharts();
+            // Trigger animations after a short delay
+            setTimeout(() => {
+                this.animationsReady = true;
+            }, 100);
+        });
     },
     beforeUnmount() {
         // clean up Chart instances to avoid Chart.js trying to draw on removed canvas
@@ -783,5 +871,78 @@ export default {
 
 .animate-pulse-dot {
     animation: pulse-dot 2s infinite;
+}
+
+/* Glass animation styles */
+@keyframes wave {
+
+    0%,
+    100% {
+        transform: translateX(-100%) skewX(15deg);
+    }
+
+    50% {
+        transform: translateX(0%) skewX(-15deg);
+    }
+}
+
+@keyframes glassReflection {
+
+    0%,
+    100% {
+        opacity: 0.2;
+        transform: translateY(-5px);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: translateY(5px);
+    }
+}
+
+.wave-animation {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: wave 3s infinite;
+}
+
+.glass-container {
+    transform-style: preserve-3d;
+}
+
+.glass-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    border-radius: 0.5rem;
+    animation: glassReflection 4s infinite;
+    pointer-events: none;
+}
+
+/* Floating animation for cards */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Glass morphism effects */
+.glass-morph {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 </style>

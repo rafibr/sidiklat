@@ -1,25 +1,26 @@
 <template>
     <AppLayout>
-        <div class="p-4">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div class="p-4 animate-slide-up">
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 animate-fade-scale">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Data Pegawai</h1>
                     <p class="text-sm text-gray-600 mt-1">Kelola data pegawai dan pengaturan JP</p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
                     <button @click="showJpSettingsModal = true"
-                        class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm">
+                        class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-all hover:shadow-lg hover:scale-105">
                         <i class="fas fa-cog mr-2"></i>Pengaturan JP
                     </button>
                     <Link :href="route('pegawai.create')"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-all hover:shadow-lg hover:scale-105">
                     <i class="fas fa-plus mr-2"></i>Tambah Pegawai
                     </Link>
                 </div>
             </div>
 
             <!-- Search and Filters -->
-            <div class="bg-white p-4 rounded-lg shadow mb-6">
+            <div class="bg-white p-4 rounded-lg shadow mb-6 animate-slide-left delay-100">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div class="relative flex-1">
                         <input type="text" v-model="searchForm.search" @input="search" placeholder="Cari pegawai..."
@@ -47,7 +48,7 @@
                     <p class="text-red-700">{{ $page.props.flash.error }}</p>
                 </div>
             </div> <!-- Data Table -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden animate-slide-up delay-200">
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-fixed divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -85,7 +86,7 @@
                                                 'Tidak ada NIP' }}</div>
                                             <div v-if="pegawai.pangkat_golongan"
                                                 class="text-xs text-gray-400 truncate max-w-[220px]">{{
-                                                pegawai.pangkat_golongan }}</div>
+                                                    pegawai.pangkat_golongan }}</div>
                                         </div>
                                     </div>
                                 </td>

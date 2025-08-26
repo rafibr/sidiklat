@@ -63,8 +63,14 @@
 
                 <!-- Content -->
                 <div
-                    class="bg-white/95 backdrop-blur-sm rounded-lg md:rounded-xl shadow-xl min-h-[400px] sm:min-h-[500px] md:min-h-[600px]">
-                    <slot />
+                    class="bg-white/95 backdrop-blur-sm rounded-lg md:rounded-xl shadow-xl min-h-[400px] sm:min-h-[500px] md:min-h-[600px] overflow-hidden">
+                    <transition name="page" enter-active-class="page-enter-active" enter-from-class="page-enter-from"
+                        enter-to-class="page-enter-to" leave-active-class="page-leave-active"
+                        leave-from-class="page-leave-from" leave-to-class="page-leave-to" mode="out-in">
+                        <div :key="$page.component" class="page-content">
+                            <slot />
+                        </div>
+                    </transition>
                 </div>
             </div>
         </div>
@@ -151,6 +157,145 @@ export default {
 /* Global styles */
 html {
     scroll-behavior: smooth;
+}
+
+/* Page Transition Animations */
+.page-content {
+    width: 100%;
+    height: 100%;
+}
+
+.page-enter-active {
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.page-leave-active {
+    transition: all 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.page-enter-from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    filter: blur(5px);
+}
+
+.page-enter-to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+.page-leave-from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(-20px) scale(1.05);
+    filter: blur(3px);
+}
+
+/* Staggered Animation for Cards */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-slide-up {
+    animation: slideInUp 0.6s ease-out forwards;
+}
+
+.animate-slide-left {
+    animation: slideInLeft 0.6s ease-out forwards;
+}
+
+.animate-slide-right {
+    animation: slideInRight 0.6s ease-out forwards;
+}
+
+.animate-fade-scale {
+    animation: fadeInScale 0.6s ease-out forwards;
+}
+
+/* Delay classes for staggered animations */
+.delay-100 {
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+.delay-200 {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.delay-300 {
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+
+.delay-400 {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+.delay-500 {
+    animation-delay: 0.5s;
+    opacity: 0;
+}
+
+.delay-600 {
+    animation-delay: 0.6s;
+    opacity: 0;
+}
+
+.delay-700 {
+    animation-delay: 0.7s;
+    opacity: 0;
 }
 
 input:focus,

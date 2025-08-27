@@ -20,44 +20,57 @@
                 </div>
 
                 <!-- Navigation Tabs -->
-                <div class="bg-white/95 backdrop-blur-sm p-1 sm:p-2 rounded-lg shadow-lg mb-3 md:mb-6 overflow-x-auto">
-                    <div class="flex gap-1 sm:gap-2 justify-center px-2 sm:px-0">
-                        <Link :href="route('dashboard')"
-                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
-                            :class="{ 'active': $page.component === 'Dashboard/Index' }">
-                        <i class="fas fa-chart-bar mr-1 sm:mr-2"></i>
-                        <span class="hidden xs:inline">Dashboard</span>
-                        <span class="xs:hidden">Dash</span>
+                <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg mb-3 md:mb-6 relative">
+                    <!-- Desktop Navigation -->
+                    <nav
+                        class="hidden md:flex items-center justify-center space-x-1 bg-white/80 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-slate-200/50 mx-2">
+                        <Link v-for="tab in navigation" :key="tab.name" :href="tab.href" :class="[
+                            'nav-tab px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                            $page.url === tab.href
+                                ? 'nav-tab-active text-white'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        ]">
+                        <i :class="tab.icon" class="mr-2"></i>
+                        {{ tab.name }}
                         </Link>
-                        <Link :href="route('progress')"
-                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
-                            :class="{ 'active': $page.component === 'Progress/Index' }">
-                        <i class="fas fa-chart-line mr-1 sm:mr-2"></i>
-                        <span class="hidden xs:inline">Progress JP</span>
-                        <span class="xs:hidden">Progress</span>
-                        </Link>
+                    </nav>
 
-                        <Link :href="route('pelatihan.comparison')"
-                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
-                            :class="{ 'active': $page.component === 'Pelatihan/Comparison' }">
-                        <i class="fas fa-balance-scale mr-1 sm:mr-2"></i>
-                        <span class="hidden sm:inline">Perbandingan</span>
-                        <span class="sm:hidden">Compare</span>
-                        </Link>
-                        <Link :href="route('pelatihan.index')"
-                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
-                            :class="{ 'active': $page.component.startsWith('Pelatihan/') && $page.component !== 'Pelatihan/Comparison' }">
-                        <i class="fas fa-database mr-1 sm:mr-2"></i>
-                        <span class="hidden sm:inline">Data Pelatihan</span>
-                        <span class="sm:hidden">Data</span>
-                        </Link>
-                        <Link :is="Link" :href="route('pegawai.index')"
-                            class="tab-button px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
-                            :class="{ 'active': $page.component.startsWith('Pegawai/') }">
-                        <i class="fas fa-users mr-1 sm:mr-2"></i>
-                        <span class="hidden sm:inline">List Pegawai</span>
-                        <span class="sm:hidden">Pegawai</span>
-                        </Link>
+                    <!-- Mobile Navigation -->
+                    <div class="md:hidden">
+                        <div class="flex items-center justify-between p-3">
+                            <!-- Current Page Indicator -->
+                            <div class="flex items-center text-sm font-medium text-slate-700">
+                                <i class="fas fa-circle text-xs text-blue-500 mr-2"></i>
+                                <span id="current-page-mobile" class="truncate">
+                                    <template v-for="tab in navigation" :key="tab.name">
+                                        <span v-if="$page.url === tab.href">{{ tab.name }}</span>
+                                    </template>
+                                </span>
+                            </div>
+
+                            <!-- Mobile Navigation Toggle -->
+                            <button id="mobile-menu-toggle"
+                                class="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors duration-200"
+                                aria-label="Toggle mobile menu">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+
+                        <!-- Mobile Navigation Menu -->
+                        <div id="mobile-menu"
+                            class="mobile-menu hidden bg-white rounded-lg shadow-lg border border-slate-200 mx-2 mb-2">
+                            <nav class="py-2">
+                                <Link v-for="tab in navigation" :key="tab.name" :href="tab.href" :class="[
+                                    'mobile-nav-item block px-4 py-3 text-sm font-medium transition-colors duration-200 border-b border-slate-100 last:border-b-0',
+                                    $page.url === tab.href
+                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                                ]">
+                                <i :class="tab.icon" class="mr-3"></i>
+                                {{ tab.name }}
+                                </Link>
+                            </nav>
+                        </div>
                     </div>
                 </div>
 
@@ -84,6 +97,90 @@ export default {
     components: {
         Link,
     },
+    data() {
+        return {
+            navigation: [
+                {
+                    name: 'Dashboard',
+                    href: '/',
+                    icon: 'fas fa-tachometer-alt'
+                },
+                {
+                    name: 'Data Pegawai',
+                    href: '/pegawai',
+                    icon: 'fas fa-users'
+                },
+                {
+                    name: 'Data Pelatihan',
+                    href: '/pelatihan',
+                    icon: 'fas fa-graduation-cap'
+                },
+                {
+                    name: 'Progress JP',
+                    href: '/progress',
+                    icon: 'fas fa-chart-line'
+                },
+                {
+                    name: 'Perbandingan',
+                    href: '/comparison',
+                    icon: 'fas fa-balance-scale'
+                }
+            ]
+        };
+    },
+    mounted() {
+        this.initMobileMenu();
+    },
+    methods: {
+        initMobileMenu() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    const isHidden = mobileMenu.classList.contains('hidden');
+
+                    if (isHidden) {
+                        mobileMenu.classList.remove('hidden');
+                        mobileMenu.classList.add('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-times text-slate-600"></i>';
+                    } else {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    }
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (event) => {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    }
+                });
+
+                // Close menu when clicking on menu items
+                const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+                mobileNavItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    });
+                });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    }
+                });
+            }
+        }
+    }
 };
 </script>
 
@@ -371,6 +468,80 @@ textarea:focus {
 
     .chart-container {
         height: 200px;
+    }
+}
+</style>
+
+<style scoped>
+/* Custom animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Mobile menu styling */
+.mobile-menu {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* Navigation tabs styling */
+.nav-tabs {
+    display: flex;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Active tab styling */
+.nav-tab-active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.1);
+}
+
+/* Hover effects */
+.nav-tab:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .nav-tabs {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .nav-tab {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* Desktop navigation */
+@media (min-width: 769px) {
+    .nav-tabs {
+        justify-content: center;
     }
 }
 </style>

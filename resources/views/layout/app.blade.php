@@ -3,10 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SIMPEG Auto SPA')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SIDIKLAT">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#3B82F6">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <title>@yield('title', 'SIDIKLAT - Sistem Informasi Data Pelatihan')</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/pwa.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @stack('styles')
 </head>
@@ -15,47 +25,146 @@
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <div
-            class="bg-white/95 backdrop-blur-sm p-3 sm:p-4 md:p-6 rounded-lg md:rounded-xl shadow-xl mb-3 md:mb-6 text-center">
-            <h1 class="text-slate-800 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
-                <i class="fas fa-chart-bar text-blue-600 mr-1 sm:mr-2"></i>
-                <span class="hidden sm:inline">Dashboard Diklat ASN</span>
-                <span class="sm:hidden">Diklat ASN</span>
-            </h1>
-            <p class="text-slate-600 text-xs sm:text-sm md:text-base hidden sm:block">
-                Sistem Informasi Manajemen Pegawai - Dashboard Pelatihan dan Pengembangan
-            </p>
-            <p class="text-slate-600 text-xs sm:hidden">
-                SIMPEG - Dashboard Pelatihan
-            </p>
+            class="bg-white/95 backdrop-blur-sm p-3 sm:p-4 md:p-6 rounded-lg md:rounded-xl shadow-xl mb-3 md:mb-6 text-center relative overflow-hidden">
+            <!-- Network Status Indicator -->
+            <div class="network-status" id="network-status"></div>
+
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute inset-0"
+                    style="background-image: radial-gradient(circle at 25% 25%, rgb(59, 130, 246) 2px, transparent 2px); background-size: 20px 20px;">
+                </div>
+            </div>
+
+            <div class="relative z-10">
+                <h1
+                    class="text-slate-800 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 flex items-center justify-center flex-wrap">
+                    <i class="fas fa-chart-bar text-blue-600 mr-2 sm:mr-3 animate-pulse"></i>
+                    <span class="hidden sm:inline lg:inline xl:inline">Dashboard Diklat ASN</span>
+                    <span class="sm:hidden">Diklat ASN</span>
+                </h1>
+
+                <p class="text-slate-600 text-xs sm:text-sm md:text-base hidden sm:block leading-relaxed">
+                    Sistem Informasi Manajemen Pegawai - Dashboard Pelatihan dan Pengembangan
+                </p>
+                <p class="text-slate-600 text-xs sm:hidden leading-relaxed">
+                    SIMPEG - Dashboard Pelatihan
+                </p>
+
+                <!-- Quick Stats (Mobile Only) -->
+                <div class="sm:hidden mt-3 pt-3 border-t border-slate-200 mobile-quick-stats">
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-blue-50 rounded-lg p-2 mobile-stat-card">
+                            <div class="mobile-stat-label text-slate-600">Total</div>
+                            <div class="mobile-stat-number text-blue-600" id="mobile-total-pegawai">--</div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-2 mobile-stat-card">
+                            <div class="mobile-stat-label text-slate-600">Aktif</div>
+                            <div class="mobile-stat-number text-green-600" id="mobile-active-training">--</div>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-2 mobile-stat-card">
+                            <div class="mobile-stat-label text-slate-600">Selesai</div>
+                            <div class="mobile-stat-number text-purple-600" id="mobile-completed-training">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="bg-white/95 backdrop-blur-sm p-1 sm:p-2 rounded-lg shadow-lg mb-3 md:mb-6 overflow-x-auto">
-            <div class="flex gap-1 sm:gap-2 justify-start sm:justify-center min-w-max sm:min-w-0 px-2 sm:px-0">
-                <a href="{{ route('dashboard') }}"
-                    class="tab-button {{ request()->routeIs('dashboard') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
-                    <i class="fas fa-chart-bar mr-1 sm:mr-2"></i>
-                    <span class="hidden xs:inline">Dashboard</span>
-                    <span class="xs:hidden">Dash</span>
-                </a>
-                <a href="{{ route('progress') }}"
-                    class="tab-button {{ request()->routeIs('progress') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
-                    <i class="fas fa-chart-line mr-1 sm:mr-2"></i>
-                    <span class="hidden xs:inline">Progress JP</span>
-                    <span class="xs:hidden">Progress</span>
-                </a>
-                <a href="{{ route('pelatihan.comparison') }}"
-                    class="tab-button {{ request()->routeIs('pelatihan.comparison') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
-                    <i class="fas fa-balance-scale mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Perbandingan</span>
-                    <span class="sm:hidden">Compare</span>
-                </a>
-                <a href="{{ route('pelatihan.index') }}"
-                    class="tab-button {{ request()->routeIs('pelatihan.*') && !request()->routeIs('pelatihan.comparison') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
-                    <i class="fas fa-database mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Data Pelatihan</span>
-                    <span class="sm:hidden">Data</span>
-                </a>
+        <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg mb-3 md:mb-6 relative navigation-wrapper">
+            <!-- Desktop Navigation -->
+            <div class="hidden md:block navigation-bounds">
+                <div class="p-2 navigation-container">
+                    <div class="desktop-nav">
+                        <a href="{{ route('dashboard') }}"
+                            class="desktop-nav-item tab-button {{ request()->routeIs('dashboard') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-chart-bar mr-1 sm:mr-2"></i>
+                            <span class="hidden lg:inline">Dashboard</span>
+                            <span class="lg:hidden">Dash</span>
+                        </a>
+                        <a href="{{ route('progress') }}"
+                            class="desktop-nav-item tab-button {{ request()->routeIs('progress') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-chart-line mr-1 sm:mr-2"></i>
+                            <span class="hidden lg:inline">Progress JP</span>
+                            <span class="lg:hidden">Progress</span>
+                        </a>
+                        <a href="{{ route('pelatihan.comparison') }}"
+                            class="desktop-nav-item tab-button {{ request()->routeIs('pelatihan.comparison') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-balance-scale mr-1 sm:mr-2"></i>
+                            <span class="hidden xl:inline">Perbandingan</span>
+                            <span class="xl:hidden">Compare</span>
+                        </a>
+                        <a href="{{ route('pelatihan.index') }}"
+                            class="desktop-nav-item tab-button {{ request()->routeIs('pelatihan.*') && !request()->routeIs('pelatihan.comparison') ? 'active' : '' }} px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-database mr-1 sm:mr-2"></i>
+                            <span class="hidden lg:inline">Data Pelatihan</span>
+                            <span class="lg:hidden">Data</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div class="md:hidden">
+                <div class="flex items-center justify-between p-2">
+                    <!-- Current Page Indicator -->
+                    <div class="flex items-center text-sm font-medium text-slate-700">
+                        <i class="fas fa-circle text-xs text-blue-500 mr-2"></i>
+                        <span id="current-page-mobile" class="truncate">
+                            @if(request()->routeIs('dashboard')) Dashboard
+                            @elseif(request()->routeIs('progress')) Progress JP
+                            @elseif(request()->routeIs('pelatihan.comparison')) Perbandingan
+                            @elseif(request()->routeIs('pelatihan.*')) Data Pelatihan
+                            @else Dashboard
+                            @endif
+                        </span>
+                    </div>
+
+                    <!-- Hamburger Menu Button -->
+                    <button id="mobile-menu-toggle"
+                        class="p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200">
+                        <i class="fas fa-bars text-slate-600"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Dropdown -->
+                <div id="mobile-menu" class="hidden bg-white border-t border-slate-200">
+                    <div class="py-2">
+                        <a href="{{ route('dashboard') }}"
+                            class="mobile-nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }} flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-chart-bar mr-3 w-5 text-center"></i>
+                            <span>Dashboard</span>
+                            @if(request()->routeIs('dashboard'))
+                            <i class="fas fa-check ml-auto text-blue-500"></i>
+                            @endif
+                        </a>
+                        <a href="{{ route('progress') }}"
+                            class="mobile-nav-item {{ request()->routeIs('progress') ? 'active' : '' }} flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-chart-line mr-3 w-5 text-center"></i>
+                            <span>Progress JP</span>
+                            @if(request()->routeIs('progress'))
+                            <i class="fas fa-check ml-auto text-blue-500"></i>
+                            @endif
+                        </a>
+                        <a href="{{ route('pelatihan.comparison') }}"
+                            class="mobile-nav-item {{ request()->routeIs('pelatihan.comparison') ? 'active' : '' }} flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-balance-scale mr-3 w-5 text-center"></i>
+                            <span>Perbandingan</span>
+                            @if(request()->routeIs('pelatihan.comparison'))
+                            <i class="fas fa-check ml-auto text-blue-500"></i>
+                            @endif
+                        </a>
+                        <a href="{{ route('pelatihan.index') }}"
+                            class="mobile-nav-item {{ request()->routeIs('pelatihan.*') && !request()->routeIs('pelatihan.comparison') ? 'active' : '' }} flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-database mr-3 w-5 text-center"></i>
+                            <span>Data Pelatihan</span>
+                            @if(request()->routeIs('pelatihan.*') && !request()->routeIs('pelatihan.comparison'))
+                            <i class="fas fa-check ml-auto text-blue-500"></i>
+                            @endif
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -68,6 +177,17 @@
     </div>
 
     @stack('scripts')
+
+    <!-- PWA Offline Indicator -->
+    <div id="connection-status" class="offline-indicator" style="display: none;">
+        <i class="fas fa-wifi-slash mr-2"></i>
+        <span id="connection-message">Anda sedang offline</span>
+    </div>
+
+    <!-- Connection Quality Indicator -->
+    <div class="connection-quality" id="connection-quality" style="display: none;">
+        <i class="fas fa-wifi"></i>
+    </div>
 
     <script>
         // Add loading state for forms
@@ -99,53 +219,252 @@
                 }
             });
 
-            // Show success message for form submissions
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success')) {
-                showNotification('Berhasil! Data telah disimpan.', 'success');
+            // Handle online/offline status
+            const connectionStatus = document.getElementById('connection-status');
+            const connectionMessage = document.getElementById('connection-message');
+            const networkStatus = document.getElementById('network-status');
+            const connectionQuality = document.getElementById('connection-quality');
+
+            function updateConnectionStatus() {
+                if (navigator.onLine) {
+                    connectionStatus.style.display = 'none';
+                    connectionStatus.classList.remove('offline-indicator');
+                    connectionStatus.classList.add('online-indicator');
+                    connectionMessage.textContent = 'Koneksi tersambung';
+                    if (networkStatus) {
+                        networkStatus.classList.remove('offline');
+                    }
+                    setTimeout(() => {
+                        connectionStatus.style.display = 'none';
+                    }, 3000);
+                } else {
+                    connectionStatus.style.display = 'block';
+                    connectionStatus.classList.remove('online-indicator');
+                    connectionStatus.classList.add('offline-indicator');
+                    connectionMessage.innerHTML = `
+                        <strong>Tidak Ada Koneksi Internet</strong><br>
+                        <small>Anda dapat melanjutkan menggunakan data yang telah disimpan di cache</small>
+                    `;
+                    if (networkStatus) {
+                        networkStatus.classList.add('offline');
+                    }
+                }
             }
 
-            // Auto-hide notifications
-            setTimeout(() => {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 300);
+            window.addEventListener('online', updateConnectionStatus);
+            window.addEventListener('offline', updateConnectionStatus);
+
+            // Initial check
+            updateConnectionStatus();
+
+            // Add touch device class
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
+            }
+
+            // Add PWA install prompt handling
+            let deferredPrompt;
+            const installButton = document.getElementById('pwa-install-btn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+
+                if (installButton) {
+                    installButton.style.display = 'block';
+                }
+            });
+
+            if (installButton) {
+                installButton.addEventListener('click', () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then((choiceResult) => {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('User accepted the install prompt');
+                            }
+                            deferredPrompt = null;
+                            installButton.style.display = 'none';
+                        });
+                    }
                 });
-            }, 5000);
-        });
+            }
 
-        // Notification function
-        function showNotification(message, type = 'info') {
-            const colors = {
-                success: 'bg-green-500',
-                error: 'bg-red-500',
-                info: 'bg-blue-500',
-                warning: 'bg-yellow-500'
-            };
+            // Hide install button if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                if (installButton) {
+                    installButton.style.display = 'none';
+                }
+            }
 
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info-circle'} mr-2"></i>
-                    ${message}
-                </div>
-            `;
+			// Add mobile menu toggle functionality
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
 
-            document.body.appendChild(notification);
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    const isHidden = mobileMenu.classList.contains('hidden');
 
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
-        }
+                    if (isHidden) {
+                        mobileMenu.classList.remove('hidden');
+                        mobileMenu.classList.add('animate-slide-down');
+                        this.innerHTML = '<i class="fas fa-times text-slate-600"></i>';
+                    } else {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        this.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    }
+                });
 
-        // Confirm delete
-        function confirmDelete(message = 'Apakah Anda yakin ingin menghapus data ini?') {
-            return confirm(message);
-        }
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    }
+                });
+
+                // Close menu when clicking on menu items
+                const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+                mobileNavItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    });
+                });
+            }
+
+            // Load mobile quick stats
+            function loadMobileStats() {
+                const mobileTotalPegawai = document.getElementById('mobile-total-pegawai');
+                const mobileActiveTraining = document.getElementById('mobile-active-training');
+                const mobileCompletedTraining = document.getElementById('mobile-completed-training');
+
+                if (mobileTotalPegawai && mobileActiveTraining && mobileCompletedTraining) {
+                    // Add loading animation
+                    [mobileTotalPegawai, mobileActiveTraining, mobileCompletedTraining].forEach(el => {
+                        el.parentElement.classList.add('mobile-stat-loading');
+                    });
+
+                    // Try to get data from localStorage first (for offline support)
+                    const cachedStats = localStorage.getItem('sidiklat-mobile-stats');
+                    if (cachedStats) {
+                        const stats = JSON.parse(cachedStats);
+                        mobileTotalPegawai.textContent = stats.totalPegawai || '--';
+                        mobileActiveTraining.textContent = stats.activeTraining || '--';
+                        mobileCompletedTraining.textContent = stats.completedTraining || '--';
+
+                        // Remove loading animation
+                        [mobileTotalPegawai, mobileActiveTraining, mobileCompletedTraining].forEach(el => {
+                            el.parentElement.classList.remove('mobile-stat-loading');
+                        });
+                    }
+
+                    // Fetch fresh data if online
+                    if (navigator.onLine) {
+                        fetch('/api/mobile-stats', {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            mobileTotalPegawai.textContent = data.total_pegawai || '--';
+                            mobileActiveTraining.textContent = data.active_training || '--';
+                            mobileCompletedTraining.textContent = data.completed_training || '--';
+
+                            // Remove loading animation
+                            [mobileTotalPegawai, mobileActiveTraining, mobileCompletedTraining].forEach(el => {
+                                el.parentElement.classList.remove('mobile-stat-loading');
+                            });
+
+                            // Cache the data
+                            localStorage.setItem('sidiklat-mobile-stats', JSON.stringify({
+                                totalPegawai: data.total_pegawai,
+                                activeTraining: data.active_training,
+                                completedTraining: data.completed_training,
+                                timestamp: Date.now()
+                            }));
+                        })
+                        .catch(error => {
+                            console.log('Could not fetch mobile stats:', error);
+                            // Remove loading animation on error
+                            [mobileTotalPegawai, mobileActiveTraining, mobileCompletedTraining].forEach(el => {
+                                el.parentElement.classList.remove('mobile-stat-loading');
+                            });
+                        });
+                    } else {
+                        // Remove loading animation if offline
+                        setTimeout(() => {
+                            [mobileTotalPegawai, mobileActiveTraining, mobileCompletedTraining].forEach(el => {
+                                el.parentElement.classList.remove('mobile-stat-loading');
+                            });
+                        }, 1000);
+                    }
+                }
+            }
+
+            // Load mobile stats on page load
+            loadMobileStats();
+
+            // Add smooth navigation transitions
+            const navLinks = document.querySelectorAll('.tab-button, .mobile-nav-item');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Add loading state
+                    this.classList.add('nav-loading');
+
+                    // Remove loading state after navigation
+                    setTimeout(() => {
+                        this.classList.remove('nav-loading');
+                    }, 1000);
+                });
+            });
+
+            // Add keyboard navigation support
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('animate-slide-down');
+                    if (mobileMenuToggle) {
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                    }
+                }
+            });
+
+            // Add swipe gesture support for mobile menu
+            if ('ontouchstart' in window) {
+                let touchStartX = 0;
+                let touchStartY = 0;
+
+                document.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                });
+
+                document.addEventListener('touchend', function(e) {
+                    if (!mobileMenu || mobileMenu.classList.contains('hidden')) return;
+
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const diffX = touchStartX - touchEndX;
+                    const diffY = touchStartY - touchEndY;
+
+                    // Swipe down to close menu
+                    if (Math.abs(diffY) > Math.abs(diffX) && diffY < -50) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('animate-slide-down');
+                        if (mobileMenuToggle) {
+                            mobileMenuToggle.innerHTML = '<i class="fas fa-bars text-slate-600"></i>';
+                        }
+                    }
+                });
+            }
+		});
     </script>
 
     <style>
@@ -278,6 +597,79 @@
 
             .chart-container {
                 height: 200px;
+            }
+        }
+
+        /* Network status indicator styles */
+        .network-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .network-status.online {
+            background: #3B82F6;
+            transform: scale(1.1);
+        }
+
+        .network-status.offline {
+            background: #ef4444;
+            transform: scale(1);
+        }
+
+        /* Connection quality indicator styles */
+        .connection-quality {
+            position: absolute;
+            top: 1rem;
+            right: 4rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .connection-quality i {
+            color: #3B82F6;
+            font-size: 1.2rem;
+        }
+
+        /* Show/hide based on connection quality */
+        .connection-quality.good {
+            display: flex;
+        }
+
+        .connection-quality.fair {
+            display: flex;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-quality.poor {
+            display: none;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
             }
         }
     </style>

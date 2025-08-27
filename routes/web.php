@@ -19,6 +19,9 @@ Route::get('/pelatihan/comparison', [PelatihanController::class, 'comparison'])-
 Route::get('/pelatihan/export', [PelatihanController::class, 'export'])->name('pelatihan.export');
 Route::resource('pelatihan', PelatihanController::class);
 
+// API route for mobile stats
+Route::get('/api/mobile-stats', [DashboardController::class, 'mobileStats'])->name('api.mobile-stats');
+
 // Route untuk mengakses file sertifikat
 Route::get('/storage/sertifikat/{filename}', function ($filename) {
 	$path = 'sertifikat/' . $filename;

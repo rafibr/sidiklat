@@ -43,7 +43,7 @@
                         <div class="flex items-center space-x-2">
                             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                             <span class="text-sm text-gray-600 font-medium">Data aktif untuk tahun {{ selectedYear
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -540,7 +540,7 @@
                                     </td>
                                     <td class="px-4 lg:px-6 py-4 hidden sm:table-cell">
                                         <span :class="getUnitPillClass(pegawai.unit_kerja)">{{ pegawai.unit_kerja
-                                        }}</span>
+                                            }}</span>
                                     </td>
                                     <td class="px-4 lg:px-6 py-4 font-semibold text-gray-900">
                                         {{ formatNumber(pegawai.jp_tercapai_filtered || pegawai.jp_tercapai || 0) }} JP

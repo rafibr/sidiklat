@@ -122,7 +122,7 @@ export default {
                 },
                 {
                     name: 'Perbandingan',
-                    href: '/comparison',
+                    href: '/pelatihan/comparison',
                     icon: 'fas fa-balance-scale'
                 }
             ]

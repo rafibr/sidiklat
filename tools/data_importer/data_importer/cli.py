@@ -90,16 +90,12 @@ def _store_excel_row(
     )
 
 
-@app.command("import-excel")
-def import_excel(
-    excel_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="Path file Excel sumber."),
-    sheet_name: Optional[str] = typer.Option(None, help="Nama sheet yang akan dibaca."),
-    sql_output: Optional[Path] = typer.Option(
-        None,
-        help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
-    ),
+def import_excel_data(
+    excel_path: Path,
+    sheet_name: Optional[str] = None,
+    sql_output: Optional[Path] = None,
 ) -> None:
-    """Impor data pelatihan dari berkas Excel."""
+    """Core routine for importing Excel data."""
 
     config = AppConfig.load()
     loader = ExcelLoader()
@@ -121,6 +117,20 @@ def import_excel(
                 _store_excel_row(row, downloader, certificate_root, client=client)
 
     logger.info("Import Excel selesai.")
+
+
+@app.command("import-excel")
+def import_excel(
+    excel_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="Path file Excel sumber."),
+    sheet_name: Optional[str] = typer.Option(None, help="Nama sheet yang akan dibaca."),
+    sql_output: Optional[Path] = typer.Option(
+        None,
+        help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
+    ),
+) -> None:
+    """Impor data pelatihan dari berkas Excel."""
+
+    import_excel_data(excel_path, sheet_name=sheet_name, sql_output=sql_output)
 
 
 CATEGORY_LABELS = {
@@ -257,6 +267,15 @@ def import_simpeg(
                     )
 
     logger.info("Import SIMPEG selesai.")
+
+
+@app.command("gui")
+def open_gui() -> None:
+    """Buka antarmuka grafis untuk impor data."""
+
+    from .gui import launch_gui
+
+    launch_gui()
 
 
 def run():  # pragma: no cover - CLI entry point

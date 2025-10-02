@@ -1,0 +1,50 @@
+{
+	"name": "SIDIKLAT - Sistem Informasi Data Pelatihan",
+	"short_name": "SIDIKLAT",
+	"description": "Aplikasi web untuk mengelola data pelatihan pegawai",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#3B82F6",
+	"orientation": "portrait-primary",
+	"scope": "/",
+	"icons": [
+		{
+			"src": "/favicon.ico",
+			"sizes": "16x16 32x32 48x48",
+			"type": "image/x-icon"
+		},
+		{
+			"src": "/build/manifest-icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable any"
+		},
+		{
+			"src": "/build/manifest-icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable any"
+		}
+	],
+	"categories": [
+		"business",
+		"productivity",
+		"education"
+	],
+	"lang": "id",
+	"screenshots": [
+		{
+			"src": "/build/screenshot-mobile.png",
+			"sizes": "360x640",
+			"type": "image/png",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/build/screenshot-desktop.png",
+			"sizes": "1280x720",
+			"type": "image/png",
+			"form_factor": "wide"
+		}
+	]
+}

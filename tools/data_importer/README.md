@@ -34,7 +34,9 @@ tools/data_importer/
    playwright install chromium
    ```
 
-3. Salin variabel koneksi database dan kredensial SIMPEG ke environment. Contoh menggunakan file `.env` pada root proyek Laravel. Variabel database hanya diperlukan jika Anda ingin langsung menulis ke database, bukan ketika menghasilkan berkas `.sql`:
+3. (Opsional) Untuk menjalankan antarmuka grafis berbasis Tkinter pastikan sistem operasi memiliki pustaka GUI yang diperlukan (mis. `tk`/`python3-tk` di Linux).
+
+4. Salin variabel koneksi database dan kredensial SIMPEG ke environment. Contoh menggunakan file `.env` pada root proyek Laravel. Variabel database hanya diperlukan jika Anda ingin langsung menulis ke database, bukan ketika menghasilkan berkas `.sql`:
 
    ```dotenv
    SIDIKLAT_DB_HOST=127.0.0.1
@@ -59,6 +61,12 @@ Jalankan CLI dengan perintah berikut dari root repository:
 
 ```bash
 python -m data_importer --help
+```
+
+Jika ingin melihat daftar perintah dari antarmuka grafis, jalankan:
+
+```bash
+python -m data_importer gui
 ```
 
 ### Impor dari Excel
@@ -90,6 +98,16 @@ Untuk menghasilkan skrip SQL tanpa menyentuh database:
 ```bash
 python -m data_importer import-excel data/daftar_pelatihan.xlsx --sheet "Sheet1" --sql-output output/pelatihan_excel.sql
 ```
+
+### Antarmuka Grafis (GUI)
+
+Gunakan perintah berikut untuk membuka antarmuka grafis sederhana yang memudahkan pemilihan berkas Excel, nama sheet, dan tujuan keluaran SQL:
+
+```bash
+python -m data_importer gui
+```
+
+Melalui GUI, proses impor dijalankan di thread terpisah sehingga jendela tetap responsif. Status keberhasilan atau kegagalan akan ditampilkan melalui dialog.
 
 ### Impor dari SIMPEG
 

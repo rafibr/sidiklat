@@ -1,0 +1,6 @@
+mysql-connector-python
+openpyxl
+playwright
+python-dotenv
+requests
+typer

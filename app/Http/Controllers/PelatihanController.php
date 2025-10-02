@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pelatihan;
 use App\Models\Pegawai;
+use App\Models\JenisPelatihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,15 +19,14 @@ class PelatihanController extends Controller
         $pelatihanCurrentYear = Pelatihan::whereYear('created_at', $currentYear)->count();
         $pelatihanLastYear = Pelatihan::whereYear('created_at', $lastYear)->count();
 
-        // Data untuk chart perbandingan per jenis
-        $jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+        $jenisPelatihan = JenisPelatihan::orderBy('nama')->pluck('nama')->toArray();
 
         $comparisonData = [];
         foreach ($jenisPelatihan as $jenis) {
-            $currentCount = Pelatihan::where('jenis_pelatihan', $jenis)
+            $currentCount = Pelatihan::ofJenis($jenis)
                 ->whereYear('created_at', $currentYear)
                 ->count();
-            $lastCount = Pelatihan::where('jenis_pelatihan', $jenis)
+            $lastCount = Pelatihan::ofJenis($jenis)
                 ->whereYear('created_at', $lastYear)
                 ->count();
 
@@ -67,11 +67,11 @@ class PelatihanController extends Controller
 
     public function index(Request $request)
     {
-        $query = Pelatihan::with('pegawai');
+        $query = Pelatihan::with(['pegawai', 'jenisPelatihan']);
 
         // Filter by jenis pelatihan
         if ($request->filled('jenis')) {
-            $query->where('jenis_pelatihan', $request->jenis);
+            $query->ofJenis($request->jenis);
         }
 
         // Search
@@ -85,7 +85,7 @@ class PelatihanController extends Controller
         }
 
         $pelatihans = $query->latest()->paginate(10);
-        $jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+        $jenisPelatihan = JenisPelatihan::orderBy('nama')->pluck('nama');
 
         return view('pelatihan.index', compact('pelatihans', 'jenisPelatihan'));
     }
@@ -93,7 +93,7 @@ class PelatihanController extends Controller
     public function create()
     {
         $pegawais = Pegawai::orderBy('nama_lengkap')->get();
-        $jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+        $jenisPelatihan = JenisPelatihan::orderBy('nama')->pluck('nama');
 
         return view('pelatihan.create', compact('pegawais', 'jenisPelatihan'));
     }
@@ -103,11 +103,11 @@ class PelatihanController extends Controller
         $validated = $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
             'nama_pelatihan' => 'required|string|max:255',
-            'jenis_pelatihan' => 'required|string',
+            'jenis_pelatihan' => 'required|string|exists:jenis_pelatihans,nama',
             'penyelenggara' => 'required|string|max:255',
             'tempat' => 'nullable|string|max:255',
-            'tanggal_mulai' => 'required|string|max:255',
-            'tanggal_selesai' => 'required|string|max:255',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'jp' => 'required|integer|min:1',
             'status' => 'required|in:selesai,sedang_berjalan,akan_datang',
             'deskripsi' => 'nullable|string',
@@ -139,7 +139,7 @@ class PelatihanController extends Controller
     public function edit(Pelatihan $pelatihan)
     {
         $pegawais = Pegawai::orderBy('nama_lengkap')->get();
-        $jenisPelatihan = ['Diklat Struktural', 'Diklat Fungsional', 'Diklat Teknis', 'Workshop', 'Seminar', 'Pelatihan Jarak Jauh', 'E-Learning'];
+        $jenisPelatihan = JenisPelatihan::orderBy('nama')->pluck('nama');
 
         return view('pelatihan.edit', compact('pelatihan', 'pegawais', 'jenisPelatihan'));
     }
@@ -149,11 +149,11 @@ class PelatihanController extends Controller
         $validated = $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
             'nama_pelatihan' => 'required|string|max:255',
-            'jenis_pelatihan' => 'required|string',
+            'jenis_pelatihan' => 'required|string|exists:jenis_pelatihans,nama',
             'penyelenggara' => 'required|string|max:255',
             'tempat' => 'nullable|string|max:255',
-            'tanggal_mulai' => 'required|string|max:255',
-            'tanggal_selesai' => 'required|string|max:255',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'jp' => 'required|integer|min:1',
             'status' => 'required|in:selesai,sedang_berjalan,akan_datang',
             'deskripsi' => 'nullable|string',

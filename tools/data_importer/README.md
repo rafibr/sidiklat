@@ -99,6 +99,19 @@ Untuk menghasilkan skrip SQL tanpa menyentuh database:
 python -m data_importer import-excel data/daftar_pelatihan.xlsx --sheet "Sheet1" --sql-output output/pelatihan_excel.sql
 ```
 
+### Impor dari JSON
+
+Jika data telah dibersihkan ke format JSON terstruktur (seperti `tools/data_importer/data/diklat_2025.json`), gunakan perintah berik
+ut untuk menuliskannya sebagai skrip SQL atau langsung ke database:
+
+```bash
+python -m data_importer import-json tools/data_importer/data/diklat_2025.json \
+  --jenis-pelatihan "Diklat 2025" --sql-output tools/data_importer/data/diklat_2025.sql
+```
+
+Setiap entri akan menggunakan informasi `nama`, `nip`, `jabatan`, dan daftar `pelatihan` pada berkas JSON. Sertifikat akan diund
+uh otomatis ketika URL tersedia sehingga kolom `sertifikat_path` pada SQL terisi sesuai struktur penyimpanan aplikasi.
+
 ### Antarmuka Grafis (GUI)
 
 Gunakan perintah berikut untuk membuka antarmuka grafis sederhana yang memudahkan pemilihan berkas Excel, nama sheet, dan tujuan keluaran SQL:
@@ -115,6 +128,12 @@ Melalui GUI, proses impor dijalankan di thread terpisah sehingga jendela tetap r
 python -m data_importer import-simpeg --categories kepemimpinan fungsional teknis
 ```
 
+Anda juga bisa memisahkan tiap kategori ke opsi tersendiri atau menuliskannya sebagai argumen biasa:
+
+```bash
+python -m data_importer import-simpeg --categories kepemimpinan --categories fungsional teknis
+```
+
 Tambahkan `--sql-output` agar seluruh hasil scraping disusun sebagai pernyataan SQL:
 
 ```bash
@@ -129,6 +148,9 @@ Perintah di atas akan:
 4. Men-scrape tabel diklat kepemimpinan, fungsional, dan teknis.
 5. Mengunduh berkas sertifikat dan menyimpannya di `storage/app/public/sertifikat`.
 6. Menyimpan/menyinkronkan data ke tabel `pegawais`, `jenis_pelatihans`, dan `pelatihans`.
+
+Contoh dataset hasil konversi 2025 tersedia pada `tools/data_importer/data/diklat_2025.json` beserta skrip SQL siap pakai di `t
+ools/data_importer/data/diklat_2025.sql`.
 
 ## Catatan Teknis
 

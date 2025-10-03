@@ -47,7 +47,7 @@ class SimpegConfig:
     base_url: str
     username: Optional[str]
     password: Optional[str]
-    headless: bool = True
+    headless: bool = False
 
     @classmethod
     def from_env(cls) -> "SimpegConfig":
@@ -55,7 +55,7 @@ class SimpegConfig:
             base_url=os.getenv("SIMPEG_BASE_URL", "https://simpeg.bkpp.banjarbarukota.go.id"),
             username=os.getenv("SIMPEG_USERNAME"),
             password=os.getenv("SIMPEG_PASSWORD"),
-            headless=os.getenv("SIMPEG_HEADLESS", "true").lower() != "false",
+            headless=os.getenv("SIMPEG_HEADLESS", "false").lower() != "false",
         )
 
 

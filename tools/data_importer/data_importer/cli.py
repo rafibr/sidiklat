@@ -36,12 +36,20 @@ def _store_excel_row(
     sertifikat_path = None
     sertifikat_sql_path = None
     if row.sertifikat_url:
-        try:
-            destination = downloader.download(row.sertifikat_url, row.nama, row.nama_pelatihan)
-            sertifikat_path = destination.relative_to(certificate_root.parent)
-            sertifikat_sql_path = sertifikat_path.as_posix()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Gagal mengunduh sertifikat %s: %s", row.sertifikat_url, exc)
+        # Check if it's a Google Drive link
+        if "drive.google.com" in row.sertifikat_url:
+            # Use Google Drive URL directly as sertifikat_path
+            sertifikat_path = row.sertifikat_url
+            sertifikat_sql_path = row.sertifikat_url
+            logger.info("Using Google Drive URL as sertifikat_path: %s", row.sertifikat_url)
+        else:
+            # Download file for non-Google Drive URLs
+            try:
+                destination = downloader.download(row.sertifikat_url, row.nama, row.nama_pelatihan)
+                sertifikat_path = destination.relative_to(certificate_root.parent)
+                sertifikat_sql_path = sertifikat_path.as_posix()
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Gagal mengunduh sertifikat %s: %s", row.sertifikat_url, exc)
 
     if sql_builder is not None:
         sql_builder.add_block(
@@ -72,7 +80,7 @@ def _store_excel_row(
         nama=row.nama,
         nip=row.nip,
         jabatan=row.jabatan,
-        unit_kerja=row.unit_kerja,
+        unit_kerja=row.unit_kerja or "-",
         keterangan=row.keterangan,
     )
 
@@ -95,6 +103,7 @@ def import_excel_data(
     excel_path: Path,
     sheet_name: Optional[str] = None,
     sql_output: Optional[Path] = None,
+    batch_size: int = 10,
 ) -> None:
     """Core routine for importing Excel data."""
 
@@ -114,8 +123,17 @@ def import_excel_data(
         logger.info("Skrip SQL tersimpan di %s", output_path)
     else:
         with database_client(config.database) as client:
-            for row in rows:
-                _store_excel_row(row, downloader, certificate_root, client=client)
+            # Process in batches to avoid timeout
+            for i in range(0, len(rows), batch_size):
+                batch = rows[i:i + batch_size]
+                logger.info("Memproses batch %d-%d dari %d", i + 1, min(i + batch_size, len(rows)), len(rows))
+
+                for row in batch:
+                    _store_excel_row(row, downloader, certificate_root, client=client)
+
+                # Commit after each batch
+                client.connection.commit()
+                logger.info("Batch %d-%d selesai dan di-commit", i + 1, min(i + batch_size, len(rows)))
 
     logger.info("Import Excel selesai.")
 
@@ -124,6 +142,7 @@ def import_json_data(
     json_path: Path,
     sql_output: Optional[Path] = None,
     jenis_pelatihan: Optional[str] = None,
+    batch_size: int = 10,
 ) -> None:
     """Import training data from a structured JSON file."""
 
@@ -147,8 +166,17 @@ def import_json_data(
         logger.info("Skrip SQL tersimpan di %s", output_path)
     else:
         with database_client(config.database) as client:
-            for row in rows:
-                _store_excel_row(row, downloader, certificate_root, client=client)
+            # Process in batches to avoid timeout
+            for i in range(0, len(rows), batch_size):
+                batch = rows[i:i + batch_size]
+                logger.info("Memproses batch %d-%d dari %d", i + 1, min(i + batch_size, len(rows)), len(rows))
+
+                for row in batch:
+                    _store_excel_row(row, downloader, certificate_root, client=client)
+
+                # Commit after each batch
+                client.connection.commit()
+                logger.info("Batch %d-%d selesai dan di-commit", i + 1, min(i + batch_size, len(rows)))
 
     logger.info("Import JSON selesai.")
 
@@ -161,10 +189,11 @@ def import_excel(
         None,
         help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
     ),
+    batch_size: int = typer.Option(10, help="Jumlah record per batch untuk menghindari timeout."),
 ) -> None:
     """Impor data pelatihan dari berkas Excel."""
 
-    import_excel_data(excel_path, sheet_name=sheet_name, sql_output=sql_output)
+    import_excel_data(excel_path, sheet_name=sheet_name, sql_output=sql_output, batch_size=batch_size)
 
 
 @app.command("import-json")
@@ -178,10 +207,11 @@ def import_json(
         None,
         help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
     ),
+    batch_size: int = typer.Option(10, help="Jumlah record per batch untuk menghindari timeout."),
 ) -> None:
     """Impor data pelatihan dari berkas JSON terstruktur."""
 
-    import_json_data(json_path, sql_output=sql_output, jenis_pelatihan=jenis_pelatihan)
+    import_json_data(json_path, sql_output=sql_output, jenis_pelatihan=jenis_pelatihan, batch_size=batch_size)
 
 
 CATEGORY_LABELS = {
@@ -204,17 +234,25 @@ def _store_simpeg_record(
     sertifikat_path = None
     sertifikat_sql_path = None
     if record.sertifikat_url:
-        try:
-            destination = downloader.download(
-                record.sertifikat_url,
-                record.pegawai_nama,
-                record.nama_pelatihan or record.induk_diklat or record.kategori,
-                session=session,
-            )
-            sertifikat_path = destination.relative_to(certificate_root.parent)
-            sertifikat_sql_path = sertifikat_path.as_posix()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Gagal mengunduh sertifikat untuk %s: %s", record.nama_pelatihan, exc)
+        # Check if it's a Google Drive link
+        if "drive.google.com" in record.sertifikat_url:
+            # Use Google Drive URL directly as sertifikat_path
+            sertifikat_path = record.sertifikat_url
+            sertifikat_sql_path = record.sertifikat_url
+            logger.info("Using Google Drive URL as sertifikat_path: %s", record.sertifikat_url)
+        else:
+            # Download file for non-Google Drive URLs
+            try:
+                destination = downloader.download(
+                    record.sertifikat_url,
+                    record.pegawai_nama,
+                    record.nama_pelatihan or record.induk_diklat or record.kategori,
+                    session=session,
+                )
+                sertifikat_path = destination.relative_to(certificate_root.parent)
+                sertifikat_sql_path = sertifikat_path.as_posix()
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Gagal mengunduh sertifikat untuk %s: %s", record.nama_pelatihan, exc)
 
     if sql_builder is not None:
         sql_builder.add_block(
@@ -272,6 +310,7 @@ def import_simpeg(
         None,
         help="Jika diset, hasil scraping ditulis ke file SQL alih-alih langsung ke database.",
     ),
+    batch_size: int = typer.Option(10, help="Jumlah record per batch untuk menghindari timeout."),
     extra_categories: List[str] = typer.Argument(
         None,
         metavar="[KATEGORI]...",
@@ -298,40 +337,65 @@ def import_simpeg(
 
     categories = selected_categories
 
-    with SimpegScraper(
-        config.simpeg.base_url,
-        headless=config.simpeg.headless,
-        download_dir=config.storage.certificate_root,
-    ) as scraper:
-        scraper.login(username, password)
-        session = scraper.build_requests_session()
-        downloader = CertificateDownloader(config.storage.certificate_root)
+    logger.info("Akan mengambil data dari kategori: %s", ", ".join(categories))
+    logger.info("Batch size: %d record per batch", batch_size)
 
-        pegawai_rows = list(scraper.iter_pegawai_rows())
-        logger.info("Mengambil diklat untuk %s pegawai", len(pegawai_rows))
+    try:
+        with SimpegScraper(
+            config.simpeg.base_url,
+            headless=config.simpeg.headless,
+            download_dir=config.storage.certificate_root,
+        ) as scraper:
+            logger.info("Mencoba login ke SIMPEG dengan username: %s", username)
+            scraper.login(username, password)
+            logger.info("Login berhasil!")
 
-        if sql_output:
-            builder = SqlScriptBuilder(sql_output)
-            for record in scraper.iter_training_records(pegawai_rows, categories=categories):
-                _store_simpeg_record(
-                    record,
-                    downloader,
-                    config.storage.certificate_root,
-                    session,
-                    sql_builder=builder,
-                )
-            output_path = builder.save()
-            logger.info("Skrip SQL tersimpan di %s", output_path)
-        else:
-            with database_client(config.database) as client:
+            session = scraper.build_requests_session()
+            downloader = CertificateDownloader(config.storage.certificate_root)
+
+            pegawai_rows = list(scraper.iter_pegawai_rows())
+            logger.info("Mengambil diklat untuk %s pegawai", len(pegawai_rows))
+
+            if sql_output:
+                builder = SqlScriptBuilder(sql_output)
                 for record in scraper.iter_training_records(pegawai_rows, categories=categories):
                     _store_simpeg_record(
                         record,
                         downloader,
                         config.storage.certificate_root,
                         session,
-                        client=client,
+                        sql_builder=builder,
                     )
+                output_path = builder.save()
+                logger.info("Skrip SQL tersimpan di %s", output_path)
+            else:
+                with database_client(config.database) as client:
+                    # Collect all records first for batch processing
+                    records = list(scraper.iter_training_records(pegawai_rows, categories=categories))
+                    logger.info("Total %d record diklat akan diproses dalam batch", len(records))
+
+                    # Process in batches to avoid timeout
+                    for i in range(0, len(records), batch_size):
+                        batch = records[i:i + batch_size]
+                        logger.info("Memproses batch %d-%d dari %d", i + 1, min(i + batch_size, len(records)), len(records))
+
+                        for record in batch:
+                            _store_simpeg_record(
+                                record,
+                                downloader,
+                                config.storage.certificate_root,
+                                session,
+                                client=client,
+                            )
+
+                        # Commit after each batch
+                        client.connection.commit()
+                        logger.info("Batch %d-%d selesai dan di-commit", i + 1, min(i + batch_size, len(records)))
+
+    except Exception as e:
+        logger.error("Error saat import SIMPEG: %s", str(e))
+        logger.error("Periksa kredensial login atau koneksi ke SIMPEG")
+        raise
 
     logger.info("Import SIMPEG selesai.")
 

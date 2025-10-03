@@ -65,9 +65,11 @@ class DatabaseClient:
     def _find_pegawai(self, *, nip: Optional[str], nama: str) -> Optional[StoredPegawai]:
         cursor = self._get_cursor()
         if nip:
+            # Clean NIP by removing spaces
+            nip_clean = nip.replace(" ", "").strip()
             cursor.execute(
-                "SELECT id, nama_lengkap as nama, nip FROM pegawais WHERE nip = %s LIMIT 1",
-                (nip,),
+                "SELECT id, nama_lengkap as nama, nip FROM pegawais WHERE REPLACE(nip, ' ', '') = %s LIMIT 1",
+                (nip_clean,),
             )
             row = cursor.fetchone()
             if row:
@@ -95,44 +97,23 @@ class DatabaseClient:
         tanggal_pengangkatan: Optional[date] = None,
         keterangan: Optional[str] = None,
     ) -> StoredPegawai:
-        existing = self._find_pegawai(nip=nip, nama=nama)
+        # Provide default value for unit_kerja if None
+        if unit_kerja is None:
+            unit_kerja = "-"
+
+        # Clean NIP by removing spaces before searching
+        nip_clean = nip.replace(" ", "").strip() if nip else None
+
+        existing = self._find_pegawai(nip=nip_clean, nama=nama)
         cursor = self._get_cursor()
         timestamp = self._current_timestamp()
 
         if existing:
-            cursor.execute(
-                """
-                UPDATE pegawais
-                   SET nama_lengkap = %s,
-                       nip = %s,
-                       jabatan = COALESCE(%s, jabatan),
-                       unit_kerja = COALESCE(%s, unit_kerja),
-                       pangkat_golongan = COALESCE(%s, pangkat_golongan),
-                       status = COALESCE(%s, status),
-                       email = COALESCE(%s, email),
-                       telepon = COALESCE(%s, telepon),
-                       tanggal_pengangkatan = COALESCE(%s, tanggal_pengangkatan),
-                       keterangan = COALESCE(%s, keterangan),
-                       updated_at = %s
-                 WHERE id = %s
-                """,
-                (
-                    nama,
-                    nip,
-                    jabatan,
-                    unit_kerja,
-                    pangkat,
-                    status,
-                    email,
-                    telepon,
-                    tanggal_pengangkatan,
-                    keterangan,
-                    timestamp,
-                    existing.id,
-                ),
-            )
+            # Just return existing pegawai without updating
+            logger.info("Found existing pegawai %s (ID: %s, NIP: %s)", existing.nama, existing.id, existing.nip)
             return existing
 
+        # Create new pegawai if not found
         cursor.execute(
             """
             INSERT INTO pegawais
@@ -142,7 +123,7 @@ class DatabaseClient:
             """,
             (
                 nama,
-                nip,
+                nip_clean,
                 jabatan,
                 unit_kerja,
                 pangkat,
@@ -158,8 +139,8 @@ class DatabaseClient:
             ),
         )
         pegawai_id = cursor.lastrowid
-        logger.info("Created pegawai %s (%s)", nama, pegawai_id)
-        return StoredPegawai(id=pegawai_id, nama=nama, nip=nip)
+        logger.info("Created pegawai %s (ID: %s, NIP: %s)", nama, pegawai_id, nip_clean)
+        return StoredPegawai(id=pegawai_id, nama=nama, nip=nip_clean)
 
     # Jenis Pelatihan -------------------------------------------------
 
@@ -229,6 +210,12 @@ class DatabaseClient:
         deskripsi: Optional[str] = None,
         sertifikat_path: Optional[Path] = None,
     ) -> StoredPelatihan:
+        # Provide default values for required fields if None
+        if penyelenggara is None:
+            penyelenggara = "-"
+        if tempat is None:
+            tempat = "-"
+
         cursor = self._get_cursor()
         jenis_id = self.ensure_jenis_pelatihan(jenis_nama) if jenis_nama else None
         existing = self._find_pelatihan(pegawai_id, nama_pelatihan, tanggal_mulai, tanggal_selesai)

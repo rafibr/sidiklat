@@ -104,10 +104,12 @@ class SimpegScraper:
         self.page.fill("#LoginForm_username", username)
         self.page.fill("#LoginForm_password", password)
         self.page.click("button[type='submit'], input[type='submit']")
-        self.page.wait_for_load_state("networkidle")
 
-        if "login" in self.page.url.lower():
-            raise PlaywrightError("Gagal login ke SIMPEG, periksa kredensial.")
+        # Wait 5 seconds for login to complete
+        import time
+        time.sleep(5)
+
+        self.page.wait_for_load_state("networkidle")
 
     def build_requests_session(self) -> requests.Session:
         if not self.context:
@@ -135,20 +137,51 @@ class SimpegScraper:
         self.page.click("button.btn.btn-primary:has-text('Cari')")
         self.page.wait_for_selector("#dt_basiccari tbody tr")
 
-        rows = self.page.locator("#dt_basiccari tbody tr")
-        count = rows.count()
-        logger.info("Menemukan %s baris pegawai", count)
-        for index in range(count):
-            row = rows.nth(index)
-            anchor = row.locator("td:nth-child(2) a").first
-            onclick = anchor.get_attribute("onclick") or ""
-            match = re.search(r"cari\('(\d+)'\)", onclick)
-            if not match:
-                continue
-            pegawai_id = match.group(1)
-            nama = anchor.inner_text().strip()
-            nip = (row.locator("td").nth(2).inner_text().strip() or None)
-            yield {"id": pegawai_id, "nama": nama, "nip": nip}
+        # Wait 5 seconds before changing items per page
+        import time
+        time.sleep(5)
+
+        # Change items per page to 100 (maximum)
+        logger.info("Mengatur items per page menjadi 100...")
+        select_element = self.page.locator("select[name='dt_basiccari_length']")
+        select_element.select_option("100")
+        time.sleep(2)  # Wait for table to reload with new page size
+
+        page_number = 1
+        while True:
+            logger.info("Memproses halaman %d pegawai", page_number)
+
+            # Wait for table to load
+            self.page.wait_for_selector("#dt_basiccari tbody tr")
+            import time
+            time.sleep(2)  # Give time for table to fully load
+
+            rows = self.page.locator("#dt_basiccari tbody tr")
+            count = rows.count()
+            logger.info("Menemukan %s baris pegawai di halaman %d", count, page_number)
+
+            for index in range(count):
+                row = rows.nth(index)
+                anchor = row.locator("td:nth-child(2) a").first
+                onclick = anchor.get_attribute("onclick") or ""
+                match = re.search(r"cari\('(\d+)'\)", onclick)
+                if not match:
+                    continue
+                pegawai_id = match.group(1)
+                nama = anchor.inner_text().strip()
+                nip = (row.locator("td").nth(2).inner_text().strip() or None)
+                yield {"id": pegawai_id, "nama": nama, "nip": nip}
+
+            # Check if there's a next page button
+            next_button = self.page.locator("#dt_basiccari_next")
+            if next_button.count() > 0 and "disabled" not in (next_button.get_attribute("class") or ""):
+                logger.info("Pindah ke halaman berikutnya...")
+                next_button.click()
+                page_number += 1
+                time.sleep(2)  # Wait for next page to load
+            else:
+                logger.info("Tidak ada halaman berikutnya, selesai scraping pegawai")
+                break
 
     # Training scraping -----------------------------------------------
 

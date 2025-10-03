@@ -16,7 +16,7 @@
 			<!-- Filters -->
 			<form @submit.prevent="submitFilter"
 				class="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 md:mb-6 animate-slide-left delay-100">
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+				<div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
 						<input type="text" v-model="filters.search" placeholder="Nama pelatihan atau pegawai..."
@@ -28,6 +28,15 @@
 						<v-combobox v-model="filters.jenis" :items="jenisPelatihanItems"
 							@update:model-value="submitFilter" placeholder="Pilih atau ketik jenis..." clearable
 							density="compact" variant="outlined" hide-details class="vuetify-input"></v-combobox>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
+						<select v-model="filters.year" @change="submitFilter"
+							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+							<option value="">Semua Tahun</option>
+							<option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+						</select>
 					</div>
 
 					<div class="flex items-end gap-2">
@@ -371,12 +380,14 @@ export default {
 		pelatihans: Object,
 		jenisPelatihan: Array,
 		pegawais: Array,
+		availableYears: Array,
 	},
 	data() {
 		return {
 			filters: {
 				search: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('search') || '' : '',
 				jenis: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('jenis') || '' : '',
+				year: this.$page.url.split('?')[1] ? new URLSearchParams(this.$page.url.split('?')[1]).get('year') || '' : '',
 				per_page: this.$page.props.per_page || 500,
 			},
 			searchTimer: null,
@@ -487,6 +498,7 @@ export default {
 			const params = new URLSearchParams();
 			if (this.filters.search) params.set('search', this.filters.search);
 			if (this.filters.jenis) params.set('jenis', this.filters.jenis);
+			if (this.filters.year) params.set('year', this.filters.year);
 			if (this.filters.per_page) params.set('per_page', this.filters.per_page);
 			params.set('format', format);
 
@@ -495,7 +507,7 @@ export default {
 			window.open(url, '_blank');
 		},
 		resetFilter() {
-			this.filters = { search: '', jenis: '' };
+			this.filters = { search: '', jenis: '', year: '' };
 			router.get(route('pelatihan.index'));
 		},
 		changePage(url) {

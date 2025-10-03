@@ -12,6 +12,7 @@ from .certificate_downloader import CertificateDownloader
 from .config import AppConfig
 from .db import DatabaseClient, database_client
 from .excel_loader import ExcelLoader
+from .json_loader import JsonLoader
 from .models import ExcelTrainingRow, SimpegTrainingRecord
 from .simpeg_scraper import SimpegScraper
 from .sql_writer import SqlScriptBuilder, build_training_sql_block
@@ -90,16 +91,12 @@ def _store_excel_row(
     )
 
 
-@app.command("import-excel")
-def import_excel(
-    excel_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="Path file Excel sumber."),
-    sheet_name: Optional[str] = typer.Option(None, help="Nama sheet yang akan dibaca."),
-    sql_output: Optional[Path] = typer.Option(
-        None,
-        help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
-    ),
+def import_excel_data(
+    excel_path: Path,
+    sheet_name: Optional[str] = None,
+    sql_output: Optional[Path] = None,
 ) -> None:
-    """Impor data pelatihan dari berkas Excel."""
+    """Core routine for importing Excel data."""
 
     config = AppConfig.load()
     loader = ExcelLoader()
@@ -121,6 +118,70 @@ def import_excel(
                 _store_excel_row(row, downloader, certificate_root, client=client)
 
     logger.info("Import Excel selesai.")
+
+
+def import_json_data(
+    json_path: Path,
+    sql_output: Optional[Path] = None,
+    jenis_pelatihan: Optional[str] = None,
+) -> None:
+    """Import training data from a structured JSON file."""
+
+    config = AppConfig.load()
+    loader = JsonLoader(fallback_jenis=jenis_pelatihan)
+    downloader = CertificateDownloader(config.storage.certificate_root)
+    certificate_root = config.storage.certificate_root
+
+    rows = loader.load(json_path)
+    if not rows:
+        logger.warning("Tidak ada data pelatihan ditemukan di %s", json_path)
+        return
+
+    logger.info("Memproses %s entri pelatihan dari JSON", len(rows))
+
+    if sql_output:
+        builder = SqlScriptBuilder(sql_output)
+        for row in rows:
+            _store_excel_row(row, downloader, certificate_root, sql_builder=builder)
+        output_path = builder.save()
+        logger.info("Skrip SQL tersimpan di %s", output_path)
+    else:
+        with database_client(config.database) as client:
+            for row in rows:
+                _store_excel_row(row, downloader, certificate_root, client=client)
+
+    logger.info("Import JSON selesai.")
+
+
+@app.command("import-excel")
+def import_excel(
+    excel_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="Path file Excel sumber."),
+    sheet_name: Optional[str] = typer.Option(None, help="Nama sheet yang akan dibaca."),
+    sql_output: Optional[Path] = typer.Option(
+        None,
+        help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
+    ),
+) -> None:
+    """Impor data pelatihan dari berkas Excel."""
+
+    import_excel_data(excel_path, sheet_name=sheet_name, sql_output=sql_output)
+
+
+@app.command("import-json")
+def import_json(
+    json_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="Path file JSON sumber."),
+    jenis_pelatihan: Optional[str] = typer.Option(
+        None,
+        help="Nama jenis pelatihan default yang akan disematkan ke setiap entri (opsional).",
+    ),
+    sql_output: Optional[Path] = typer.Option(
+        None,
+        help="Jika diset, data tidak langsung dimasukkan ke database melainkan ditulis ke file SQL ini.",
+    ),
+) -> None:
+    """Impor data pelatihan dari berkas JSON terstruktur."""
+
+    import_json_data(json_path, sql_output=sql_output, jenis_pelatihan=jenis_pelatihan)
 
 
 CATEGORY_LABELS = {
@@ -203,11 +264,18 @@ def import_simpeg(
     password: Optional[str] = typer.Option(None, help="Password SIMPEG. Default dari env SIMPEG_PASSWORD."),
     categories: Optional[List[str]] = typer.Option(
         None,
-        help="Daftar kategori yang diambil (kepemimpinan, fungsional, teknis).",
+        "--categories",
+        "-c",
+        help="Daftar kategori yang diambil (kepemimpinan, fungsional, teknis). Opsi ini dapat diulang.",
     ),
     sql_output: Optional[Path] = typer.Option(
         None,
         help="Jika diset, hasil scraping ditulis ke file SQL alih-alih langsung ke database.",
+    ),
+    extra_categories: List[str] = typer.Argument(
+        None,
+        metavar="[KATEGORI]...",
+        help="Kategori tambahan yang boleh ditulis tanpa opsi --categories.",
     ),
 ) -> None:
     """Scrape data SIMPEG dan simpan ke database atau file SQL."""
@@ -219,7 +287,16 @@ def import_simpeg(
     if not username or not password:
         raise typer.BadParameter("Username dan password SIMPEG wajib diisi.")
 
-    categories = categories or ["kepemimpinan"]
+    selected_categories: List[str] = []
+    if categories:
+        selected_categories.extend(categories)
+    if extra_categories:
+        selected_categories.extend(extra_categories)
+
+    if not selected_categories:
+        selected_categories = ["kepemimpinan"]
+
+    categories = selected_categories
 
     with SimpegScraper(
         config.simpeg.base_url,
@@ -257,6 +334,15 @@ def import_simpeg(
                     )
 
     logger.info("Import SIMPEG selesai.")
+
+
+@app.command("gui")
+def open_gui() -> None:
+    """Buka antarmuka grafis untuk impor data."""
+
+    from .gui import launch_gui
+
+    launch_gui()
 
 
 def run():  # pragma: no cover - CLI entry point

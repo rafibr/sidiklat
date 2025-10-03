@@ -1,0 +1,363 @@
+[
+  {
+    "nama": "Drs. Rahmat Taufik , M.Si",
+    "nip": "197006151990031008",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Inspektur",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Agus Fahlupi , S.IP, M.Si",
+    "nip": "197108301991011002",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Sekretaris",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Masrul , SP",
+    "nip": "196911161997031004",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Inspektur Pembantu Pencegahan Dan Investigasi",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Diah Mayasari , SKM",
+    "nip": "198006202006042019",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Inspektur Pembantu Wilayah I",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Fikri Nazwar Ihsany , SH",
+    "nip": "198505062010011006",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Inspektur Pembantu Wilayah III",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Ekya Rutmala Santi , SE",
+    "nip": "198103302006042016",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Kepala Sub Bagian Perencanaan Dan Keuangan",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Madda Elliyana , S.Psi.,M.Psi.",
+    "nip": "198403092010012007",
+    "jenis_jabatan": "Struktural",
+    "jabatan": "Kepala Sub Bagian Umum Dan Kepegawaian",
+    "total_jp": 24,
+    "pelatihan": [
+      {
+        "nama": "Peningkatan Kapasitas: Manajemen Implementasi Service Excellence ASN dalam Mengelola Pelayanan Publik yang Profesional",
+        "jp": null,
+        "link_sertifikat": "https://drive.google.com/file/d/1k3f3NXGfWNv-nbIvKaig8ZdfR4CFUTri/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Rini Febrina , S.IP",
+    "nip": "197302211997032003",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Andi Noor Rakhman , S.Sos",
+    "nip": "196906201990101001",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Indah Wahyuni Damayanti , AP.Msi",
+    "nip": "197606031994122001",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Sri Riwayati , S.Sos, MM",
+    "nip": "197304011995032002",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Ana Elfah , S.Pi",
+    "nip": "197204161998032006",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Faulita , SE.MAP",
+    "nip": "197110101994032004",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Budi Santoso , S.Sos",
+    "nip": "197803062006041010",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Nita Yuliawati Achmad , ST",
+    "nip": "197607042005012012",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Madya",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Tia Melyana Rotua Simanjuntak , SKM",
+    "nip": "198202282006042012",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Madya",
+    "total_jp": 60,
+    "pelatihan": [
+      {
+        "nama": "Reviu atas RPJMD dan Renstra",
+        "jp": 60,
+        "link_sertifikat": "https://drive.google.com/file/d/1I2bStBOf54cDh_AkuD6Jzt_5vS-cu7X8/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Isniati Fajriani , SH",
+    "nip": "196912181999032003",
+    "jenis_jabatan": "Fungsional Umum",
+    "jabatan": "Pengelola Gaji",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Rosita , SH",
+    "nip": "197208142000032003",
+    "jenis_jabatan": "Fungsional Umum",
+    "jabatan": "Pengelola Kepegawaian",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Noormilawati , SP",
+    "nip": "197506052005012011",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Iwan Setiawan , S.AP",
+    "nip": "197712241998031004",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Kepegawaian Muda",
+    "total_jp": 24,
+    "pelatihan": [
+      {
+        "nama": "Agen Perubahan Melalui Sertifikasi Penyuluh Anti Korupsi",
+        "jp": null,
+        "link_sertifikat": "https://drive.google.com/file/d/1NbTlS2KIVrsSD2-uY95aA_QS67FGUGM3/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Ari Priyanto , ST",
+    "nip": "197304012006041025",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Magna Muzakir , ST",
+    "nip": "197509272006041009",
+    "jenis_jabatan": "Fungsional Umum",
+    "jabatan": "Analis Tindak Lanjut Laporan Hasil Pemeriksaan",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Yuli Hamdani , ST",
+    "nip": "197503272006041011",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Mulyani , SE, MM",
+    "nip": "197908162006041012",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Amaliah Fitri , ST",
+    "nip": "198406022009032009",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Muda",
+    "total_jp": 50,
+    "pelatihan": [
+      {
+        "nama": "Reviu Rencana Kerja dan Anggaran Pemerintah Daerah di lingkungan APIP",
+        "jp": 50,
+        "link_sertifikat": "https://drive.google.com/file/d/1PV42v5DW9SANdA2_aRVmaK6uxyjU1wnN/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Rusnani , S.ST.,M.Kes",
+    "nip": "197709172006042004",
+    "jenis_jabatan": "Fungsional Umum",
+    "jabatan": "Analis Perencanaan, Evaluasi Dan Pelaporan",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Anton Septiadi , SE",
+    "nip": "198009182010011011",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Muda",
+    "total_jp": 50,
+    "pelatihan": [
+      {
+        "nama": "Pelatihan Pemeriksaan Barang Milik Daerah Batch 2",
+        "jp": null,
+        "link_sertifikat": "https://drive.google.com/file/d/1K05FF3bNuFJl6VSYINRCCBUem84_gCs5/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Ni Kade Dwi Aryani , SE",
+    "nip": "198401222010012008",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Gusti Monalisa , S.Sos",
+    "nip": "197905182007012005",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Saidah Ulya , S.AP",
+    "nip": "196804191993032003",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Endang Pujiastuti , SP",
+    "nip": "196801192007012018",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Dewi Indaryani , S.Sos",
+    "nip": "197306212007012014",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Maria Ulfah , SE, M.Acc",
+    "nip": "198801052010012009",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Ahli Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Subhan Noor , S.Kom",
+    "nip": "198109162010011008",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Ahli Muda",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Muhammad Rasyid Ridha , SE",
+    "nip": "198303232010011021",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Ahli Pertama",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Teti Anggraini , S.I.P",
+    "nip": "197703162006042005",
+    "jenis_jabatan": "Fungsional Umum",
+    "jabatan": "Penata Layanan Operasional",
+    "total_jp": 0,
+    "pelatihan": []
+  },
+  {
+    "nama": "Isnaini Inten Prawesti , A.Md",
+    "nip": "198412032010012007",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "Auditor Pelaksana Lanjutan",
+    "total_jp": 50,
+    "pelatihan": [
+      {
+        "nama": "Reviu Rencana Kerja dan Anggaran Pemerintah Daerah di lingkungan APIP",
+        "jp": 50,
+        "link_sertifikat": "https://drive.google.com/file/d/1IzNxD1QkAJbb9h1026HREffmB7U_-y8M/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Dewi Febriliyanti , S.Ap",
+    "nip": "199202052022032006",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Pertama",
+    "total_jp": 60,
+    "pelatihan": [
+      {
+        "nama": "Reviu atas RPJMD dan Renstra",
+        "jp": 60,
+        "link_sertifikat": "https://drive.google.com/file/d/1w8Kh7hYQOfzhDKQQaRqOMMptJuuEsSHp/view",
+        "keterangan": null
+      }
+    ]
+  },
+  {
+    "nama": "Silawati , S.Ap",
+    "nip": "199610082022032009",
+    "jenis_jabatan": "Fungsional Tertentu",
+    "jabatan": "PPUPD Pengawas Pemerintah Pertama",
+    "total_jp": 0,
+    "pelatihan": []
+  }
+]

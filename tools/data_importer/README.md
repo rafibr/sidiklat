@@ -34,7 +34,9 @@ tools/data_importer/
    playwright install chromium
    ```
 
-3. Salin variabel koneksi database dan kredensial SIMPEG ke environment. Contoh menggunakan file `.env` pada root proyek Laravel. Variabel database hanya diperlukan jika Anda ingin langsung menulis ke database, bukan ketika menghasilkan berkas `.sql`:
+3. (Opsional) Untuk menjalankan antarmuka grafis berbasis Tkinter pastikan sistem operasi memiliki pustaka GUI yang diperlukan (mis. `tk`/`python3-tk` di Linux).
+
+4. Salin variabel koneksi database dan kredensial SIMPEG ke environment. Contoh menggunakan file `.env` pada root proyek Laravel. Variabel database hanya diperlukan jika Anda ingin langsung menulis ke database, bukan ketika menghasilkan berkas `.sql`:
 
    ```dotenv
    SIDIKLAT_DB_HOST=127.0.0.1
@@ -59,6 +61,12 @@ Jalankan CLI dengan perintah berikut dari root repository:
 
 ```bash
 python -m data_importer --help
+```
+
+Jika ingin melihat daftar perintah dari antarmuka grafis, jalankan:
+
+```bash
+python -m data_importer gui
 ```
 
 ### Impor dari Excel
@@ -91,10 +99,39 @@ Untuk menghasilkan skrip SQL tanpa menyentuh database:
 python -m data_importer import-excel data/daftar_pelatihan.xlsx --sheet "Sheet1" --sql-output output/pelatihan_excel.sql
 ```
 
+### Impor dari JSON
+
+Jika data telah dibersihkan ke format JSON terstruktur (seperti `tools/data_importer/data/diklat_2025.json`), gunakan perintah berik
+ut untuk menuliskannya sebagai skrip SQL atau langsung ke database:
+
+```bash
+python -m data_importer import-json tools/data_importer/data/diklat_2025.json \
+  --jenis-pelatihan "Diklat 2025" --sql-output tools/data_importer/data/diklat_2025.sql
+```
+
+Setiap entri akan menggunakan informasi `nama`, `nip`, `jabatan`, dan daftar `pelatihan` pada berkas JSON. Sertifikat akan diund
+uh otomatis ketika URL tersedia sehingga kolom `sertifikat_path` pada SQL terisi sesuai struktur penyimpanan aplikasi.
+
+### Antarmuka Grafis (GUI)
+
+Gunakan perintah berikut untuk membuka antarmuka grafis sederhana yang memudahkan pemilihan berkas Excel, nama sheet, dan tujuan keluaran SQL:
+
+```bash
+python -m data_importer gui
+```
+
+Melalui GUI, proses impor dijalankan di thread terpisah sehingga jendela tetap responsif. Status keberhasilan atau kegagalan akan ditampilkan melalui dialog.
+
 ### Impor dari SIMPEG
 
 ```bash
 python -m data_importer import-simpeg --categories kepemimpinan fungsional teknis
+```
+
+Anda juga bisa memisahkan tiap kategori ke opsi tersendiri atau menuliskannya sebagai argumen biasa:
+
+```bash
+python -m data_importer import-simpeg --categories kepemimpinan --categories fungsional teknis
 ```
 
 Tambahkan `--sql-output` agar seluruh hasil scraping disusun sebagai pernyataan SQL:
@@ -111,6 +148,9 @@ Perintah di atas akan:
 4. Men-scrape tabel diklat kepemimpinan, fungsional, dan teknis.
 5. Mengunduh berkas sertifikat dan menyimpannya di `storage/app/public/sertifikat`.
 6. Menyimpan/menyinkronkan data ke tabel `pegawais`, `jenis_pelatihans`, dan `pelatihans`.
+
+Contoh dataset hasil konversi 2025 tersedia pada `tools/data_importer/data/diklat_2025.json` beserta skrip SQL siap pakai di `t
+ools/data_importer/data/diklat_2025.sql`.
 
 ## Catatan Teknis
 

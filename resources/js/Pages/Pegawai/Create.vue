@@ -1,222 +1,129 @@
 <template>
-	<AppLayout>
-		<div class="p-4">
-			<div class="mb-6">
-				<div class="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-					<Link :href="route('pegawai.index')" class="hover:text-blue-600">Data Pegawai</Link>
-					<i class="fas fa-chevron-right text-xs"></i>
-					<span>Tambah Pegawai</span>
-				</div>
-				<h1 class="text-2xl font-bold text-gray-900">Tambah Pegawai Baru</h1>
-			</div>
+    <AppLayout>
+        <div class="space-y-6 pb-12">
+            <nav class="text-xs text-slate-500">
+                <Link :href="route('pegawai.index')" class="hover:text-indigo-600">Data pegawai</Link>
+                <span class="mx-2">/</span>
+                <span class="text-slate-700">Tambah pegawai</span>
+            </nav>
 
-			<div class="bg-white rounded-lg shadow-sm">
-				<form @submit.prevent="submit" class="p-6">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-						<!-- Left Column -->
-						<div class="space-y-4">
-							<h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Informasi Dasar
-							</h3>
+            <section class="rounded-2xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
+                <div class="mb-6 flex flex-col gap-2">
+                    <h1 class="text-xl font-semibold text-slate-900">Tambah pegawai baru</h1>
+                    <p class="text-sm text-slate-500">Lengkapi data pegawai untuk memulai pemantauan progres pelatihan.</p>
+                </div>
 
-							<div>
-								<label for="nama_lengkap" class="block text-sm font-medium text-gray-700 mb-2">
-									Nama Lengkap <span class="text-red-500">*</span>
-								</label>
-								<input type="text" id="nama_lengkap" v-model="form.nama_lengkap" required
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.nama_lengkap }">
-								<p v-if="errors.nama_lengkap" class="text-red-500 text-xs mt-1">{{ errors.nama_lengkap
-									}}
-								</p>
-							</div>
+                <form @submit.prevent="submit" class="space-y-8">
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <div class="space-y-5">
+                            <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Informasi dasar</h2>
 
-							<div>
-								<label for="nip" class="block text-sm font-medium text-gray-700 mb-2">
-									NIP
-								</label>
-								<input type="text" id="nip" v-model="form.nip"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.nip }">
-								<p v-if="errors.nip" class="text-red-500 text-xs mt-1">{{ errors.nip }}</p>
-								<p class="text-gray-500 text-xs mt-1">Opsional. Kosongkan jika belum ada.</p>
-							</div>
+                            <FormField label="Nama lengkap" :error="errors.nama_lengkap" required>
+                                <input id="nama_lengkap" v-model="form.nama_lengkap" type="text" autocomplete="name" required
+                                    class="form-input" placeholder="Masukkan nama sesuai identitas" />
+                            </FormField>
 
-							<div>
-								<label for="pangkat_golongan" class="block text-sm font-medium text-gray-700 mb-2">
-									Pangkat/Golongan
-								</label>
-								<input type="text" id="pangkat_golongan" v-model="form.pangkat_golongan"
-									placeholder="Contoh: Penata, III/c"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.pangkat_golongan }">
-								<p v-if="errors.pangkat_golongan" class="text-red-500 text-xs mt-1">{{
-									errors.pangkat_golongan }}</p>
-							</div>
+                            <FormField label="NIP" :error="errors.nip">
+                                <input id="nip" v-model="form.nip" type="text" class="form-input" placeholder="Opsional" />
+                                <p class="mt-1 text-xs text-slate-400">Kosongkan jika belum tersedia.</p>
+                            </FormField>
 
-							<div>
-								<label for="jabatan" class="block text-sm font-medium text-gray-700 mb-2">
-									Jabatan
-								</label>
-								<input type="text" id="jabatan" v-model="form.jabatan"
-									placeholder="Contoh: Staff Keuangan"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.jabatan }">
-								<p v-if="errors.jabatan" class="text-red-500 text-xs mt-1">{{ errors.jabatan }}</p>
-							</div>
+                            <FormField label="Pangkat / golongan" :error="errors.pangkat_golongan">
+                                <input id="pangkat_golongan" v-model="form.pangkat_golongan" type="text" class="form-input"
+                                    placeholder="Contoh: Penata, III/c" />
+                            </FormField>
 
-							<div>
-								<label for="unit_kerja" class="block text-sm font-medium text-gray-700 mb-2">
-									Unit Kerja
-								</label>
-								<input type="text" id="unit_kerja" v-model="form.unit_kerja"
-									placeholder="Contoh: Bagian Keuangan"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.unit_kerja }">
-								<p v-if="errors.unit_kerja" class="text-red-500 text-xs mt-1">{{ errors.unit_kerja }}
-								</p>
-							</div>
+                            <FormField label="Jabatan" :error="errors.jabatan">
+                                <input id="jabatan" v-model="form.jabatan" type="text" class="form-input" placeholder="Contoh: Staf Keuangan" />
+                            </FormField>
 
-							<div>
-								<label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-									Status <span class="text-red-500">*</span>
-								</label>
-								<select id="status" v-model="form.status" required
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.status }">
-									<option value="">Pilih Status</option>
-									<option value="aktif">Aktif</option>
-									<option value="tidak_aktif">Tidak Aktif</option>
-									<option value="pensiun">Pensiun</option>
-								</select>
-								<p v-if="errors.status" class="text-red-500 text-xs mt-1">{{ errors.status }}</p>
-							</div>
-						</div>
+                            <FormField label="Unit kerja" :error="errors.unit_kerja">
+                                <input id="unit_kerja" v-model="form.unit_kerja" type="text" class="form-input" placeholder="Contoh: Bagian Umum" />
+                            </FormField>
 
-						<!-- Right Column -->
-						<div class="space-y-4">
-							<h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Informasi
-								Tambahan</h3>
+                            <FormField label="Status" :error="errors.status" required>
+                                <select id="status" v-model="form.status" class="form-input" required>
+                                    <option value="aktif">Aktif</option>
+                                    <option value="tidak_aktif">Tidak aktif</option>
+                                    <option value="pensiun">Pensiun</option>
+                                </select>
+                            </FormField>
+                        </div>
 
-							<div>
-								<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-									Email
-								</label>
-								<input type="email" id="email" v-model="form.email" placeholder="nama@example.com"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.email }">
-								<p v-if="errors.email" class="text-red-500 text-xs mt-1">{{ errors.email }}</p>
-							</div>
+                        <div class="space-y-5">
+                            <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Kontak & target</h2>
 
-							<div>
-								<label for="telepon" class="block text-sm font-medium text-gray-700 mb-2">
-									Telepon
-								</label>
-								<input type="tel" id="telepon" v-model="form.telepon" placeholder="08xx-xxxx-xxxx"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.telepon }">
-								<p v-if="errors.telepon" class="text-red-500 text-xs mt-1">{{ errors.telepon }}</p>
-							</div>
+                            <FormField label="Email" :error="errors.email">
+                                <input id="email" v-model="form.email" type="email" autocomplete="email" class="form-input" placeholder="nama@instansi.go.id" />
+                            </FormField>
 
-							<div>
-								<label for="tanggal_pengangkatan" class="block text-sm font-medium text-gray-700 mb-2">
-									Tanggal Pengangkatan
-								</label>
-								<input type="date" id="tanggal_pengangkatan" v-model="form.tanggal_pengangkatan"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.tanggal_pengangkatan }">
-								<p v-if="errors.tanggal_pengangkatan" class="text-red-500 text-xs mt-1">{{
-									errors.tanggal_pengangkatan }}</p>
-							</div>
+                            <FormField label="Nomor telepon" :error="errors.telepon">
+                                <input id="telepon" v-model="form.telepon" type="tel" class="form-input" placeholder="08xx xxxx xxxx" />
+                            </FormField>
 
-							<div>
-								<label for="jp_target" class="block text-sm font-medium text-gray-700 mb-2">
-									Target JP Tahunan
-								</label>
-								<input type="number" id="jp_target" v-model.number="form.jp_target" min="0" max="1000"
-									:placeholder="`Default: ${jpDefault} JP`"
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.jp_target }">
-								<p v-if="errors.jp_target" class="text-red-500 text-xs mt-1">{{ errors.jp_target }}</p>
-								<p class="text-gray-500 text-xs mt-1">
-									Kosongkan untuk menggunakan nilai default ({{ jpDefault }} JP)
-								</p>
-							</div>
+                            <FormField label="Tanggal pengangkatan" :error="errors.tanggal_pengangkatan">
+                                <input id="tanggal_pengangkatan" v-model="form.tanggal_pengangkatan" type="date" class="form-input" />
+                            </FormField>
 
-							<div>
-								<label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
-									Keterangan
-								</label>
-								<textarea id="keterangan" v-model="form.keterangan" rows="3"
-									placeholder="Catatan atau keterangan tambahan..."
-									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-									:class="{ 'border-red-300': errors.keterangan }"></textarea>
-								<p v-if="errors.keterangan" class="text-red-500 text-xs mt-1">{{ errors.keterangan }}
-								</p>
-							</div>
-						</div>
-					</div>
+                            <FormField label="Target JP tahunan" :error="errors.jp_target">
+                                <input id="jp_target" v-model.number="form.jp_target" type="number" min="0" class="form-input"
+                                    :placeholder="`Default ${jpDefault} JP`" />
+                                <p class="mt-1 text-xs text-slate-400">Biarkan kosong untuk mengikuti target default instansi.</p>
+                            </FormField>
 
-					<!-- Form Actions -->
-					<div class="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-						<Link :href="route('pegawai.index')"
-							class="px-6 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-200">
-						Batal
-						</Link>
-						<button type="submit" :disabled="form.processing"
-							class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition duration-200 disabled:opacity-50">
-							<i v-if="form.processing" class="fas fa-spinner fa-spin mr-2"></i>
-							{{ form.processing ? 'Menyimpan...' : 'Simpan Pegawai' }}
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</AppLayout>
+                            <FormField label="Catatan tambahan" :error="errors.keterangan">
+                                <textarea id="keterangan" v-model="form.keterangan" rows="3" class="form-input"
+                                    placeholder="Catatan mengenai penugasan atau kebutuhan pelatihan"></textarea>
+                            </FormField>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+                        <Link :href="route('pegawai.index')"
+                            class="inline-flex items-center justify-center rounded-xl border border-slate-200/70 px-5 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-slate-400">Batal</Link>
+                        <button type="submit" :disabled="form.processing"
+                            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-70">
+                            <i v-if="form.processing" class="fas fa-spinner fa-spin mr-2"></i>
+                            <span>{{ form.processing ? 'Menyimpan...' : 'Simpan pegawai' }}</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import FormField from '@/Pages/Pegawai/Partials/FormField.vue';
 
 export default {
-	components: { AppLayout, Link },
-	props: {
-		jpDefault: {
-			type: Number,
-			default: 20
-		},
-		errors: {
-			type: Object,
-			default: () => ({})
-		}
-	},
-	setup() {
-		const form = useForm({
-			nama_lengkap: '',
-			nip: '',
-			pangkat_golongan: '',
-			jabatan: '',
-			unit_kerja: '',
-			status: 'aktif',
-			email: '',
-			telepon: '',
-			tanggal_pengangkatan: '',
-			jp_target: null,
-			keterangan: ''
-		});
+    components: { AppLayout, Link, FormField },
+    props: {
+        jpDefault: { type: Number, default: 20 },
+        errors: { type: Object, default: () => ({}) },
+    },
+    setup() {
+        const form = useForm({
+            nama_lengkap: '',
+            nip: '',
+            pangkat_golongan: '',
+            jabatan: '',
+            unit_kerja: '',
+            status: 'aktif',
+            email: '',
+            telepon: '',
+            tanggal_pengangkatan: '',
+            jp_target: null,
+            keterangan: '',
+        });
 
-		const submit = () => {
-			form.post(route('pegawai.store'), {
-				onSuccess: () => {
-					// Redirect handled by controller
-				}
-			});
-		};
+        const submit = () => {
+            form.post(route('pegawai.store'));
+        };
 
-		return {
-			form,
-			submit
-		};
-	}
+        return { form, submit };
+    },
 };
 </script>

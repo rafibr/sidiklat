@@ -3,7 +3,7 @@
         <div class="relative p-3 sm:p-4 md:p-6 animate-slide-up">
             <!-- Loading overlay -->
             <div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
-                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
             <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 animate-fade-scale">
                 Perbandingan Data Pelatihan
@@ -15,9 +15,9 @@
 
                 <div class="flex flex-wrap gap-2 mb-3">
                     <span v-for="year in selectedYears" :key="year"
-                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">
                         {{ year }}
-                        <button @click="removeYear(year)" class="ml-2 text-blue-600 hover:text-blue-800">
+                        <button @click="removeYear(year)" class="ml-2 text-indigo-600 hover:text-indigo-700">
                             <i class="fas fa-times text-xs"></i>
                         </button>
                     </span>
@@ -247,10 +247,10 @@ export default {
             return styleObj;
         },
         getDiffColor(diff) {
-            return diff >= 0 ? 'text-green-600' : 'text-red-600';
+            return diff >= 0 ? 'text-emerald-600' : 'text-rose-600';
         },
         getChangeColor(change) {
-            return change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            return change >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
         },
         async initCharts() {
             // Import Chart.js dynamically to avoid SSR issues

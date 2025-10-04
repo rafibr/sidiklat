@@ -7,7 +7,7 @@
         <div class="flex space-x-2">
           <Link
             :href="route('pelatihan.edit', pelatihan.id)"
-            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition duration-200"
+            class="bg-amber-600 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition duration-200"
           >
             <i class="fas fa-edit mr-2"></i>Edit
           </Link>
@@ -96,7 +96,7 @@
           </div>
           <div>
             <label class="text-sm font-medium text-gray-600">Jam Pelajaran (JP)</label>
-            <p class="text-2xl font-bold text-blue-600">{{ pelatihan.jp }}</p>
+            <p class="text-2xl font-bold text-indigo-600">{{ pelatihan.jp }}</p>
           </div>
         </div>
       </div>
@@ -112,14 +112,14 @@
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Sertifikat</h3>
         <div class="flex items-center space-x-4">
           <div class="flex-shrink-0">
-            <i class="fas fa-certificate text-3xl text-yellow-500"></i>
+            <i class="fas fa-certificate text-3xl text-amber-600"></i>
           </div>
           <div class="flex-1">
             <p class="text-gray-700 mb-2">Sertifikat pelatihan tersedia</p>
             <a
               :href="`/storage/${pelatihan.sertifikat_path}`"
               target="_blank"
-              class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+              class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200"
             >
               <i class="fas fa-download mr-2"></i>
               Lihat/Download Sertifikat
@@ -139,13 +139,13 @@
         <div class="space-x-2">
           <Link
             :href="route('pelatihan.edit', pelatihan.id)"
-            class="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200"
+            class="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-600 transition duration-200"
           >
             <i class="fas fa-edit mr-2"></i>Edit Pelatihan
           </Link>
           <button
             @click="deleteItem"
-            class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+            class="px-6 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-600 transition duration-200"
           >
             <i class="fas fa-trash mr-2"></i>Hapus
           </button>
@@ -171,17 +171,17 @@ export default {
   methods: {
     getJenisColor(jenis) {
       const colorMap = {
-        'Diklat Struktural': 'bg-blue-100 text-blue-800',
-        'Diklat Fungsional': 'bg-green-100 text-green-800',
-        'Diklat Teknis': 'bg-purple-100 text-purple-800',
-        'Workshop': 'bg-orange-100 text-orange-800'
+        'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+        'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
+        'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+        'Workshop': 'bg-amber-100 text-amber-700'
       };
       return colorMap[jenis] || 'bg-gray-100 text-gray-800';
     },
     getStatusColor(status) {
       const colorMap = {
-        'selesai': 'bg-green-100 text-green-800',
-        'sedang_berjalan': 'bg-yellow-100 text-yellow-800',
+        'selesai': 'bg-emerald-100 text-emerald-700',
+        'sedang_berjalan': 'bg-amber-100 text-amber-700',
         'akan_datang': 'bg-gray-100 text-gray-800'
       };
       return colorMap[status] || 'bg-gray-100 text-gray-800';

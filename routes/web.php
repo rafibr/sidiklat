@@ -1,40 +1,53 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\PegawaiController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\Response;
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+});
 
-// Pegawai routes
-Route::resource('pegawai', PegawaiController::class);
-Route::post('/pegawai/update-jp-default', [PegawaiController::class, 'updateJpDefault'])->name('pegawai.update-jp-default');
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-Route::get('/pelatihan/comparison', [PelatihanController::class, 'comparison'])->name('pelatihan.comparison');
-Route::get('/pelatihan/export', [PelatihanController::class, 'export'])->name('pelatihan.export');
-Route::resource('pelatihan', PelatihanController::class);
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
 
-// API route for mobile stats
-Route::get('/api/mobile-stats', [DashboardController::class, 'mobileStats'])->name('api.mobile-stats');
+    // Pegawai routes
+    Route::resource('pegawai', PegawaiController::class);
+    Route::post('/pegawai/update-jp-default', [PegawaiController::class, 'updateJpDefault'])->name('pegawai.update-jp-default');
 
-// Route untuk mengakses file sertifikat
-Route::get('/storage/sertifikat/{filename}', function ($filename) {
-	$path = 'sertifikat/' . $filename;
+    Route::get('/pelatihan/comparison', [PelatihanController::class, 'comparison'])->name('pelatihan.comparison');
+    Route::get('/pelatihan/export', [PelatihanController::class, 'export'])->name('pelatihan.export');
+    Route::resource('pelatihan', PelatihanController::class);
 
-	if (!Storage::disk('public')->exists($path)) {
-		abort(404);
-	}
+    // API route for mobile stats
+    Route::get('/api/mobile-stats', [DashboardController::class, 'mobileStats'])->name('api.mobile-stats');
 
-	$file = Storage::disk('public')->get($path);
-	$fullPath = Storage::disk('public')->path($path);
-	$type = mime_content_type($fullPath) ?: 'application/octet-stream';
+    // Route untuk mengakses file sertifikat
+    Route::get('/storage/sertifikat/{filename}', function ($filename) {
+        $path = 'sertifikat/' . $filename;
 
-	return response($file, 200)
-		->header('Content-Type', $type)
-		->header('Content-Disposition', 'inline; filename="' . $filename . '"');
-})->name('sertifikat.show');
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        $file = Storage::disk('public')->get($path);
+        $fullPath = Storage::disk('public')->path($path);
+        $type = mime_content_type($fullPath) ?: 'application/octet-stream';
+
+        return response($file, 200)
+            ->header('Content-Type', $type)
+            ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+    })->name('sertifikat.show');
+});
+
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+});

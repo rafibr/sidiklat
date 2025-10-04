@@ -3,7 +3,7 @@
 		<div class="relative p-3 sm:p-4 md:p-6 animate-slide-up">
 			<!-- Loading overlay -->
 			<div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
-				<div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+				<div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
 			</div>
 			<div class="mb-4 md:mb-6 animate-fade-scale">
 				<h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
@@ -17,7 +17,7 @@
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-2">Filter Tahun</label>
 							<select v-model="filters.year"
-								class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+								class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
 								<option v-for="year in availableYears" :key="year" :value="year">
 									{{ year }}
 								</option>
@@ -27,13 +27,13 @@
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-2">Cari Pegawai</label>
 							<input type="text" v-model="filters.search" placeholder="Nama pegawai..."
-								class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
+								class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
 						</div>
 
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-2">Unit Kerja</label>
 							<select v-model="filters.unit_kerja"
-								class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+								class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
 								<option value="">Semua Unit</option>
 								<option v-for="unit in unitKerjas" :key="unit" :value="unit">
 									{{ unit }}
@@ -43,7 +43,7 @@
 
 						<div class="flex items-end gap-2">
 							<button type="submit"
-								class="flex-1 sm:flex-none bg-blue-600 text-white px-3 sm:px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition-colors">
+								class="flex-1 sm:flex-none bg-indigo-600 text-white px-3 sm:px-4 py-2 text-sm rounded-md hover:bg-indigo-700 transition-colors">
 								<i class="fas fa-search mr-1 sm:mr-2"></i>
 								<span class="hidden sm:inline">Filter</span>
 								<span class="sm:hidden">Cari</span>
@@ -113,7 +113,7 @@
 				<div class="flex justify-center space-x-2">
 					<button v-for="link in pegawais.links" :key="link.label" @click="changePage(link.url)"
 						:disabled="!link.url" class="px-3 py-2 text-sm border rounded"
-						:class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-600'"
+						:class="link.active ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'"
 						v-html="link.label"></button>
 				</div>
 			</div>
@@ -166,16 +166,16 @@ export default {
 		},
 		getProgressColor(pegawai) {
 			const progress = this.calculateProgress(pegawai);
-			if (progress >= 80) return 'bg-green-500';
-			if (progress >= 50) return 'bg-yellow-500';
-			return 'bg-red-500';
+			if (progress >= 80) return 'bg-emerald-600';
+			if (progress >= 50) return 'bg-amber-600';
+			return 'bg-rose-600';
 		},
 		getJenisColor(jenis) {
 			const colorMap = {
-				'Diklat Struktural': 'bg-blue-100 text-blue-800',
-				'Diklat Fungsional': 'bg-green-100 text-green-800',
-				'Diklat Teknis': 'bg-purple-100 text-purple-800',
-				'Workshop': 'bg-orange-100 text-orange-800'
+				'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+				'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
+				'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+				'Workshop': 'bg-amber-100 text-amber-700'
 			};
 			return colorMap[jenis] || 'bg-gray-100 text-gray-800';
 		},

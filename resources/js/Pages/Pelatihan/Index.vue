@@ -7,7 +7,7 @@
 				<div class="flex items-center gap-3">
 
 					<button @click="startAddNew" v-if="!isAddingNew"
-						class="w-full sm:w-auto bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-all hover:shadow-lg hover:scale-105 text-center text-sm">
+						class="w-full sm:w-auto bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all hover:shadow-lg hover:scale-105 text-center text-sm">
 						<i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Pelatihan
 					</button>
 				</div>
@@ -20,7 +20,7 @@
 					<div>
 						<label class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
 						<input type="text" v-model="filters.search" placeholder="Nama pelatihan atau pegawai..."
-							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
+							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
 					</div>
 
 					<div>
@@ -33,7 +33,7 @@
 					<div>
 						<label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
 						<select v-model="filters.year" @change="submitFilter"
-							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
 							<option value="">Semua Tahun</option>
 							<option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
 						</select>
@@ -52,7 +52,7 @@
 			</form>
 
 			<div v-if="$page.props.flash && $page.props.flash.success"
-				class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+				class="bg-emerald-100 border border-emerald-400 text-emerald-700 px-4 py-3 rounded mb-4">
 				{{ $page.props.flash.success }}
 			</div>
 
@@ -71,7 +71,7 @@
 							<div class="flex items-center gap-2">
 								<label class="text-sm text-gray-600 hidden sm:inline">Item per halaman:</label>
 								<select v-model.number="filters.per_page" @change="submitFilter"
-									class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+									class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white">
 									<option :value="10">10</option>
 									<option :value="25">25</option>
 									<option :value="50">50</option>
@@ -83,7 +83,7 @@
 							<div class="flex items-center gap-2">
 								<div v-if="editingCount > 1" class="flex items-center gap-2 mr-2">
 									<button @click.prevent="saveAll"
-										class="text-xs bg-green-600 text-white hover:bg-green-700 px-3 py-1 rounded">Save
+										class="text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1 rounded">Save
 										All</button>
 									<button @click.prevent="cancelAll"
 										class="text-xs bg-gray-300 text-gray-800 hover:bg-gray-400 px-3 py-1 rounded">Cancel
@@ -167,13 +167,13 @@
 										class="text-xs border rounded px-1 py-1 w-full" placeholder="JP" />
 								</td>
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
-									<div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
+									<div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-indigo-400"
 										@dragover.prevent @drop.prevent="handleFileDrop($event, 'new')"
 										@click="$refs.newFileInput.click()">
 										<span v-if="!newRow.sertifikat" class="text-xs text-gray-500">
 											<i class="fas fa-cloud-upload"></i> Drop/Click
 										</span>
-										<span v-else class="text-xs text-green-600">
+										<span v-else class="text-xs text-emerald-600">
 											<i class="fas fa-file-pdf"></i> {{ newRow.sertifikat.name }}
 										</span>
 										<input ref="newFileInput" type="file" @change="handleFileSelect($event, 'new')"
@@ -182,11 +182,11 @@
 								</td>
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
 									<div class="action-buttons">
-										<button @click="saveNew" class="text-green-600 hover:text-green-800 p-1"
+										<button @click="saveNew" class="text-emerald-600 hover:text-emerald-700 p-1"
 											title="Simpan">
 											<i class="fas fa-save"></i>
 										</button>
-										<button @click="cancelAddNew" class="text-red-600 hover:text-red-800 p-1"
+										<button @click="cancelAddNew" class="text-rose-600 hover:text-rose-700 p-1"
 											title="Batal">
 											<i class="fas fa-times"></i>
 										</button>
@@ -289,7 +289,7 @@
 										<div v-if="pelatihan.sertifikat_path" class="flex items-center gap-1">
 											<a :href="`/storage/${pelatihan.sertifikat_path}`" target="_blank"
 												rel="noopener"
-												class="file-link inline-flex items-center gap-2 text-blue-600 hover:text-blue-800">
+												class="file-link inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700">
 												<i class="fas fa-file-pdf"></i>
 												<span class="file-name text-xs truncate max-w-20"
 													:title="getFileName(pelatihan.sertifikat_path)">
@@ -300,12 +300,12 @@
 										<span v-else class="text-gray-400">Tidak ada</span>
 									</div>
 									<div v-else
-										class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
+										class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-indigo-400"
 										@dragover.prevent @drop.prevent="handleFileDrop($event, pelatihan.id)"
 										@click="$refs[`fileInput${pelatihan.id}`][0].click()">
 										<div v-if="!editingFiles[pelatihan.id]" class="text-xs text-center">
 											<div v-if="pelatihan.sertifikat_path"
-												class="text-green-600 mb-1 truncate max-w-28">
+												class="text-emerald-600 mb-1 truncate max-w-28">
 												<i class="fas fa-file-pdf mr-1"></i>
 												<span class="text-sm">{{ getFileName(pelatihan.sertifikat_path)
 												}}</span>
@@ -316,7 +316,7 @@
 													'ganti' : 'upload' }}</span>
 											</div>
 										</div>
-										<span v-else class="text-xs text-green-600">
+										<span v-else class="text-xs text-emerald-600">
 											<i class="fas fa-file-pdf"></i> {{ editingFiles[pelatihan.id].name }}
 										</span>
 										<input :ref="`fileInput${pelatihan.id}`" type="file"
@@ -329,21 +329,21 @@
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
 									<div v-if="!isEditing(pelatihan)" class="action-buttons">
 										<button @click="startEdit(pelatihan)"
-											class="text-yellow-600 hover:text-yellow-800 p-1" title="Edit">
+											class="text-amber-600 hover:text-amber-700 p-1" title="Edit">
 											<i class="fas fa-edit"></i>
 										</button>
 										<button @click="deleteItem(pelatihan.id)"
-											class="text-red-600 hover:text-red-800 p-1" title="Hapus">
+											class="text-rose-600 hover:text-rose-700 p-1" title="Hapus">
 											<i class="fas fa-trash"></i>
 										</button>
 									</div>
 									<div v-else class="action-buttons">
 										<button @click="saveEdit(pelatihan)"
-											class="text-green-600 hover:text-green-800 p-1" title="Simpan">
+											class="text-emerald-600 hover:text-emerald-700 p-1" title="Simpan">
 											<i class="fas fa-save"></i>
 										</button>
 										<button @click="cancelEdit(pelatihan)"
-											class="text-red-600 hover:text-red-800 p-1" title="Batal">
+											class="text-rose-600 hover:text-rose-700 p-1" title="Batal">
 											<i class="fas fa-times"></i>
 										</button>
 									</div>
@@ -359,7 +359,7 @@
 				<div class="flex justify-center space-x-2">
 					<button v-for="link in pelatihans.links" :key="link.label" @click="changePage(link.url)"
 						:disabled="!link.url" class="px-3 py-2 text-sm border rounded"
-						:class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-600'"
+						:class="link.active ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'"
 						v-html="link.label"></button>
 				</div>
 			</div>
@@ -470,13 +470,13 @@ export default {
 
 		getJenisColor(jenis) {
 			const colorMap = {
-				'Diklat Struktural': 'bg-blue-100 text-blue-800',
-				'Diklat Fungsional': 'bg-green-100 text-green-800',
-				'Diklat Teknis': 'bg-purple-100 text-purple-800',
-				'Workshop': 'bg-orange-100 text-orange-800',
-				'Pelatihan Jarak Jauh': 'bg-indigo-100 text-indigo-800',
-				'E-Learning': 'bg-teal-100 text-teal-800',
-				'Seminar': 'bg-red-100 text-red-800'
+				'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+				'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
+				'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+				'Workshop': 'bg-amber-100 text-amber-700',
+				'Pelatihan Jarak Jauh': 'bg-indigo-100 text-indigo-700',
+				'E-Learning': 'bg-emerald-100 text-emerald-700',
+				'Seminar': 'bg-rose-100 text-rose-700'
 			};
 			return colorMap[jenis] || 'bg-gray-100 text-gray-800';
 		},

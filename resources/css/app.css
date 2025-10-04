@@ -196,8 +196,12 @@
 button:focus,
 .btn:focus,
 a:focus {
-	outline: 2px solid #3B82F6;
-	outline-offset: 2px;
+        outline: 2px solid #3B82F6;
+        outline-offset: 2px;
+}
+
+.form-input {
+        @apply w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30;
 }
 
 /* High contrast mode support */

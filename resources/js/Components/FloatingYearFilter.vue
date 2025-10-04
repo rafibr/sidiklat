@@ -3,22 +3,22 @@
         <div v-if="visible" class="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 sm:bottom-6">
             <div class="relative" @mouseenter="expand" @mouseleave="collapse">
                 <button type="button"
-                    class="flex items-center gap-2 rounded-full bg-slate-900/90 px-4 py-2 text-sm font-semibold text-slate-100 shadow-lg transition-all duration-200 hover:bg-slate-900"
+                    class="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-2xl transition-all duration-200 hover:shadow-[0_12px_30px_rgba(14,116,144,0.35)]"
                     @click="toggle"
                 >
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800/80 text-slate-100">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white">
                         <i class="fas fa-calendar"></i>
                     </span>
                     <span>{{ selectedYear }}</span>
                     <i class="fas" :class="expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                 </button>
-                <div v-if="expanded" class="absolute bottom-full right-0 z-50 mb-3 w-60 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl">
-                    <div class="border-b border-slate-100 bg-slate-50/70 px-4 py-3">
-                        <p class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Pilih Tahun Laporan</p>
+                <div v-if="expanded" class="absolute bottom-full right-0 z-50 mb-3 w-60 overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-2xl">
+                    <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 px-4 py-3 text-white">
+                        <p class="text-xs font-semibold tracking-wide uppercase">Pilih Tahun Laporan</p>
                     </div>
                     <div class="px-4 py-3">
                         <select :value="selectedYear" @change="onYearChange"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                            class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
                             <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
                         </select>
                         <p class="mt-2 text-xs text-slate-400">Sesuaikan ringkasan performa dengan tahun yang Anda perlukan.</p>

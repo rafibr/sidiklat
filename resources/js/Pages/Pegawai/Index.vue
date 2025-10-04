@@ -1,20 +1,21 @@
 <template>
     <AppLayout>
         <div class="space-y-6 pb-12">
-            <section class="rounded-2xl border border-slate-200/70 bg-white px-5 py-6 shadow-sm">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <section class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
+                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]"></div>
+                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="text-xl font-semibold text-slate-900">Data Pegawai</h1>
-                        <p class="text-sm text-slate-500">Kelola informasi pegawai dan target JP tahunan secara terpusat.</p>
+                        <h1 class="text-xl font-semibold">Data Pegawai</h1>
+                        <p class="text-sm text-white/80">Kelola informasi pegawai dan target JP tahunan secara terpusat.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
                         <button @click="showJpSettingsModal = true"
-                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-indigo-500 hover:text-indigo-600">
+                            class="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
                             <i class="fas fa-sliders-h"></i>
                             Pengaturan JP
                         </button>
                         <Link :href="route('pegawai.create')"
-                            class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-600">
+                            class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-slate-100">
                             <i class="fas fa-plus"></i>
                             Tambah pegawai
                         </Link>

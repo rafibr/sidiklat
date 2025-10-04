@@ -8,22 +8,22 @@
                 </div>
             </div>
 
-            <section ref="yearFilterCard" class="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 px-5 py-6 shadow-sm backdrop-blur">
-                <div class="pointer-events-none absolute inset-x-0 -top-32 h-40 bg-gradient-to-b from-indigo-100/60 via-transparent to-transparent"></div>
+            <section ref="yearFilterCard" class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
+                <div class="pointer-events-none absolute inset-x-0 -top-32 h-40 bg-gradient-to-b from-white/20 via-transparent to-transparent"></div>
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                     <div class="space-y-2">
-                        <h1 class="text-2xl font-semibold text-slate-900">Dashboard Kinerja Diklat</h1>
-                        <p class="text-sm text-slate-500 max-w-xl">Pemantauan real-time terhadap pencapaian jam pelatihan pegawai dan efektivitas program belajar sepanjang tahun {{ selectedYear }}.</p>
+                        <h1 class="text-2xl font-semibold">Dashboard Kinerja Diklat</h1>
+                        <p class="max-w-xl text-sm text-white/80">Pemantauan real-time terhadap pencapaian jam pelatihan pegawai dan efektivitas program belajar sepanjang tahun {{ selectedYear }}.</p>
                     </div>
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <div class="rounded-xl border border-slate-200/70 bg-white/70 px-4 py-3 text-sm text-slate-600 shadow-sm">
-                            <p class="font-medium text-slate-700">Tahun aktif</p>
-                            <p class="text-lg font-semibold text-indigo-600">{{ selectedYear }}</p>
+                        <div class="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white/80 shadow-lg backdrop-blur">
+                            <p class="font-medium text-white/90">Tahun aktif</p>
+                            <p class="text-lg font-semibold text-white">{{ selectedYear }}</p>
                         </div>
                         <div class="relative">
                             <label class="sr-only" for="year-filter">Filter tahun</label>
                             <select id="year-filter" :value="selectedYear" @change="changeYear($event.target.value)"
-                                class="w-48 rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                                class="w-48 rounded-xl border border-white/30 bg-white/20 px-4 py-3 text-sm text-white focus:border-white focus:ring-2 focus:ring-white/60">
                                 <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
                             </select>
                         </div>
@@ -33,16 +33,16 @@
 
             <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <div v-for="card in summaryCards" :key="card.label"
-                    class="flex flex-col justify-between rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm backdrop-blur">
+                    :class="['flex flex-col justify-between rounded-2xl p-5 text-white shadow-xl ring-1 ring-black/5', card.surface]">
                     <div class="flex items-center justify-between">
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl" :class="card.iconBackground">
                             <i :class="card.icon" class="text-base"></i>
                         </div>
-                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ card.caption }}</span>
+                        <span class="text-xs font-medium uppercase tracking-wider text-white/70">{{ card.caption }}</span>
                     </div>
                     <div class="mt-6 space-y-1">
-                        <p class="text-sm font-medium text-slate-500">{{ card.label }}</p>
-                        <p class="text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+                        <p class="text-sm font-medium text-white/80">{{ card.label }}</p>
+                        <p class="text-2xl font-semibold text-white">{{ card.value }}</p>
                     </div>
                 </div>
             </section>
@@ -257,29 +257,33 @@ export default {
                     label: 'Total pegawai',
                     caption: 'Aktif terdaftar',
                     value: this.formatNumber(this.stats?.total_pegawai || 0),
-                    icon: 'fas fa-users text-indigo-600',
-                    iconBackground: 'bg-indigo-50 text-indigo-600',
+                    icon: 'fas fa-users',
+                    iconBackground: 'bg-white/20 text-white',
+                    surface: 'bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500',
                 },
                 {
                     label: 'Program pelatihan',
                     caption: 'Seluruh jenis',
                     value: this.formatNumber(this.stats?.total_pelatihan || 0),
-                    icon: 'fas fa-briefcase text-indigo-600',
-                    iconBackground: 'bg-indigo-50 text-indigo-600',
+                    icon: 'fas fa-briefcase',
+                    iconBackground: 'bg-white/20 text-white',
+                    surface: 'bg-gradient-to-br from-sky-500 via-cyan-500 to-emerald-500',
                 },
                 {
                     label: 'Total JP terserap',
                     caption: 'Kumulatif',
                     value: this.formatNumber(this.stats?.total_jp || 0),
-                    icon: 'fas fa-clock text-indigo-600',
-                    iconBackground: 'bg-indigo-50 text-indigo-600',
+                    icon: 'fas fa-clock',
+                    iconBackground: 'bg-white/20 text-white',
+                    surface: 'bg-gradient-to-br from-indigo-700 via-violet-600 to-fuchsia-500',
                 },
                 {
                     label: 'Rata-rata progress',
                     caption: 'Per pegawai',
                     value: `${Number(this.stats?.rata_progress || 0).toFixed(1)}%`,
-                    icon: 'fas fa-chart-line text-indigo-600',
-                    iconBackground: 'bg-indigo-50 text-indigo-600',
+                    icon: 'fas fa-chart-line',
+                    iconBackground: 'bg-white/20 text-white',
+                    surface: 'bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500',
                 },
             ];
         },

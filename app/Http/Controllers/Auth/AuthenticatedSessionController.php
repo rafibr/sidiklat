@@ -7,14 +7,15 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Inertia\Response;
+use Inertia\ResponseFactory;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
      * Display the login view.
      */
-    public function create(Request $request): View
+    public function create(Request $request): Response|ResponseFactory
     {
         return inertia('Auth/Login', [
             'canResetPassword' => false,

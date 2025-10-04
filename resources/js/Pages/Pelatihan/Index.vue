@@ -1,77 +1,78 @@
 <template>
 	<AppLayout>
-		<div class="p-3 sm:p-4 md:p-6 animate-slide-up">
-			<div
-				class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 sm:gap-0 animate-fade-scale">
-				<h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Data Pelatihan</h2>
-				<div class="flex items-center gap-3">
+                <div class="p-3 sm:p-4 md:p-6 animate-slide-up space-y-6">
+                        <div class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 p-6 text-white shadow-xl animate-fade-scale">
+                                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.3),_transparent_60%)]"></div>
+                                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <h2 class="text-lg sm:text-xl md:text-2xl font-semibold">Data Pelatihan</h2>
+                                        <div class="flex items-center gap-3">
+                                                <button @click="startAddNew" v-if="!isAddingNew"
+                                                        class="w-full sm:w-auto rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-slate-100">
+                                                        <i class="fas fa-plus mr-2"></i>Tambah Pelatihan
+                                                </button>
+                                        </div>
+                                </div>
+                        </div>
 
-					<button @click="startAddNew" v-if="!isAddingNew"
-						class="w-full sm:w-auto bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-all hover:shadow-lg hover:scale-105 text-center text-sm">
-						<i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Pelatihan
-					</button>
-				</div>
-			</div>
+                        <!-- Filters -->
+                        <form @submit.prevent="submitFilter"
+                                class="rounded-2xl border border-indigo-100 bg-white/80 p-4 shadow-sm backdrop-blur animate-slide-left delay-100">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
+                                        <div>
+                                                <label class="mb-2 block text-sm font-medium text-slate-700">Cari</label>
+                                                <input type="text" v-model="filters.search" placeholder="Nama pelatihan atau pegawai..."
+                                                        class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40" />
+                                        </div>
 
-			<!-- Filters -->
-			<form @submit.prevent="submitFilter"
-				class="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 md:mb-6 animate-slide-left delay-100">
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
-					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
-						<input type="text" v-model="filters.search" placeholder="Nama pelatihan atau pegawai..."
-							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
-					</div>
+                                        <div>
+                                                <label class="mb-2 block text-sm font-medium text-slate-700">Jenis Pelatihan</label>
+                                                <v-combobox v-model="filters.jenis" :items="jenisPelatihanItems"
+                                                        @update:model-value="submitFilter" placeholder="Pilih atau ketik jenis..." clearable
+                                                        density="compact" variant="outlined" hide-details class="vuetify-input"></v-combobox>
+                                        </div>
 
-					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-2">Jenis Pelatihan</label>
-						<v-combobox v-model="filters.jenis" :items="jenisPelatihanItems"
-							@update:model-value="submitFilter" placeholder="Pilih atau ketik jenis..." clearable
-							density="compact" variant="outlined" hide-details class="vuetify-input"></v-combobox>
-					</div>
+                                        <div>
+                                                <label class="mb-2 block text-sm font-medium text-slate-700">Tahun</label>
+                                                <select v-model="filters.year" @change="submitFilter"
+                                                        class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">
+                                                        <option value="">Semua Tahun</option>
+                                                        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+                                                </select>
+                                        </div>
 
-					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
-						<select v-model="filters.year" @change="submitFilter"
-							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-							<option value="">Semua Tahun</option>
-							<option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
-						</select>
-					</div>
-
-					<div class="flex items-end gap-2">
-						<!-- Filter button removed: search & jenis auto-apply -->
-						<div class="flex-1">
-							<button type="button" @click="resetFilter"
-								class="w-full bg-gray-500 text-white px-3 sm:px-4 py-2 text-sm rounded-md hover:bg-gray-600 transition-colors text-center">
-								Reset
-							</button>
-						</div>
-					</div>
-				</div>
-			</form>
+                                        <div class="flex items-end gap-2">
+                                                <!-- Filter button removed: search & jenis auto-apply -->
+                                                <div class="flex-1">
+                                                        <button type="button" @click="resetFilter"
+                                                                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+                                                                Reset
+                                                        </button>
+                                                </div>
+                                        </div>
+                                </div>
+                        </form>
 
 			<div v-if="$page.props.flash && $page.props.flash.success"
-				class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+				class="bg-emerald-100 border border-emerald-400 text-emerald-700 px-4 py-3 rounded mb-4">
 				{{ $page.props.flash.success }}
 			</div>
 
 			<!-- Table -->
-			<div
-				class="bg-white rounded-lg shadow-lg overflow-hidden border-compact card-compact animate-slide-up delay-200">
+                        <div
+                                class="overflow-hidden rounded-2xl border border-indigo-100 bg-white/90 shadow-lg backdrop-blur animate-slide-up delay-200">
 				<div class="overflow-x-auto">
 					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
-						<div class="flex items-center gap-4">
-							<div class="text-sm text-gray-600">Total: <strong>{{ totalPelatihans }}</strong></div>
-							<div class="text-sm text-gray-600" v-if="rangeText">Menampilkan <strong>{{ rangeText
-							}}</strong></div>
-						</div>
+                                        <div class="flex items-center gap-4 text-sm text-slate-600">
+                                                <div>Total: <strong class="text-slate-900">{{ totalPelatihans }}</strong></div>
+                                                <div v-if="rangeText">Menampilkan <strong class="text-slate-900">{{ rangeText
+                                                        }}</strong></div>
+                                        </div>
 
 						<div class="flex items-center gap-3">
 							<div class="flex items-center gap-2">
 								<label class="text-sm text-gray-600 hidden sm:inline">Item per halaman:</label>
-								<select v-model.number="filters.per_page" @change="submitFilter"
-									class="w-full sm:w-auto px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                                                                <select v-model.number="filters.per_page" @change="submitFilter"
+                                                                        class="w-full rounded-xl border border-indigo-100 bg-white px-3 py-2 pr-8 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 sm:w-auto">
 									<option :value="10">10</option>
 									<option :value="25">25</option>
 									<option :value="50">50</option>
@@ -83,55 +84,55 @@
 							<div class="flex items-center gap-2">
 								<div v-if="editingCount > 1" class="flex items-center gap-2 mr-2">
 									<button @click.prevent="saveAll"
-										class="text-xs bg-green-600 text-white hover:bg-green-700 px-3 py-1 rounded">Save
+										class="text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1 rounded">Save
 										All</button>
 									<button @click.prevent="cancelAll"
 										class="text-xs bg-gray-300 text-gray-800 hover:bg-gray-400 px-3 py-1 rounded">Cancel
 										All</button>
 								</div>
-								<button @click.prevent="exportData('csv')"
-									class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">CSV</button>
-								<button @click.prevent="exportData('xls')"
-									class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">XLS</button>
-								<button @click.prevent="exportData('pdf')"
-									class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">PDF</button>
+                                                                <button @click.prevent="exportData('csv')"
+                                                                        class="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100">CSV</button>
+                                                                <button @click.prevent="exportData('xls')"
+                                                                        class="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100">XLS</button>
+                                                                <button @click.prevent="exportData('pdf')"
+                                                                        class="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100">PDF</button>
 							</div>
 						</div>
 					</div>
-					<table class="min-w-full divide-y divide-gray-200 text-xs">
-						<thead class="bg-gray-50">
-							<tr>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									Pegawai
-								</th>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									Pelatihan
-								</th>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									Jenis
-								</th>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									Tanggal
-								</th>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									JP
-								</th>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									Sertifikat
-								</th>
-								<th
-									class="px-2 py-1 sm:px-3 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-									Aksi
-								</th>
-							</tr>
-						</thead>
-						<tbody class="bg-white divide-y divide-gray-200">
+                                        <table class="min-w-full divide-y divide-slate-100 text-xs">
+                                                <thead class="bg-indigo-50/60 text-slate-600">
+                                                        <tr>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        Pegawai
+                                                                </th>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        Pelatihan
+                                                                </th>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        Jenis
+                                                                </th>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        Tanggal
+                                                                </th>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        JP
+                                                                </th>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        Sertifikat
+                                                                </th>
+                                                                <th
+                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        Aksi
+                                                                </th>
+                                                        </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-100 bg-white/80">
 							<!-- Add New Row -->
 							<tr v-if="isAddingNew" class="adding-row">
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
@@ -167,13 +168,13 @@
 										class="text-xs border rounded px-1 py-1 w-full" placeholder="JP" />
 								</td>
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
-									<div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
+									<div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-indigo-400"
 										@dragover.prevent @drop.prevent="handleFileDrop($event, 'new')"
 										@click="$refs.newFileInput.click()">
-										<span v-if="!newRow.sertifikat" class="text-xs text-gray-500">
+                                                                <span v-if="!newRow.sertifikat" class="text-xs text-slate-500">
 											<i class="fas fa-cloud-upload"></i> Drop/Click
 										</span>
-										<span v-else class="text-xs text-green-600">
+										<span v-else class="text-xs text-emerald-600">
 											<i class="fas fa-file-pdf"></i> {{ newRow.sertifikat.name }}
 										</span>
 										<input ref="newFileInput" type="file" @change="handleFileSelect($event, 'new')"
@@ -182,11 +183,11 @@
 								</td>
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
 									<div class="action-buttons">
-										<button @click="saveNew" class="text-green-600 hover:text-green-800 p-1"
+										<button @click="saveNew" class="text-emerald-600 hover:text-emerald-700 p-1"
 											title="Simpan">
 											<i class="fas fa-save"></i>
 										</button>
-										<button @click="cancelAddNew" class="text-red-600 hover:text-red-800 p-1"
+										<button @click="cancelAddNew" class="text-rose-600 hover:text-rose-700 p-1"
 											title="Batal">
 											<i class="fas fa-times"></i>
 										</button>
@@ -195,8 +196,8 @@
 							</tr>
 
 							<!-- Empty State -->
-							<tr v-if="pelatihans.data.length === 0 && !isAddingNew">
-								<td colspan="7" class="px-2 py-6 sm:px-3 sm:py-6 text-center text-gray-500">
+                                                        <tr v-if="pelatihans.data.length === 0 && !isAddingNew">
+                                                                <td colspan="7" class="px-2 py-6 sm:px-3 sm:py-6 text-center text-slate-500">
 									<i class="fas fa-database text-4xl mb-4"></i>
 									<p>Tidak ada data pelatihan</p>
 								</td>
@@ -214,7 +215,7 @@
 									<div v-if="!isEditing(pelatihan)">
 										<div class="text-sm font-medium text-gray-900">{{ pelatihan.pegawai.nama_lengkap
 										}}</div>
-										<div class="text-xs text-gray-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP'
+                                                                                <div class="text-xs text-slate-500">{{ pelatihan.pegawai.nip || 'Tidak Ada NIP'
 										}}</div>
 									</div>
 									<v-combobox v-else
@@ -233,7 +234,7 @@
 									<div v-if="!isEditing(pelatihan)">
 										<div class="text-xs font-medium text-gray-900">{{ pelatihan.nama_pelatihan }}
 										</div>
-										<div class="text-xs text-gray-500">{{ pelatihan.penyelenggara }}</div>
+                                                                                <div class="text-xs text-slate-500">{{ pelatihan.penyelenggara }}</div>
 									</div>
 									<div v-else>
 										<input v-model="pelatihan.nama_pelatihan"
@@ -263,7 +264,7 @@
 								<!-- Tanggal Column -->
 								<td class="px-2 py-2 sm:px-3 sm:py-2 editable-cell date-jp-container"
 									:class="{ 'editable-cell': isEditing(pelatihan) }">
-									<div v-if="!isEditing(pelatihan)" class="text-xs text-gray-500">
+                                                                        <div v-if="!isEditing(pelatihan)" class="text-xs text-slate-500">
 										{{ formatDate(pelatihan.tanggal_mulai) }} - {{
 											formatDate(pelatihan.tanggal_selesai) }}
 									</div>
@@ -284,12 +285,12 @@
 								</td>
 
 								<!-- Sertifikat Column -->
-								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-gray-500">
+                                                        <td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs text-slate-500">
 									<div v-if="!isEditing(pelatihan)">
 										<div v-if="pelatihan.sertifikat_path" class="flex items-center gap-1">
 											<a :href="`/storage/${pelatihan.sertifikat_path}`" target="_blank"
 												rel="noopener"
-												class="file-link inline-flex items-center gap-2 text-blue-600 hover:text-blue-800">
+												class="file-link inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700">
 												<i class="fas fa-file-pdf"></i>
 												<span class="file-name text-xs truncate max-w-20"
 													:title="getFileName(pelatihan.sertifikat_path)">
@@ -300,23 +301,23 @@
 										<span v-else class="text-gray-400">Tidak ada</span>
 									</div>
 									<div v-else
-										class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-blue-400"
+										class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-indigo-400"
 										@dragover.prevent @drop.prevent="handleFileDrop($event, pelatihan.id)"
 										@click="$refs[`fileInput${pelatihan.id}`][0].click()">
 										<div v-if="!editingFiles[pelatihan.id]" class="text-xs text-center">
 											<div v-if="pelatihan.sertifikat_path"
-												class="text-green-600 mb-1 truncate max-w-28">
+												class="text-emerald-600 mb-1 truncate max-w-28">
 												<i class="fas fa-file-pdf mr-1"></i>
 												<span class="text-sm">{{ getFileName(pelatihan.sertifikat_path)
 												}}</span>
 											</div>
-											<div class="text-gray-500">
+                                                                                        <div class="text-slate-500">
 												<i class="fas fa-cloud-upload mr-1"></i>
 												<span class="text-xs">Drop/Click untuk {{ pelatihan.sertifikat_path ?
 													'ganti' : 'upload' }}</span>
 											</div>
 										</div>
-										<span v-else class="text-xs text-green-600">
+										<span v-else class="text-xs text-emerald-600">
 											<i class="fas fa-file-pdf"></i> {{ editingFiles[pelatihan.id].name }}
 										</span>
 										<input :ref="`fileInput${pelatihan.id}`" type="file"
@@ -329,21 +330,21 @@
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap text-xs font-medium">
 									<div v-if="!isEditing(pelatihan)" class="action-buttons">
 										<button @click="startEdit(pelatihan)"
-											class="text-yellow-600 hover:text-yellow-800 p-1" title="Edit">
+											class="text-amber-600 hover:text-amber-700 p-1" title="Edit">
 											<i class="fas fa-edit"></i>
 										</button>
 										<button @click="deleteItem(pelatihan.id)"
-											class="text-red-600 hover:text-red-800 p-1" title="Hapus">
+											class="text-rose-600 hover:text-rose-700 p-1" title="Hapus">
 											<i class="fas fa-trash"></i>
 										</button>
 									</div>
 									<div v-else class="action-buttons">
 										<button @click="saveEdit(pelatihan)"
-											class="text-green-600 hover:text-green-800 p-1" title="Simpan">
+											class="text-emerald-600 hover:text-emerald-700 p-1" title="Simpan">
 											<i class="fas fa-save"></i>
 										</button>
 										<button @click="cancelEdit(pelatihan)"
-											class="text-red-600 hover:text-red-800 p-1" title="Batal">
+											class="text-rose-600 hover:text-rose-700 p-1" title="Batal">
 											<i class="fas fa-times"></i>
 										</button>
 									</div>
@@ -359,7 +360,7 @@
 				<div class="flex justify-center space-x-2">
 					<button v-for="link in pelatihans.links" :key="link.label" @click="changePage(link.url)"
 						:disabled="!link.url" class="px-3 py-2 text-sm border rounded"
-						:class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-600'"
+						:class="link.active ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'"
 						v-html="link.label"></button>
 				</div>
 			</div>
@@ -470,13 +471,13 @@ export default {
 
 		getJenisColor(jenis) {
 			const colorMap = {
-				'Diklat Struktural': 'bg-blue-100 text-blue-800',
-				'Diklat Fungsional': 'bg-green-100 text-green-800',
-				'Diklat Teknis': 'bg-purple-100 text-purple-800',
-				'Workshop': 'bg-orange-100 text-orange-800',
-				'Pelatihan Jarak Jauh': 'bg-indigo-100 text-indigo-800',
-				'E-Learning': 'bg-teal-100 text-teal-800',
-				'Seminar': 'bg-red-100 text-red-800'
+				'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+				'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
+				'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+				'Workshop': 'bg-amber-100 text-amber-700',
+				'Pelatihan Jarak Jauh': 'bg-indigo-100 text-indigo-700',
+				'E-Learning': 'bg-emerald-100 text-emerald-700',
+				'Seminar': 'bg-rose-100 text-rose-700'
 			};
 			return colorMap[jenis] || 'bg-gray-100 text-gray-800';
 		},

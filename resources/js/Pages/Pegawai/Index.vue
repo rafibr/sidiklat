@@ -1,154 +1,121 @@
 <template>
     <AppLayout>
-        <div class="p-4 animate-slide-up">
-            <div
-                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 animate-fade-scale">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Data Pegawai</h1>
-                    <p class="text-sm text-gray-600 mt-1">Kelola data pegawai dan pengaturan JP</p>
+        <div class="space-y-6 pb-12">
+            <section class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
+                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]"></div>
+                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold">Data Pegawai</h1>
+                        <p class="text-sm text-white/80">Kelola informasi pegawai dan target JP tahunan secara terpusat.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button @click="showJpSettingsModal = true"
+                            class="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
+                            <i class="fas fa-sliders-h"></i>
+                            Pengaturan JP
+                        </button>
+                        <Link :href="route('pegawai.create')"
+                            class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-slate-100">
+                            <i class="fas fa-plus"></i>
+                            Tambah pegawai
+                        </Link>
+                    </div>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <button @click="showJpSettingsModal = true"
-                        class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-all hover:shadow-lg hover:scale-105">
-                        <i class="fas fa-cog mr-2"></i>Pengaturan JP
-                    </button>
-                    <Link :href="route('pegawai.create')"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-all hover:shadow-lg hover:scale-105">
-                    <i class="fas fa-plus mr-2"></i>Tambah Pegawai
-                    </Link>
-                </div>
-            </div>
+            </section>
 
-            <!-- Search and Filters -->
-            <div class="bg-white p-4 rounded-lg shadow mb-6 animate-slide-left delay-100">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <section class="rounded-2xl border border-slate-200/70 bg-white px-5 py-5 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="relative flex-1">
-                        <input type="text" v-model="searchForm.search" @input="search" placeholder="Cari pegawai..."
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" v-model="searchForm.search" @input="search" placeholder="Cari nama, NIP, atau unit kerja"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-10 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <button v-if="searchForm.search" @click="clearSearch"
-                        class="text-gray-600 hover:text-gray-800 px-3 py-2">
-                        <i class="fas fa-times mr-1"></i>Clear
-                    </button>
+                        class="text-sm font-medium text-slate-500 hover:text-slate-700">Reset pencarian</button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Success/Error Messages -->
-            <div v-if="$page.props.flash?.success" class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
-                <div class="flex">
-                    <i class="fas fa-check-circle text-green-400 mt-0.5 mr-3"></i>
-                    <p class="text-green-700">{{ $page.props.flash.success }}</p>
+            <section class="rounded-2xl border border-slate-200/70 bg-white shadow-sm">
+                <div class="flex flex-col gap-3 px-5 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm text-slate-500">Menampilkan <span class="font-semibold text-slate-900">{{ pegawais.from }}-{{ pegawais.to }}</span> dari <span class="font-semibold text-slate-900">{{ pegawais.total }}</span> pegawai.</p>
+                    <div class="flex items-center gap-2 text-sm text-slate-500">
+                        <label for="per-page" class="hidden sm:inline">Baris per halaman</label>
+                        <select id="per-page" v-model.number="perPage" @change="updatePerPage"
+                            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                            <option :value="10">10</option>
+                            <option :value="25">25</option>
+                            <option :value="50">50</option>
+                            <option :value="100">100</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-
-            <div v-if="$page.props.flash?.error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-                <div class="flex">
-                    <i class="fas fa-exclamation-circle text-red-400 mt-0.5 mr-3"></i>
-                    <p class="text-red-700">{{ $page.props.flash.error }}</p>
-                </div>
-            </div> <!-- Data Table -->
-            <div class="bg-white rounded-lg shadow overflow-hidden animate-slide-up delay-200">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full table-fixed divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-slate-100 text-sm">
+                        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <tr>
-                                <th
-                                    class="w-3/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Pegawai</th>
-                                <th
-                                    class="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Unit Kerja</th>
-                                <th
-                                    class="w-3/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    JP Progress</th>
-                                <th
-                                    class="w-2/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kontak</th>
-                                <th
-                                    class="w-2/12 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Aksi</th>
+                                <th class="px-5 py-3">Pegawai</th>
+                                <th class="px-5 py-3">Unit & Jabatan</th>
+                                <th class="px-5 py-3">Progress JP</th>
+                                <th class="px-5 py-3">Kontak</th>
+                                <th class="px-5 py-3 text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="pegawai in pegawais.data" :key="pegawai.id"
-                                class="hover:bg-gray-50 cursor-pointer" @click="goToDetail(pegawai)">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div
-                                            class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                            <i class="fas fa-user text-blue-600"></i>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr v-for="pegawai in pegawais.data" :key="pegawai.id" class="hover:bg-slate-50/60">
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                            <i class="fas fa-user"></i>
                                         </div>
                                         <div>
-                                            <div class="text-sm font-medium text-gray-900 truncate max-w-[220px]">{{
-                                                pegawai.nama_lengkap }}</div>
-                                            <div class="text-sm text-gray-500 truncate max-w-[220px]">{{ pegawai.nip ||
-                                                'Tidak ada NIP' }}</div>
-                                            <div v-if="pegawai.pangkat_golongan"
-                                                class="text-xs text-gray-400 truncate max-w-[220px]">{{
-                                                    pegawai.pangkat_golongan }}</div>
+                                            <p class="text-sm font-semibold text-slate-900">{{ pegawai.nama_lengkap }}</p>
+                                            <p class="text-xs text-slate-500">{{ pegawai.nip || 'NIP belum tersedia' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <div v-if="pegawai.unit_kerja">
-                                            <span
-                                                :class="getUnitPillClass(pegawai.unit_kerja) + ' inline-block max-w-[160px] truncate'"
-                                                @click.stop>
-                                                {{ pegawai.unit_kerja }}
-                                            </span>
-                                        </div>
-                                        <div v-else class="text-sm text-gray-900">-</div>
-                                        <div v-if="pegawai.jabatan" class="text-sm text-gray-500 mt-1">{{
-                                            pegawai.jabatan }}
-                                        </div>
+                                <td class="px-5 py-4">
+                                    <div class="space-y-1">
+                                        <span :class="getUnitPillClass(pegawai.unit_kerja)" class="inline-flex max-w-[220px] items-center rounded-full px-3 py-1 text-xs font-medium">{{ pegawai.unit_kerja || 'Unit belum diatur' }}</span>
+                                        <p class="text-xs text-slate-500">{{ pegawai.jabatan }}</p>
                                     </div>
                                 </td>
-                                <!-- Status column removed per request -->
-                                <td class="px-6 py-4">
-                                    <div class="text-sm">
-                                        <div class="flex items-center justify-between mb-1">
-                                            <span class="text-gray-600">{{ pegawai.jp_tercapai || 0 }}/{{
-                                                pegawai.jp_target_display || jpDefault }} ({{ currentYear }})</span>
-                                            <span class="text-xs font-medium"
-                                                :class="getProgressColor(pegawai.jp_tercapai, pegawai.jp_target_display)">
+                                <td class="px-5 py-4">
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-xs text-slate-500">
+                                            <span>{{ pegawai.jp_tercapai || 0 }}/{{ pegawai.jp_target_display || jpDefault }} JP</span>
+                                            <span :class="getProgressColor(pegawai.jp_tercapai, pegawai.jp_target_display)">
                                                 {{ Math.round(calculateProgress(pegawai)) }}%
                                             </span>
                                         </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="h-2 rounded-full transition-all duration-300"
-                                                :class="getProgressBgColor(pegawai.jp_tercapai, pegawai.jp_target_display)"
-                                                :style="{ width: Math.min(100, calculateProgress(pegawai)) + '%' }">
-                                            </div>
+                                        <div class="h-2 w-full rounded-full bg-slate-100">
+                                            <div class="h-full rounded-full" :class="getProgressBgColor(pegawai.jp_tercapai, pegawai.jp_target_display)"
+                                                :style="{ width: Math.min(100, calculateProgress(pegawai)) + '%' }"></div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm">
-                                        <div v-if="pegawai.email" class="text-gray-600 mb-1 truncate max-w-[180px]">
-                                            <i class="fas fa-envelope w-4 mr-1"></i>{{ pegawai.email }}
-                                        </div>
-                                        <div v-if="pegawai.telepon" class="text-gray-600 truncate max-w-[180px]">
-                                            <i class="fas fa-phone w-4 mr-1"></i>{{ pegawai.telepon }}
-                                        </div>
-                                        <div v-if="!pegawai.email && !pegawai.telepon" class="text-gray-400 text-xs">
-                                            Tidak ada kontak
-                                        </div>
+                                <td class="px-5 py-4 text-xs text-slate-500">
+                                    <div class="space-y-1">
+                                        <p v-if="pegawai.email" class="flex items-center gap-2">
+                                            <i class="fas fa-envelope"></i>
+                                            <span class="truncate">{{ pegawai.email }}</span>
+                                        </p>
+                                        <p v-if="pegawai.telepon" class="flex items-center gap-2">
+                                            <i class="fas fa-phone"></i>
+                                            <span>{{ pegawai.telepon }}</span>
+                                        </p>
+                                        <p v-if="!pegawai.email && !pegawai.telepon" class="italic text-slate-400">Kontak belum diatur</p>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <Link :href="route('pegawai.show', pegawai.id)"
-                                            class="text-blue-600 hover:text-blue-900 p-1" @click.stop>
-                                        <i class="fas fa-eye"></i>
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center justify-end gap-2 text-sm">
+                                        <Link :href="route('pegawai.show', pegawai.id)" class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 hover:border-indigo-500 hover:text-indigo-600">
+                                            <i class="fas fa-eye"></i>
                                         </Link>
-                                        <Link :href="route('pegawai.edit', pegawai.id)"
-                                            class="text-green-600 hover:text-green-900 p-1" @click.stop>
-                                        <i class="fas fa-edit"></i>
+                                        <Link :href="route('pegawai.edit', pegawai.id)" class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 hover:border-indigo-500 hover:text-indigo-600">
+                                            <i class="fas fa-pen"></i>
                                         </Link>
                                         <button @click="confirmDelete(pegawai)"
-                                            class="text-red-600 hover:text-red-900 p-1">
+                                            class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 transition-colors hover:border-rose-500 hover:text-rose-600">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -157,214 +124,133 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <div v-if="pegawais.links && pegawais.links.length > 3"
-                    class="px-6 py-3 border-t border-gray-200 bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 flex justify-between sm:hidden">
-                            <Link v-if="pegawais.prev_page_url" :href="pegawais.prev_page_url"
-                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Previous
-                            </Link>
-                            <Link v-if="pegawais.next_page_url" :href="pegawais.next_page_url"
-                                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Next
-                            </Link>
-                        </div>
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p class="text-sm text-gray-700">
-                                    Menampilkan {{ pegawais.from }} sampai {{ pegawais.to }} dari {{ pegawais.total }}
-                                    data
-                                </p>
-                            </div>
-                            <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                    <template v-for="(link, index) in pegawais.links" :key="index">
-                                        <Link v-if="link.url && link.label !== '...'" :href="link.url"
-                                            class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                                            :class="{
-                                                'z-10 bg-blue-50 border-blue-500 text-blue-600': link.active,
-                                                'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': !link.active,
-                                                'rounded-l-md': index === 0,
-                                                'rounded-r-md': index === pegawais.links.length - 1
-                                            }" v-html="link.label">
-                                        </Link>
-                                        <span v-else-if="link.label === '...'"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                                            ...
-                                        </span>
-                                    </template>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
+                <div v-if="pegawais.links && pegawais.links.length > 3" class="border-t border-slate-100 px-5 py-4">
+                    <nav class="flex flex-wrap items-center justify-center gap-2 text-sm">
+                        <template v-for="(link, index) in pegawais.links" :key="index">
+                            <Link v-if="link.url && link.label !== '...'" :href="link.url"
+                                class="rounded-lg border border-slate-200/70 px-3 py-2"
+                                :class="link.active ? 'border-indigo-500 bg-indigo-50 text-indigo-600 font-semibold' : 'text-slate-600 hover:border-indigo-400 hover:text-indigo-600'"
+                                v-html="link.label" />
+                            <span v-else class="px-3 py-2 text-slate-400">...</span>
+                        </template>
+                    </nav>
                 </div>
-            </div>
+            </section>
 
-            <!-- Empty State -->
-            <div v-if="pegawais.data.length === 0" class="text-center py-12">
-                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-users text-gray-400 text-3xl"></i>
+            <div v-if="pegawais.data.length === 0" class="rounded-2xl border border-dashed border-slate-200/70 bg-slate-50 py-12 text-center">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
+                    <i class="fas fa-users text-2xl text-slate-400"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">
-                    {{ searchForm.search ? 'Tidak Ada Hasil' : 'Belum Ada Data Pegawai' }}
-                </h3>
-                <p class="text-sm text-gray-500 mb-4">
-                    {{ searchForm.search ? 'Coba ubah kata kunci pencarian' : 'Mulai dengan menambahkan pegawai baru' }}
-                </p>
-                <Link v-if="!searchForm.search" :href="route('pegawai.create')"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                <i class="fas fa-plus mr-2"></i>Tambah Pegawai
-                </Link>
+                <h3 class="mt-4 text-lg font-semibold text-slate-800">Belum ada data pegawai</h3>
+                <p class="mt-1 text-sm text-slate-500">Mulai dengan menambahkan pegawai baru untuk memonitor progres JP.</p>
             </div>
         </div>
 
-        <!-- JP Settings Modal -->
-        <div v-if="showJpSettingsModal"
-            class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-            @click.self="showJpSettingsModal = false">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <div class="mt-3">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Pengaturan JP Target Tahunan</h3>
-                        <button @click="showJpSettingsModal = false" class="text-gray-400 hover:text-gray-600">
+        <transition name="fade">
+            <div v-if="showJpSettingsModal" class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 px-4"
+                @click.self="showJpSettingsModal = false">
+                <div class="w-full max-w-md rounded-2xl border border-slate-200/70 bg-white p-6 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-slate-900">Pengaturan target JP tahunan</h2>
+                        <button @click="showJpSettingsModal = false" class="text-slate-400 hover:text-slate-600">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-
-                    <form @submit.prevent="submitJpSettings">
-                        <div class="mb-4">
-                            <label for="tahun" class="block text-sm font-medium text-gray-700 mb-2">
-                                Tahun
-                            </label>
-                            <select id="tahun" v-model.number="jpSettingsForm.tahun" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <form @submit.prevent="submitJpSettings" class="mt-6 space-y-4">
+                        <div>
+                            <label for="tahun" class="block text-sm font-medium text-slate-600">Tahun</label>
+                            <select id="tahun" v-model.number="jpSettingsForm.tahun"
+                                class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
                                 <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
                             </select>
-                            <p class="text-xs text-gray-500 mt-1">Pilih tahun untuk mengatur JP target</p>
                         </div>
-
-                        <div class="mb-4">
-                            <label for="jp_default" class="block text-sm font-medium text-gray-700 mb-2">
-                                JP Target untuk Semua Pegawai
-                            </label>
-                            <input type="number" id="jp_default" v-model.number="jpSettingsForm.jp_default" min="0"
-                                max="1000" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            <p class="text-xs text-gray-500 mt-1">Nilai ini akan diterapkan ke semua pegawai untuk tahun
-                                {{
-                                    jpSettingsForm.tahun }}</p>
+                        <div>
+                            <label for="jp_default" class="block text-sm font-medium text-slate-600">JP target default</label>
+                            <input id="jp_default" type="number" min="0" v-model.number="jpSettingsForm.jp_default"
+                                class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                            <p class="mt-2 text-xs text-slate-500">Nilai ini akan diterapkan ke seluruh pegawai untuk tahun {{ jpSettingsForm.tahun }}.</p>
                         </div>
-
-                        <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                            <div class="flex items-start">
-                                <i class="fas fa-info-circle text-yellow-600 mt-0.5 mr-2"></i>
-                                <div class="text-sm text-yellow-800">
-                                    <p><strong>Catatan:</strong></p>
-                                    <p>• Pengaturan ini akan memengaruhi semua pegawai</p>
-                                    <p>• Target yang sudah diatur manual tidak akan berubah</p>
-                                    <p>• Jika tahun dipilih belum memiliki target, akan menggunakan target tahun
-                                        sebelumnya</p>
-                                </div>
-                            </div>
+                        <div class="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-xs text-amber-700">
+                            Penyesuaian akan diterapkan otomatis pada pegawai yang belum memiliki target khusus.
                         </div>
-
-                        <div class="flex justify-end space-x-3">
+                        <div class="flex justify-end gap-3">
                             <button type="button" @click="showJpSettingsModal = false"
-                                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
-                                Batal
-                            </button>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                Simpan
-                            </button>
+                                class="rounded-xl border border-slate-200/70 px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-400">Batal</button>
+                            <button type="submit"
+                                class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">Simpan</button>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
+        </transition>
 
-        <!-- Delete Confirmation Modal -->
-        <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-            @click.self="showDeleteModal = false">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <div class="mt-3 text-center">
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+        <transition name="fade">
+            <div v-if="showDeleteModal" class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 px-4"
+                @click.self="showDeleteModal = false">
+                <div class="w-full max-w-md rounded-2xl border border-slate-200/70 bg-white p-6 shadow-2xl">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+                        <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Konfirmasi Hapus</h3>
-                    <p class="text-sm text-gray-500 mb-4">
-                        Apakah Anda yakin ingin menghapus pegawai <strong>{{ pegawaiToDelete?.nama_lengkap }}</strong>?
-                        <br>Data yang sudah dihapus tidak dapat dikembalikan.
-                    </p>
-                    <div class="flex justify-center space-x-3">
+                    <h3 class="mt-4 text-lg font-semibold text-slate-900">Hapus pegawai?</h3>
+                    <p class="mt-2 text-sm text-slate-500">Pegawai <strong>{{ pegawaiToDelete?.nama_lengkap }}</strong> akan dihapus permanen beserta catatan progresnya.</p>
+                    <div class="mt-6 flex justify-end gap-3">
                         <button @click="showDeleteModal = false"
-                            class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
-                            Batal
-                        </button>
+                            class="rounded-xl border border-slate-200/70 px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-400">Batal</button>
                         <button @click="deletePegawai"
-                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                            Hapus
-                        </button>
+                            class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600">Hapus</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </transition>
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, reactive } from 'vue';
 import { debounce } from 'lodash';
+import { reactive, ref, watch } from 'vue';
 
 export default {
     components: { AppLayout, Link },
     props: {
         pegawais: Object,
-        jpDefault: {
-            type: Number,
-            default: 20
-        },
-        currentYear: {
-            type: Number,
-            default: () => new Date().getFullYear()
-        },
-        filters: Object
+        jpDefault: { type: Number, default: 20 },
+        currentYear: { type: Number, default: () => new Date().getFullYear() },
+        filters: { type: Object, default: () => ({}) },
     },
     setup(props) {
         const showJpSettingsModal = ref(false);
         const showDeleteModal = ref(false);
         const pegawaiToDelete = ref(null);
 
-        const searchForm = reactive({
-            search: props.filters.search || ''
-        });
+        const searchForm = reactive({ search: props.filters.search || '' });
+        const jpSettingsForm = reactive({ jp_default: props.jpDefault, tahun: props.currentYear });
+        const perPage = ref(Number(props.filters.per_page) || 10);
 
-        const jpSettingsForm = reactive({
-            jp_default: props.jpDefault,
-            tahun: props.currentYear
-        });
-
-        // Generate available years (current year + 2 previous + 2 next)
         const availableYears = ref([]);
-        const currentYearInt = parseInt(props.currentYear);
+        const currentYearInt = parseInt(props.currentYear, 10);
         for (let i = -2; i <= 2; i++) {
             availableYears.value.push(currentYearInt + i);
         }
 
+        watch(
+            () => props.filters.per_page,
+            (value) => {
+                if (value) {
+                    perPage.value = Number(value);
+                }
+            },
+            { immediate: true }
+        );
+
         const search = debounce(() => {
-            router.get(route('pegawai.index'), { search: searchForm.search }, {
-                preserveState: true,
-                replace: true
-            });
+            router.get(route('pegawai.index'), { search: searchForm.search, per_page: perPage.value }, { preserveState: true, replace: true });
         }, 300);
 
         const clearSearch = () => {
             searchForm.search = '';
-            router.get(route('pegawai.index'));
+            router.get(route('pegawai.index'), { per_page: perPage.value }, { preserveState: true, replace: true });
         };
 
         const confirmDelete = (pegawai) => {
@@ -373,11 +259,12 @@ export default {
         };
 
         const deletePegawai = () => {
+            if (!pegawaiToDelete.value) return;
             router.delete(route('pegawai.destroy', pegawaiToDelete.value.id), {
                 onSuccess: () => {
                     showDeleteModal.value = false;
                     pegawaiToDelete.value = null;
-                }
+                },
             });
         };
 
@@ -385,13 +272,8 @@ export default {
             router.post(route('pegawai.update-jp-default'), jpSettingsForm, {
                 onSuccess: () => {
                     showJpSettingsModal.value = false;
-                }
+                },
             });
-        };
-
-        // navigate to pegawai detail
-        const goToDetail = (pegawai) => {
-            router.visit(route('pegawai.show', pegawai.id));
         };
 
         const calculateProgress = (pegawai) => {
@@ -402,45 +284,50 @@ export default {
 
         const getProgressColor = (achieved, target) => {
             const progress = calculateProgress({ jp_tercapai: achieved, jp_target_display: target || props.jpDefault });
-            if (progress >= 100) return 'text-green-600';
-            if (progress >= 75) return 'text-blue-600';
-            if (progress >= 50) return 'text-yellow-600';
-            return 'text-red-600';
+            if (progress >= 100) return 'text-emerald-600';
+            if (progress >= 75) return 'text-indigo-600';
+            if (progress >= 50) return 'text-amber-600';
+            return 'text-rose-600';
         };
 
         const getProgressBgColor = (achieved, target) => {
             const progress = calculateProgress({ jp_tercapai: achieved, jp_target_display: target || props.jpDefault });
-            if (progress >= 100) return 'bg-green-500';
-            if (progress >= 75) return 'bg-blue-500';
-            if (progress >= 50) return 'bg-yellow-500';
-            return 'bg-red-500';
+            if (progress >= 100) return 'bg-emerald-600';
+            if (progress >= 75) return 'bg-indigo-600';
+            if (progress >= 50) return 'bg-amber-600';
+            return 'bg-rose-600';
         };
 
-        // deterministic color pill for unit_kerja
         const palette = [
-            'bg-indigo-100 text-indigo-800',
-            'bg-green-100 text-green-800',
-            'bg-blue-100 text-blue-800',
-            'bg-yellow-100 text-yellow-800',
-            'bg-purple-100 text-purple-800',
-            'bg-pink-100 text-pink-800',
-            'bg-orange-100 text-orange-800',
-            'bg-teal-100 text-teal-800'
+            'bg-indigo-100 text-indigo-700',
+            'bg-emerald-100 text-emerald-700',
+            'bg-sky-100 text-sky-700',
+            'bg-amber-100 text-amber-700',
+            'bg-slate-200 text-slate-700',
         ];
 
         const hashString = (s) => {
-            let h = 0;
-            for (let i = 0; i < s.length; i++) {
-                h = (h << 5) - h + s.charCodeAt(i);
-                h |= 0; // convert to 32bit integer
+            let hash = 0;
+            for (let i = 0; i < s.length; i += 1) {
+                hash = (hash << 5) - hash + s.charCodeAt(i);
+                hash |= 0;
             }
-            return Math.abs(h);
+            return Math.abs(hash);
         };
 
         const getUnitPillClass = (unit) => {
-            if (!unit) return 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
-            const idx = hashString(unit) % palette.length;
-            return `inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${palette[idx]}`;
+            if (!unit) {
+                return 'bg-slate-200 text-slate-700';
+            }
+            const index = hashString(unit) % palette.length;
+            return palette[index];
+        };
+
+        const updatePerPage = () => {
+            router.get(route('pegawai.index'), { search: searchForm.search, per_page: perPage.value }, {
+                preserveState: true,
+                replace: true,
+            });
         };
 
         return {
@@ -450,17 +337,30 @@ export default {
             searchForm,
             jpSettingsForm,
             availableYears,
+            perPage,
             search,
             clearSearch,
             confirmDelete,
             deletePegawai,
             submitJpSettings,
-            goToDetail,
-            getUnitPillClass,
             calculateProgress,
             getProgressColor,
-            getProgressBgColor
+            getProgressBgColor,
+            getUnitPillClass,
+            updatePerPage,
         };
-    }
+    },
 };
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

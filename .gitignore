@@ -19,10 +19,6 @@
 /storage/*.key
 /storage/pail
 
-# Seeder files dengan data real - jangan di-push ke git
-/database/seeders/PegawaiSeeder.php
-/database/seeders/PelatihanSeeder.php
-
 # Prototype aplikasi - folder contoh HTML statis
 /aplikasi-contoh-simple/
 /aplikasi-contoh-simple/*

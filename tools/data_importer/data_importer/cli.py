@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+import requests
 import typer
 
 from .certificate_downloader import CertificateDownloader
@@ -18,7 +19,11 @@ from .simpeg_scraper import SimpegScraper
 from .sql_writer import SqlScriptBuilder, build_training_sql_block
 
 
-logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
 logger = logging.getLogger(__name__)
 
 app = typer.Typer(help="Import data pegawai dan pelatihan ke SIDIKLAT.")
@@ -45,11 +50,23 @@ def _store_excel_row(
         else:
             # Download file for non-Google Drive URLs
             try:
+                logger.info("Attempting to download certificate from: %s", row.sertifikat_url)
                 destination = downloader.download(row.sertifikat_url, row.nama, row.nama_pelatihan)
-                sertifikat_path = destination.relative_to(certificate_root.parent)
-                sertifikat_sql_path = sertifikat_path.as_posix()
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("Gagal mengunduh sertifikat %s: %s", row.sertifikat_url, exc)
+                if destination:
+                    sertifikat_path = destination.relative_to(certificate_root.parent)
+                    sertifikat_sql_path = sertifikat_path.as_posix()
+                    logger.info("Certificate successfully downloaded to: %s", sertifikat_sql_path)
+                else:
+                    logger.warning("Download returned None for URL: %s", row.sertifikat_url)
+            except requests.exceptions.HTTPError as exc:
+                logger.error("HTTP Error downloading certificate from %s: Status %s - %s",
+                           row.sertifikat_url, exc.response.status_code if hasattr(exc, 'response') else 'Unknown', exc)
+            except requests.exceptions.Timeout:
+                logger.error("Timeout downloading certificate from %s (waited 60 seconds)", row.sertifikat_url)
+            except requests.exceptions.ConnectionError as exc:
+                logger.error("Connection error downloading certificate from %s: %s", row.sertifikat_url, exc)
+            except Exception as exc:
+                logger.error("Unexpected error downloading certificate from %s: %s", row.sertifikat_url, exc, exc_info=True)
 
     if sql_builder is not None:
         sql_builder.add_block(
@@ -243,16 +260,28 @@ def _store_simpeg_record(
         else:
             # Download file for non-Google Drive URLs
             try:
+                logger.info("Attempting to download certificate from: %s", record.sertifikat_url)
                 destination = downloader.download(
                     record.sertifikat_url,
                     record.pegawai_nama,
                     record.nama_pelatihan or record.induk_diklat or record.kategori,
                     session=session,
                 )
-                sertifikat_path = destination.relative_to(certificate_root.parent)
-                sertifikat_sql_path = sertifikat_path.as_posix()
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("Gagal mengunduh sertifikat untuk %s: %s", record.nama_pelatihan, exc)
+                if destination:
+                    sertifikat_path = destination.relative_to(certificate_root.parent)
+                    sertifikat_sql_path = sertifikat_path.as_posix()
+                    logger.info("Certificate successfully downloaded to: %s", sertifikat_sql_path)
+                else:
+                    logger.warning("Download returned None for URL: %s", record.sertifikat_url)
+            except requests.exceptions.HTTPError as exc:
+                logger.error("HTTP Error downloading certificate from %s: Status %s - %s",
+                           record.sertifikat_url, exc.response.status_code if hasattr(exc, 'response') else 'Unknown', exc)
+            except requests.exceptions.Timeout:
+                logger.error("Timeout downloading certificate from %s (waited 60 seconds)", record.sertifikat_url)
+            except requests.exceptions.ConnectionError as exc:
+                logger.error("Connection error downloading certificate from %s: %s", record.sertifikat_url, exc)
+            except Exception as exc:
+                logger.error("Unexpected error downloading certificate for %s: %s", record.nama_pelatihan, exc, exc_info=True)
 
     if sql_builder is not None:
         sql_builder.add_block(

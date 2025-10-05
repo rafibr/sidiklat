@@ -25,8 +25,11 @@ class PegawaiController extends Controller
             });
         }
 
+        // Get per_page from request or default to 10
+        $perPage = $request->get('per_page', 10);
+
         // Sort by created_at desc by default
-        $pegawais = $query->orderBy('created_at', 'desc')->paginate(10);
+        $pegawais = $query->orderBy('created_at', 'desc')->paginate($perPage)->appends($request->only(['search', 'per_page']));
 
         // Calculate stats for each pegawai based on yearly targets
         $pegawais->getCollection()->transform(function ($pegawai) use ($currentYear) {
@@ -50,7 +53,10 @@ class PegawaiController extends Controller
             'pegawais' => $pegawais,
             'jpDefault' => $jpDefault,
             'currentYear' => $currentYear,
-            'filters' => $request->only(['search'])
+            'filters' => [
+                'search' => $request->get('search'),
+                'per_page' => $perPage,
+            ]
         ]);
     }
 

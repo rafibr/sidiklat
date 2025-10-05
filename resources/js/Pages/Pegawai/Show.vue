@@ -2,7 +2,11 @@
     <AppLayout>
         <div class="space-y-6 pb-12">
             <div>
-                <Link :href="route('pegawai.index')" class="text-sm text-indigo-600 hover:underline">&larr; Kembali ke data pegawai</Link>
+                <Link :href="route('pegawai.index')"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl border border-indigo-200 hover:border-indigo-300 transition-all duration-200 shadow-sm hover:shadow-md">
+                <i class="fas fa-arrow-left"></i>
+                Kembali ke data pegawai
+                </Link>
             </div>
 
             <div class="rounded-2xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
@@ -103,7 +107,7 @@
                                     <div>
                                         <p class="text-sm font-medium text-indigo-600">Sertifikat</p>
                                         <p class="text-2xl font-bold text-indigo-700">{{ getTrainingWithCertificates()
-                                        }}</p>
+                                            }}</p>
                                         <p class="text-xs text-indigo-600">dari {{ getTotalPelatihan() }}</p>
                                     </div>
                                     <i class="fas fa-certificate text-indigo-600 text-2xl"></i>
@@ -212,8 +216,7 @@
                             </div>
 
                             <!-- Year Filter -->
-                            <select v-model="selectedYear" @change="filterByYear"
-                                class="form-input sm:w-40">
+                            <select v-model="selectedYear" @change="filterByYear" class="form-input sm:w-40">
                                 <option value="">Semua Tahun</option>
                                 <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
                             </select>
@@ -231,7 +234,7 @@
                     <div v-if="searchQuery" class="mb-4">
                         <p class="text-sm text-slate-600">
                             Menampilkan {{ searchResults.length }} pelatihan dari pencarian "<strong>{{ searchQuery
-                            }}</strong>"
+                                }}</strong>"
                             <button @click="clearSearch" class="text-indigo-600 hover:text-indigo-700 ml-2">
                                 <i class="fas fa-times"></i> Hapus filter
                             </button>
@@ -241,9 +244,9 @@
                     <!-- Grid View -->
                     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div v-for="pel in filteredPelatihan" :key="pel.id"
-                            class="bg-white border border-slate-200/70 rounded-2xl p-4 hover:shadow-md transition-shadow" @dragover.prevent
-                            @dragenter.prevent="addDragClass($event)" @dragleave.prevent="removeDragClass($event)"
-                            @drop.prevent="handleFileDrop($event, pel)">
+                            class="bg-white border border-slate-200/70 rounded-2xl p-4 hover:shadow-md transition-shadow"
+                            @dragover.prevent @dragenter.prevent="addDragClass($event)"
+                            @dragleave.prevent="removeDragClass($event)" @drop.prevent="handleFileDrop($event, pel)">
                             <!-- Training Card Header -->
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex-1">
@@ -308,7 +311,7 @@
                     <div v-else v-for="(data, year) in displayedPelatihansByYear" :key="year" class="mb-6">
                         <h3 class="text-lg font-medium text-slate-700 mb-3 flex items-center">
                             <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm mr-3">{{ year
-                                }}</span>
+                            }}</span>
                             <span class="text-sm text-slate-500">({{ (data.pelatihan && data.pelatihan.length) || 0 }}
                                 pelatihan)</span>
                         </h3>
@@ -321,7 +324,8 @@
                                 <div class="flex justify-between items-start gap-4">
                                     <div class="flex-1">
                                         <div class="flex items-start justify-between mb-2">
-                                            <h4 class="font-semibold text-slate-900 flex-1">{{ pel.nama_pelatihan }}</h4>
+                                            <h4 class="font-semibold text-slate-900 flex-1">{{ pel.nama_pelatihan }}
+                                            </h4>
                                             <span
                                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ml-3"
                                                 :class="getJenisColor(pel.jenis_pelatihan ? pel.jenis_pelatihan.nama : 'Unknown')">
@@ -349,7 +353,7 @@
                                                 class="text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-2 text-sm">
                                                 <i class="fas fa-file-pdf"></i>
                                                 <span>{{ getFileName(pel.file_sertifikat) || 'Lihat Sertifikat'
-                                                    }}</span>
+                                                }}</span>
                                             </a>
                                             <span v-else class="text-xs text-slate-400">Tidak ada sertifikat</span>
 
@@ -364,7 +368,7 @@
                                                         class="text-emerald-600 mb-1 truncate max-w-28">
                                                         <i class="fas fa-file-pdf mr-1"></i>
                                                         <span class="text-sm">{{ getFileName(pel.file_sertifikat)
-                                                            }}</span>
+                                                        }}</span>
                                                     </div>
                                                     <div class="text-slate-500">
                                                         <i class="fas fa-cloud-upload mr-1"></i>

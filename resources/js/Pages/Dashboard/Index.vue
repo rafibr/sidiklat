@@ -1,5 +1,5 @@
 <template>
-    <AppLayout>
+    <AppLayout v-if="isAuthenticated">
         <div class="space-y-6 pb-24">
             <div v-if="loading"
                 class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
@@ -46,7 +46,7 @@
                             <i :class="card.icon" class="text-base"></i>
                         </div>
                         <span class="text-xs font-medium uppercase tracking-wider text-white/70">{{ card.caption
-                            }}</span>
+                        }}</span>
                     </div>
                     <div class="mt-6 space-y-1">
                         <p class="text-sm font-medium text-white/80">{{ card.label }}</p>
@@ -160,9 +160,9 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-lg font-semibold text-emerald-600">{{ employee.progress_percentage
-                                        }}%</p>
+                                    }}%</p>
                                     <p class="text-xs text-slate-500">{{ employee.jp_achieved }}/{{ employee.jp_target
-                                        }} JP</p>
+                                    }} JP</p>
                                 </div>
                             </div>
                         </div>
@@ -188,7 +188,7 @@
                                     <p class="text-lg font-semibold text-rose-600">{{ employee.progress_percentage }}%
                                     </p>
                                     <p class="text-xs text-slate-500">{{ employee.jp_achieved }}/{{ employee.jp_target
-                                        }} JP</p>
+                                    }} JP</p>
                                 </div>
                             </div>
                         </div>
@@ -203,7 +203,7 @@
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <h3 class="text-lg font-semibold text-slate-900">Distribusi Jenis Pelatihan</h3>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ selectedYear
-                            }}</span>
+                        }}</span>
                     </div>
                     <div class="mt-4 flex items-center justify-center">
                         <canvas ref="jenisChart" class="max-h-80 w-full"></canvas>
@@ -260,16 +260,204 @@
                 @change="changeYear" />
         </div>
     </AppLayout>
+
+    <GuestLayout v-else>
+        <div class="space-y-6 pb-24">
+            <div v-if="loading"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+                <div
+                    class="flex items-center space-x-3 rounded-xl border border-slate-200/70 bg-white px-6 py-4 shadow-lg">
+                    <span class="loading-spinner-small"></span>
+                    <span class="text-sm font-medium text-slate-600">Memuat data...</span>
+                </div>
+            </div>
+
+            <section ref="yearFilterCard"
+                class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
+                <div
+                    class="pointer-events-none absolute inset-x-0 -top-32 h-40 bg-gradient-to-b from-white/20 via-transparent to-transparent">
+                </div>
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                    <div class="space-y-2">
+                        <h1 class="text-2xl font-semibold">Dashboard Kinerja Diklat</h1>
+                        <p class="max-w-xl text-sm text-white/80">Pemantauan real-time terhadap pencapaian jam pelatihan
+                            pegawai dan efektivitas program belajar sepanjang tahun {{ selectedYear }}.</p>
+                    </div>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <div
+                            class="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white/80 shadow-lg backdrop-blur">
+                            <p class="font-medium text-white/90">Tahun aktif</p>
+                            <p class="text-lg font-semibold text-white">{{ selectedYear }}</p>
+                        </div>
+                        <div class="relative">
+                            <label class="sr-only" for="year-filter">Filter tahun</label>
+                            <select id="year-filter" :value="selectedYear" @change="changeYear($event.target.value)"
+                                class="w-48 rounded-xl border border-white/30 bg-white/20 px-4 py-3 text-sm text-white focus:border-white focus:ring-2 focus:ring-white/60 [&>option]:text-slate-900 [&>option]:bg-white">
+                                <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Copy semua content dari AppLayout section -->
+            <!-- Bagian summary cards, charts, dll sama persis -->
+            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div v-for="card in summaryCards" :key="card.label"
+                    :class="['flex flex-col justify-between rounded-2xl p-5 text-white shadow-xl ring-1 ring-black/5', card.surface]">
+                    <div class="flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl" :class="card.iconBackground">
+                            <i :class="card.icon" class="text-base"></i>
+                        </div>
+                        <span class="text-xs font-medium uppercase tracking-wider text-white/70">{{ card.caption
+                        }}</span>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-3xl font-bold">{{ card.value }}</p>
+                        <p class="mt-1 text-sm text-white/80">{{ card.label }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- JP Fulfillment Overview -->
+            <section
+                class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                    <h2 class="text-lg font-semibold text-slate-900">Ringkasan Pencapaian JP Pegawai</h2>
+                    <p class="mt-1 text-sm text-slate-600">Distribusi status pencapaian target JP tahun {{
+                        selectedYear }}</p>
+                </div>
+                <div class="p-6">
+                    <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="flex items-center gap-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                                <i class="fas fa-check-circle text-xl text-emerald-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-emerald-700">{{ jpFulfillment.categories.completed
+                                }}</p>
+                                <p class="text-sm text-emerald-600">Selesai (≥100%)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 rounded-xl border border-indigo-200 bg-indigo-50/50 p-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+                                <i class="fas fa-chart-line text-xl text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-indigo-700">{{ jpFulfillment.categories.on_track }}
+                                </p>
+                                <p class="text-sm text-indigo-600">On Track (75-99%)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+                                <i class="fas fa-exclamation-triangle text-xl text-amber-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-amber-700">{{ jpFulfillment.categories.behind }}</p>
+                                <p class="text-sm text-amber-600">Tertinggal (50-74%)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 rounded-xl border border-rose-200 bg-rose-50/50 p-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100">
+                                <i class="fas fa-times-circle text-xl text-rose-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-rose-700">{{ jpFulfillment.categories.critical }}</p>
+                                <p class="text-sm text-rose-600">Kritis (&lt;50%)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl bg-slate-50 p-4">
+                        <div class="mb-2 flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Progress Keseluruhan</span>
+                            <span class="text-lg font-bold text-indigo-600">{{ jpFulfillment.totals.overall_progress
+                                }}%</span>
+                        </div>
+                        <div class="h-3 w-full rounded-full bg-slate-200">
+                            <div class="h-3 rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all"
+                                :style="{ width: jpFulfillment.totals.overall_progress + '%' }"></div>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-600">
+                            {{ jpFulfillment.totals.jp_achieved }} JP dari {{ jpFulfillment.totals.jp_target }} JP
+                            target
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts and other sections -->
+            <section class="grid gap-6 lg:grid-cols-2">
+                <div
+                    class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+                    <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                        <h2 class="text-lg font-semibold text-slate-900">Distribusi Jenis Pelatihan</h2>
+                        <p class="mt-1 text-sm text-slate-600">Berdasarkan data tahun {{ selectedYear }}</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas ref="jenisChart" class="h-64"></canvas>
+                    </div>
+                </div>
+
+                <div
+                    class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+                    <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                        <h2 class="text-lg font-semibold text-slate-900">Top 10 Pegawai JP Tertinggi</h2>
+                        <p class="mt-1 text-sm text-slate-600">Pencapaian JP tahun {{ selectedYear }}</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            <div v-for="(pegawai, index) in progressPegawai" :key="pegawai.id"
+                                class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition-all hover:border-indigo-300 hover:bg-indigo-50/30">
+                                <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                                    :class="{
+                                        'bg-amber-100 text-amber-700': index === 0,
+                                        'bg-slate-200 text-slate-700': index === 1,
+                                        'bg-orange-100 text-orange-700': index === 2,
+                                        'bg-slate-100 text-slate-600': index > 2
+                                    }">
+                                    {{ index + 1 }}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-slate-900">{{ pegawai.nama }}</p>
+                                    <p class="truncate text-xs text-slate-500">{{ pegawai.unit_kerja || 'Tidak ada unit'
+                                    }}</p>
+                                </div>
+                                <div class="flex-shrink-0 text-right">
+                                    <p class="text-sm font-semibold text-indigo-600">{{ pegawai.jp_tercapai }} JP</p>
+                                    <p class="text-xs" :class="{
+                                        'text-emerald-600': pegawai.persentase >= 100,
+                                        'text-indigo-600': pegawai.persentase >= 75 && pegawai.persentase < 100,
+                                        'text-amber-600': pegawai.persentase >= 50 && pegawai.persentase < 75,
+                                        'text-rose-600': pegawai.persentase < 50
+                                    }">
+                                        {{ pegawai.persentase }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <FloatingYearFilter :selected-year="selectedYear" :years="availableYears" :visible="floatingYearVisible"
+                @change="changeYear" />
+        </div>
+    </GuestLayout>
 </template>
 
 <script>
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 import FloatingYearFilter from '@/Components/FloatingYearFilter.vue';
 
 export default {
     components: {
         AppLayout,
+        GuestLayout,
         FloatingYearFilter
     },
     props: {
@@ -279,6 +467,17 @@ export default {
         progressPegawai: Array,
         availableYears: Array,
         selectedYear: Number,
+        isAuthenticated: {
+            type: Boolean,
+            default: false
+        },
+    },
+    computed: {
+        layoutComponent() {
+            // Gunakan GuestLayout jika tidak terautentikasi, AppLayout jika terautentikasi
+            console.log('isAuthenticated:', this.isAuthenticated);
+            return this.isAuthenticated ? AppLayout : GuestLayout;
+        }
     },
     data() {
         return {

@@ -8,6 +8,9 @@ use App\Http\Controllers\PegawaiController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
+// Halaman utama bisa diakses tanpa login (untuk stakeholder/pimpinan)
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
@@ -15,8 +18,6 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
 
     // Pegawai routes

@@ -84,6 +84,9 @@ class DashboardController extends Controller
             rsort($availableYears);
         }
 
+        // Tentukan apakah user terautentikasi
+        $isAuthenticated = $request->user() !== null;
+
         return Inertia::render('Dashboard/Index', [
             'stats' => $stats,
             'jpFulfillment' => $jpFulfillment,
@@ -91,6 +94,7 @@ class DashboardController extends Controller
             'progressPegawai' => $progressPegawai,
             'availableYears' => $availableYears,
             'selectedYear' => $year,
+            'isAuthenticated' => $isAuthenticated,
         ]);
     }
 

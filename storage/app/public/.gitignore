@@ -1,5 +1,3 @@
 *
 !.gitignore
-# folder sertifikat dan isinya diabaikan oleh git
-# karena berisi file-file sensitif seperti file pdf
 sertifikat/

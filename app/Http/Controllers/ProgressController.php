@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Pegawai;
 use App\Models\Pelatihan;
+use App\Support\Database\DateQueryHelper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProgressController extends Controller
@@ -58,11 +58,16 @@ class ProgressController extends Controller
 		$unitKerjas = Pegawai::distinct('unit_kerja')->pluck('unit_kerja');
 
 		// Get available years from pelatihan data
-		$availableYears = Pelatihan::selectRaw('DISTINCT YEAR(tanggal_mulai) as year')
-			->whereNotNull('tanggal_mulai')
-			->orderByDesc('year')
-			->pluck('year')
-			->toArray();
+                $yearExpression = DateQueryHelper::yearExpression('tanggal_mulai');
+
+                $availableYears = Pelatihan::selectRaw("DISTINCT {$yearExpression} as year")
+                        ->whereNotNull('tanggal_mulai')
+                        ->orderByDesc('year')
+                        ->pluck('year')
+                        ->map(fn ($value) => (int) $value)
+                        ->filter()
+                        ->values()
+                        ->toArray();
 
 		// Ensure current year is in available years if not present
 		if (!in_array($year, $availableYears)) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pegawai;
 use App\Models\Pelatihan;
 use App\Models\JenisPelatihan;
+use App\Support\Database\DateQueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -59,11 +60,16 @@ class DashboardController extends Controller
 		});
 
 		// Get available years from pelatihan data
-		$availableYears = Pelatihan::selectRaw('DISTINCT YEAR(tanggal_mulai) as year')
-			->whereNotNull('tanggal_mulai')
-			->orderByDesc('year')
-			->pluck('year')
-			->toArray();
+                $yearExpression = DateQueryHelper::yearExpression('tanggal_mulai');
+
+                $availableYears = Pelatihan::selectRaw("DISTINCT {$yearExpression} as year")
+                        ->whereNotNull('tanggal_mulai')
+                        ->orderByDesc('year')
+                        ->pluck('year')
+                        ->map(fn ($value) => (int) $value)
+                        ->filter()
+                        ->values()
+                        ->toArray();
 
 		// Ensure current year is in available years if not present
 		if (!in_array($year, $availableYears)) {
@@ -81,8 +87,8 @@ class DashboardController extends Controller
 		]);
 	}
 
-	private function calculateAverageProgress($year)
-	{
+        private function calculateAverageProgress($year)
+        {
 		// Calculate average progress based on pelatihan data from specific year using yearly JP targets
 		$pegawais = Pegawai::select('pegawais.id')
 			->selectRaw('COALESCE(SUM(pelatihans.jp), 0) as jp_tercapai')
@@ -105,8 +111,8 @@ class DashboardController extends Controller
 		return $totalProgress / $pegawais->count();
 	}
 
-	private function calculateJpFulfillmentStats($year)
-	{
+        private function calculateJpFulfillmentStats($year)
+        {
 		// Get all employees with their JP progress for the year
 		$pegawais = Pegawai::select('pegawais.id', 'pegawais.nama_lengkap', 'pegawais.unit_kerja')
 			->selectRaw('COALESCE(SUM(pelatihans.jp), 0) as jp_tercapai')
@@ -168,36 +174,36 @@ class DashboardController extends Controller
 			return $b['progress_percentage'] <=> $a['progress_percentage'];
 		});
 
-		return [
-			'total_employees' => $totalEmployees,
-			'categories' => [
-				'completed' => $completed,
-				'on_track' => $onTrack,
-				'behind' => $behind,
-				'critical' => $critical
-			],
-			'percentages' => [
-				'completed' => $totalEmployees > 0 ? round(($completed / $totalEmployees) * 100, 1) : 0,
-				'on_track' => $totalEmployees > 0 ? round(($onTrack / $totalEmployees) * 100, 1) : 0,
-				'behind' => $totalEmployees > 0 ? round(($behind / $totalEmployees) * 100, 1) : 0,
-				'critical' => $totalEmployees > 0 ? round(($critical / $totalEmployees) * 100, 1) : 0
-			],
-			'totals' => [
-				'jp_target' => $totalJpTarget,
-				'jp_achieved' => $totalJpAchieved,
-				'overall_progress' => $totalJpTarget > 0 ? round(($totalJpAchieved / $totalJpTarget) * 100, 1) : 0
-			],
-			'top_performers' => array_slice($employeeDetails, 0, 5), // Top 5
-			'needs_attention' => array_slice(array_reverse($employeeDetails), 0, 5) // Bottom 5
-		];
-	}
+                return [
+                        'total_employees' => $totalEmployees,
+                        'categories' => [
+                                'completed' => $completed,
+                                'on_track' => $onTrack,
+                                'behind' => $behind,
+                                'critical' => $critical
+                        ],
+                        'percentages' => [
+                                'completed' => $totalEmployees > 0 ? round(($completed / $totalEmployees) * 100, 1) : 0,
+                                'on_track' => $totalEmployees > 0 ? round(($onTrack / $totalEmployees) * 100, 1) : 0,
+                                'behind' => $totalEmployees > 0 ? round(($behind / $totalEmployees) * 100, 1) : 0,
+                                'critical' => $totalEmployees > 0 ? round(($critical / $totalEmployees) * 100, 1) : 0
+                        ],
+                        'totals' => [
+                                'jp_target' => $totalJpTarget,
+                                'jp_achieved' => $totalJpAchieved,
+                                'overall_progress' => $totalJpTarget > 0 ? round(($totalJpAchieved / $totalJpTarget) * 100, 1) : 0
+                        ],
+                        'top_performers' => array_slice($employeeDetails, 0, 5), // Top 5
+                        'needs_attention' => array_slice(array_reverse($employeeDetails), 0, 5) // Bottom 5
+                ];
+        }
 
-	/**
-	 * Get mobile stats for quick display
-	 */
-	public function mobileStats()
-	{
-		$currentYear = now()->year;
+        /**
+         * Get mobile stats for quick display
+         */
+        public function mobileStats()
+        {
+                $currentYear = now()->year;
 
 		$stats = [
 			'total_pegawai' => Pegawai::count(),

@@ -5,21 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Pelatihan;
 use App\Models\Pegawai;
 use App\Models\JenisPelatihan;
+use App\Support\Database\DateQueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 
 class PelatihanController extends Controller
 {
     public function comparison(Request $request)
     {
-        // Get available years from tanggal_mulai using YEAR()
-        $availableYears = Pelatihan::selectRaw('YEAR(tanggal_mulai) as year')
-            ->groupBy('year')
+        $yearExpression = DateQueryHelper::yearExpression('tanggal_mulai');
+
+        // Get available years from tanggal_mulai using driver-safe expression
+        $availableYears = Pelatihan::selectRaw("{$yearExpression} as year")
+            ->whereNotNull('tanggal_mulai')
+            ->groupByRaw($yearExpression)
             ->orderBy('year', 'desc')
             ->pluck('year')
+            ->map(fn ($value) => (int) $value)
             ->filter()
             ->values();
 
@@ -79,6 +83,8 @@ class PelatihanController extends Controller
     {
         $query = Pelatihan::with(['pegawai', 'jenisPelatihan']);
 
+        $yearExpression = DateQueryHelper::yearExpression('tanggal_mulai');
+
         // Filter by jenis pelatihan
         if ($request->filled('jenis')) {
             // Accept jenis nama (string) and find corresponding ID
@@ -117,10 +123,12 @@ class PelatihanController extends Controller
         $pegawais = Pegawai::select('id', 'nama_lengkap')->orderBy('nama_lengkap')->get();
 
         // Get available years from pelatihan data
-        $availableYears = Pelatihan::selectRaw('YEAR(tanggal_mulai) as year')
-            ->groupBy('year')
+        $availableYears = Pelatihan::selectRaw("{$yearExpression} as year")
+            ->whereNotNull('tanggal_mulai')
+            ->groupByRaw($yearExpression)
             ->orderBy('year', 'desc')
             ->pluck('year')
+            ->map(fn ($value) => (int) $value)
             ->filter()
             ->values();
 

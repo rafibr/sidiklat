@@ -170,20 +170,20 @@
                                     <div class="flex items-center justify-between mb-2">
                                         <h4 class="font-semibold text-slate-900">{{ year }}</h4>
                                         <span class="text-sm font-medium"
-                                            :class="getYearProgressPercentage(data.totalJP) >= 100 ? 'text-emerald-600' : 'text-amber-600'">
-                                            {{ data.totalJP }} JP ({{ getYearProgressPercentage(data.totalJP) }}%)
+                                            :class="getYearProgressPercentage(data.totalJP, data.targetJP) >= 100 ? 'text-emerald-600' : 'text-amber-600'">
+                                            {{ formatNumber(data.totalJP || 0) }} JP ({{
+                                                getYearProgressPercentage(data.totalJP, data.targetJP) }}%)
                                         </span>
                                     </div>
                                     <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
                                         <div class="h-2 rounded-full transition-all duration-300"
-                                            :class="getYearProgressBgColor(data.totalJP)"
-                                            :style="`width: ${Math.min(getYearProgressPercentage(data.totalJP), 100)}%`">
+                                            :class="getYearProgressBgColor(data.totalJP, data.targetJP)"
+                                            :style="`width: ${Math.min(getYearProgressPercentage(data.totalJP, data.targetJP), 100)}%`">
                                         </div>
                                     </div>
                                     <div class="text-sm text-slate-600">
-                                        {{ (data.pelatihan && data.pelatihan.length) || 0 }} pelatihan • Target: {{
-                                            pegawai.jp_target || 20 }}
-                                        JP/tahun
+                                        {{ (data.pelatihan && data.pelatihan.length) || 0 }} pelatihan - Target: {{
+                                            formatNumber(data.targetJP || 0) }} JP/tahun
                                     </div>
                                 </div>
                             </div>
@@ -481,8 +481,8 @@ export default {
             if (!this.selectedYear) {
                 return this.getAllPelatihan();
             }
-            const y = this.pelatihansByYear[this.selectedYear] || {};
-            return Array.isArray(y.pelatihan) ? y.pelatihan : [];
+            const yearData = this.displayedPelatihansByYear[this.selectedYear];
+            return yearData && Array.isArray(yearData.pelatihan) ? yearData.pelatihan : [];
         },
 
         filteredPelatihansByYear() {
@@ -676,7 +676,7 @@ export default {
             let maxCount = 0;
             let mostActiveYear = '';
 
-            Object.entries(this.pelatihansByYear || {}).forEach(([year, data]) => {
+            Object.entries(this.displayedPelatihansByYear || {}).forEach(([year, data]) => {
                 const list = data && Array.isArray(data.pelatihan) ? data.pelatihan : [];
                 if (list.length > maxCount) {
                     maxCount = list.length;
@@ -690,7 +690,7 @@ export default {
         getMostActiveYearCount() {
             let maxCount = 0;
 
-            Object.entries(this.pelatihansByYear || {}).forEach(([year, data]) => {
+            Object.entries(this.displayedPelatihansByYear || {}).forEach(([year, data]) => {
                 const list = data && Array.isArray(data.pelatihan) ? data.pelatihan : [];
                 if (list.length > maxCount) {
                     maxCount = list.length;
@@ -704,9 +704,10 @@ export default {
             let maxJP = 0;
             let year = '';
 
-            Object.entries(this.pelatihansByYear || {}).forEach(([y, data]) => {
-                if (data.totalJP > maxJP) {
-                    maxJP = data.totalJP;
+            Object.entries(this.displayedPelatihansByYear || {}).forEach(([y, data]) => {
+                const totalJP = data && typeof data.totalJP === 'number' ? data.totalJP : 0;
+                if (totalJP > maxJP) {
+                    maxJP = totalJP;
                     year = y;
                 }
             });
@@ -724,13 +725,15 @@ export default {
             return result.year;
         },
 
-        getYearProgressPercentage(jp) {
-            const target = this.pegawai.jp_target || 20;
-            return Math.round((jp / target) * 100);
+        getYearProgressPercentage(jp, target) {
+            const targetValue = Number(target);
+            const achieved = Number(jp) || 0;
+            if (!Number.isFinite(targetValue) || targetValue <= 0) return 0;
+            return Math.round((achieved / targetValue) * 100);
         },
 
-        getYearProgressBgColor(jp) {
-            const percentage = this.getYearProgressPercentage(jp);
+        getYearProgressBgColor(jp, target) {
+            const percentage = this.getYearProgressPercentage(jp, target);
             if (percentage >= 100) return 'bg-emerald-600';
             if (percentage >= 75) return 'bg-indigo-600';
             if (percentage >= 50) return 'bg-amber-600';

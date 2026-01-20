@@ -109,12 +109,12 @@ class PelatihanController extends Controller
             });
         }
 
-        // Allow client to request per-page via query param (default 25, max 200)
+        // Allow client to request per-page via query param (default 25, max 500)
         $perPage = (int) $request->get('per_page', 25);
         if ($perPage <= 0) {
             $perPage = 25;
         }
-        $perPage = min($perPage, 200);
+        $perPage = min($perPage, 500);
 
         $pelatihans = $query->latest()->paginate($perPage)->withQueryString();
         // Provide jenis list from DB (id + nama) for filters/forms

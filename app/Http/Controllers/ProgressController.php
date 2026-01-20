@@ -15,13 +15,19 @@ class ProgressController extends Controller
 		// Get year filter, default to current year
 		$year = $request->get('year', now()->year);
 
-		$query = Pegawai::select('pegawais.*')
+		$query = Pegawai::select(
+			'pegawais.id',
+			'pegawais.nama_lengkap',
+			'pegawais.nip',
+			'pegawais.pangkat_golongan',
+			'pegawais.unit_kerja'
+		)
 			->selectRaw('COALESCE(SUM(pelatihans.jp), 0) as jp_tercapai_filtered')
 			->leftJoin('pelatihans', function ($join) use ($year) {
 				$join->on('pegawais.id', '=', 'pelatihans.pegawai_id')
 					->whereYear('pelatihans.tanggal_mulai', $year);
 			})
-			->groupBy('pegawais.id');
+			->groupBy('pegawais.id', 'pegawais.nama_lengkap', 'pegawais.nip', 'pegawais.pangkat_golongan', 'pegawais.unit_kerja');
 
 		// Filter by unit kerja
 		if ($request->filled('unit_kerja')) {

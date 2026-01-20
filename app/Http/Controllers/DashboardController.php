@@ -218,10 +218,10 @@ class DashboardController extends Controller
 
         $stats = [
             'total_pegawai' => Pegawai::count(),
-            'active_training' => Pelatihan::where('status', 'Sedang Berjalan')
+            'active_training' => Pelatihan::where('status', 'sedang_berjalan')
                 ->whereYear('tanggal_mulai', $currentYear)
                 ->count(),
-            'completed_training' => Pelatihan::where('status', 'Selesai')
+            'completed_training' => Pelatihan::where('status', 'selesai')
                 ->whereYear('tanggal_mulai', $currentYear)
                 ->count(),
             'total_jp_this_year' => Pelatihan::whereYear('tanggal_mulai', $currentYear)->sum('jp'),

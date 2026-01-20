@@ -434,7 +434,7 @@ export default {
 				const total = p.total || this.totalPelatihans;
 				const from = (current - 1) * per + 1;
 				const to = Math.min(current * per, total);
-				return `${from}–${to} dari ${total}`;
+				return `${from}-${to} dari ${total}`;
 			}
 
 			const current = p.meta.current_page || p.meta.current_page === 0 ? p.meta.current_page : (p.current_page || 1);
@@ -442,7 +442,7 @@ export default {
 			const total = p.meta.total || p.total || this.totalPelatihans;
 			const from = (current - 1) * per + 1;
 			const to = Math.min(current * per, total);
-			return `${from}–${to} dari ${total}`;
+			return `${from}-${to} dari ${total}`;
 		}
 		,
 		editingCount() {

@@ -43,9 +43,9 @@
 
                             <FormField label="Status" :error="errors.status" required>
                                 <select id="status" v-model="form.status" class="form-input" required>
-                                    <option value="aktif">Aktif</option>
-                                    <option value="tidak_aktif">Tidak aktif</option>
-                                    <option value="pensiun">Pensiun</option>
+                                    <option value="ASN">ASN</option>
+                                    <option value="PTT">PTT</option>
+                                    <option value="T. Kontrak">T. Kontrak</option>
                                 </select>
                             </FormField>
                         </div>
@@ -111,7 +111,7 @@ export default {
             pangkat_golongan: '',
             jabatan: '',
             unit_kerja: '',
-            status: 'aktif',
+            status: 'ASN',
             email: '',
             telepon: '',
             tanggal_pengangkatan: '',

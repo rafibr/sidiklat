@@ -2,12 +2,12 @@
     <AppLayout>
         <div class="space-y-6 pb-12">
             <nav class="text-xs text-slate-500">
-                <Link :href="route('pegawai.index')" class="hover:text-indigo-600">Data pegawai</Link>
+                <Link :href="route('pegawai.index')" class="hover:text-sky-700">Data pegawai</Link>
                 <span class="mx-2">/</span>
                 <span class="text-slate-700">Tambah pegawai</span>
             </nav>
 
-            <section class="rounded-2xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
+            <section class="rounded-xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
                 <div class="mb-6 flex flex-col gap-2">
                     <h1 class="text-xl font-semibold text-slate-900">Tambah pegawai baru</h1>
                     <p class="text-sm text-slate-500">Lengkapi data pegawai untuk memulai pemantauan progres pelatihan.</p>
@@ -25,7 +25,7 @@
 
                             <FormField label="NIP" :error="errors.nip">
                                 <input id="nip" v-model="form.nip" type="text" class="form-input" placeholder="Opsional" />
-                                <p class="mt-1 text-xs text-slate-400">Kosongkan jika belum tersedia.</p>
+                                <p class="mt-1 text-xs text-slate-500">Kosongkan jika belum tersedia.</p>
                             </FormField>
 
                             <FormField label="Pangkat / golongan" :error="errors.pangkat_golongan">
@@ -68,7 +68,7 @@
                             <FormField label="Target JP tahunan" :error="errors.jp_target">
                                 <input id="jp_target" v-model.number="form.jp_target" type="number" min="0" class="form-input"
                                     :placeholder="`Default ${jpDefault} JP`" />
-                                <p class="mt-1 text-xs text-slate-400">Biarkan kosong untuk mengikuti target default instansi.</p>
+                                <p class="mt-1 text-xs text-slate-500">Biarkan kosong untuk mengikuti target default instansi.</p>
                             </FormField>
 
                             <FormField label="Catatan tambahan" :error="errors.keterangan">
@@ -82,7 +82,7 @@
                         <Link :href="route('pegawai.index')"
                             class="inline-flex items-center justify-center rounded-xl border border-slate-200/70 px-5 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-slate-400">Batal</Link>
                         <button type="submit" :disabled="form.processing"
-                            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-70">
+                            class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70">
                             <i v-if="form.processing" class="fas fa-spinner fa-spin mr-2"></i>
                             <span>{{ form.processing ? 'Menyimpan...' : 'Simpan pegawai' }}</span>
                         </button>

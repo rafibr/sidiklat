@@ -1,12 +1,12 @@
 <template>
 	<AppLayout>
-                <div class="relative space-y-6 p-3 sm:p-4 md:p-6 animate-slide-up">
+                <div class="relative space-y-6">
                         <!-- Loading overlay -->
                         <div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
-                                <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                <div class="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                        <div class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 p-6 text-white shadow-xl animate-fade-scale">
-                                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.3),_transparent_60%)]"></div>
+                        <div class="relative overflow-hidden rounded-xl border border-sky-200/60 bg-slate-900 p-6 text-white shadow-sm">
+
                                 <div class="relative space-y-3">
                                         <h2 class="text-lg sm:text-xl md:text-2xl font-semibold">Progress Jam Pelajaran (JP) Pegawai</h2>
                                         <p class="text-sm text-white/80 max-w-3xl">Pantau capaian Jam Pelajaran tiap pegawai berdasarkan unit kerja dan temukan siapa yang membutuhkan pendampingan tambahan.</p>
@@ -14,13 +14,13 @@
                         </div>
 
                         <!-- Filters -->
-                        <form method="GET" class="rounded-2xl border border-indigo-100 bg-white/80 p-4 shadow-sm backdrop-blur animate-slide-left delay-100"
+                        <form method="GET" class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm  animate-slide-left delay-100"
                                 @submit.prevent="submitFilter">
                                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
                                                 <div>
                                                         <label class="mb-2 block text-sm font-medium text-slate-700">Filter Tahun</label>
                                                         <select v-model="filters.year"
-                                                                class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">
+                                                                class="w-full rounded-xl border border-sky-100 px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40">
                                                                 <option v-for="year in availableYears" :key="year" :value="year">
                                                                         {{ year }}
                                                                 </option>
@@ -30,13 +30,13 @@
                                                 <div>
                                                         <label class="mb-2 block text-sm font-medium text-slate-700">Cari Pegawai</label>
                                                         <input type="text" v-model="filters.search" placeholder="Nama pegawai..."
-                                                                class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40" />
+                                                                class="w-full rounded-xl border border-sky-100 px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40" />
                                                 </div>
 
                                                 <div>
                                                         <label class="mb-2 block text-sm font-medium text-slate-700">Unit Kerja</label>
                                                         <select v-model="filters.unit_kerja"
-                                                                class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">
+                                                                class="w-full rounded-xl border border-sky-100 px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40">
                                                                 <option value="">Semua Unit</option>
                                                                 <option v-for="unit in unitKerjas" :key="unit" :value="unit">
                                                                         {{ unit }}
@@ -46,7 +46,7 @@
 
 						<div class="flex items-end gap-2">
                                                         <button type="submit"
-                                                                class="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg sm:flex-none">
+                                                                class="flex-1 rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg sm:flex-none">
                                                                 <i class="fas fa-search mr-1 sm:mr-2"></i>
                                                                 <span class="hidden sm:inline">Filter</span>
                                                                 <span class="sm:hidden">Cari</span>
@@ -63,7 +63,7 @@
                         <div class="grid gap-4"
                                 :class="{ 'animate-slide-up delay-200': animationsReady, 'opacity-0': !animationsReady }">
                                 <Link v-for="pegawai in pegawais.data" :key="pegawai.id" :href="route('pegawai.show', pegawai.id)"
-                                        class="block overflow-hidden rounded-2xl border border-indigo-100 bg-white/90 shadow-sm backdrop-blur transition-all hover:-translate-y-1 hover:shadow-xl">
+                                        class="block overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm  transition-all  hover:shadow-sm">
                                 <div class="p-3 sm:p-4 md:p-5">
                                         <div class="flex items-center justify-between gap-3">
                                                 <div class="flex-1 min-w-0">
@@ -114,8 +114,8 @@
                         <div v-if="pegawais.links" class="mt-6">
                                 <div class="flex justify-center space-x-2">
                                         <button v-for="link in pegawais.links" :key="link.label" @click="changePage(link.url)"
-                                                :disabled="!link.url" class="rounded-lg border border-indigo-100 px-3 py-2 text-sm transition"
-                                                :class="link.active ? 'bg-gradient-to-r from-indigo-600 to-sky-500 text-white shadow-md' : 'bg-white/80 text-slate-600 hover:bg-slate-100'"
+                                                :disabled="!link.url" class="rounded-lg border border-sky-100 px-3 py-2 text-sm transition"
+                                                :class="link.active ? 'bg-sky-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100'"
                                                 v-html="link.label"></button>
                                 </div>
                         </div>
@@ -174,9 +174,9 @@ export default {
 		},
 		getJenisColor(jenis) {
 			const colorMap = {
-				'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+				'Diklat Struktural': 'bg-sky-100 text-sky-700',
 				'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
-				'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+				'Diklat Teknis': 'bg-sky-100 text-sky-700',
 				'Workshop': 'bg-amber-100 text-amber-700'
 			};
 			return colorMap[jenis] || 'bg-gray-100 text-gray-800';

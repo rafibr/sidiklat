@@ -1,8 +1,8 @@
 <template>
     <AppLayout>
         <div class="space-y-6 pb-12">
-            <section class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
-                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]"></div>
+            <section class="relative overflow-hidden rounded-xl border border-sky-200/60 bg-slate-900 px-5 py-6 text-white shadow-sm">
+
                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 class="text-xl font-semibold">Data Pegawai</h1>
@@ -15,7 +15,7 @@
                             Pengaturan JP
                         </button>
                         <Link :href="route('pegawai.create')"
-                            class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-slate-100">
+                            class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-sky-700 shadow-lg transition hover:bg-slate-100">
                             <i class="fas fa-plus"></i>
                             Tambah pegawai
                         </Link>
@@ -23,25 +23,25 @@
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-slate-200/70 bg-white px-5 py-5 shadow-sm">
+            <section class="rounded-xl border border-slate-200/70 bg-white px-5 py-5 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="relative flex-1">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
                         <input type="text" v-model="searchForm.search" @input="search" placeholder="Cari nama, NIP, atau unit kerja"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-10 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                            class="w-full rounded-xl border border-slate-200 bg-white px-10 py-3 text-sm text-slate-700 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30">
                     </div>
                     <button v-if="searchForm.search" @click="clearSearch"
                         class="text-sm font-medium text-slate-500 hover:text-slate-700">Reset pencarian</button>
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-slate-200/70 bg-white shadow-sm">
+            <section class="rounded-xl border border-slate-200/70 bg-white shadow-sm">
                 <div class="flex flex-col gap-3 px-5 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <p class="text-sm text-slate-500">Menampilkan <span class="font-semibold text-slate-900">{{ pegawais.from }}-{{ pegawais.to }}</span> dari <span class="font-semibold text-slate-900">{{ pegawais.total }}</span> pegawai.</p>
                     <div class="flex items-center gap-2 text-sm text-slate-500">
                         <label for="per-page" class="hidden sm:inline">Baris per halaman</label>
                         <select id="per-page" v-model.number="perPage" @change="updatePerPage"
-                            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30">
                             <option :value="10">10</option>
                             <option :value="25">25</option>
                             <option :value="50">50</option>
@@ -51,7 +51,7 @@
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-100 text-sm">
-                        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <thead class="bg-slate-50 text-left text-xs font-semibold text-slate-500">
                             <tr>
                                 <th class="px-5 py-3">Pegawai</th>
                                 <th class="px-5 py-3">Unit & Jabatan</th>
@@ -64,7 +64,7 @@
                             <tr v-for="pegawai in pegawais.data" :key="pegawai.id" class="hover:bg-slate-50/60">
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-700">
                                             <i class="fas fa-user"></i>
                                         </div>
                                         <div>
@@ -103,15 +103,15 @@
                                             <i class="fas fa-phone"></i>
                                             <span>{{ pegawai.telepon }}</span>
                                         </p>
-                                        <p v-if="!pegawai.email && !pegawai.telepon" class="italic text-slate-400">Kontak belum diatur</p>
+                                        <p v-if="!pegawai.email && !pegawai.telepon" class="italic text-slate-500">Kontak belum diatur</p>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4">
                                     <div class="flex items-center justify-end gap-2 text-sm">
-                                        <Link :href="route('pegawai.show', pegawai.id)" class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 hover:border-indigo-500 hover:text-indigo-600">
+                                        <Link :href="route('pegawai.show', pegawai.id)" class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 hover:border-sky-500 hover:text-sky-700">
                                             <i class="fas fa-eye"></i>
                                         </Link>
-                                        <Link :href="route('pegawai.edit', pegawai.id)" class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 hover:border-indigo-500 hover:text-indigo-600">
+                                        <Link :href="route('pegawai.edit', pegawai.id)" class="rounded-lg border border-slate-200/70 px-3 py-2 text-slate-600 hover:border-sky-500 hover:text-sky-700">
                                             <i class="fas fa-pen"></i>
                                         </Link>
                                         <button @click="confirmDelete(pegawai)"
@@ -129,17 +129,17 @@
                         <template v-for="(link, index) in pegawais.links" :key="index">
                             <Link v-if="link.url && link.label !== '...'" :href="link.url"
                                 class="rounded-lg border border-slate-200/70 px-3 py-2"
-                                :class="link.active ? 'border-indigo-500 bg-indigo-50 text-indigo-600 font-semibold' : 'text-slate-600 hover:border-indigo-400 hover:text-indigo-600'"
+                                :class="link.active ? 'border-sky-500 bg-sky-50 text-sky-700 font-semibold' : 'text-slate-600 hover:border-sky-400 hover:text-sky-700'"
                                 v-html="link.label" />
-                            <span v-else class="px-3 py-2 text-slate-400">...</span>
+                            <span v-else class="px-3 py-2 text-slate-500">...</span>
                         </template>
                     </nav>
                 </div>
             </section>
 
-            <div v-if="pegawais.data.length === 0" class="rounded-2xl border border-dashed border-slate-200/70 bg-slate-50 py-12 text-center">
+            <div v-if="pegawais.data.length === 0" class="rounded-xl border border-dashed border-slate-200/70 bg-slate-50 py-12 text-center">
                 <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
-                    <i class="fas fa-users text-2xl text-slate-400"></i>
+                    <i class="fas fa-users text-2xl text-slate-500"></i>
                 </div>
                 <h3 class="mt-4 text-lg font-semibold text-slate-800">Belum ada data pegawai</h3>
                 <p class="mt-1 text-sm text-slate-500">Mulai dengan menambahkan pegawai baru untuk memonitor progres JP.</p>
@@ -149,10 +149,10 @@
         <transition name="fade">
             <div v-if="showJpSettingsModal" class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 px-4"
                 @click.self="showJpSettingsModal = false">
-                <div class="w-full max-w-md rounded-2xl border border-slate-200/70 bg-white p-6 shadow-2xl">
+                <div class="w-full max-w-md rounded-xl border border-slate-200/70 bg-white p-6 shadow-lg">
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-slate-900">Pengaturan target JP tahunan</h2>
-                        <button @click="showJpSettingsModal = false" class="text-slate-400 hover:text-slate-600">
+                        <button @click="showJpSettingsModal = false" class="text-slate-500 hover:text-slate-600">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -160,14 +160,14 @@
                         <div>
                             <label for="tahun" class="block text-sm font-medium text-slate-600">Tahun</label>
                             <select id="tahun" v-model.number="jpSettingsForm.tahun"
-                                class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                                class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30">
                                 <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
                             </select>
                         </div>
                         <div>
                             <label for="jp_default" class="block text-sm font-medium text-slate-600">JP target default</label>
                             <input id="jp_default" type="number" min="0" v-model.number="jpSettingsForm.jp_default"
-                                class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">
+                                class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30">
                             <p class="mt-2 text-xs text-slate-500">Nilai ini akan diterapkan ke seluruh pegawai untuk tahun {{ jpSettingsForm.tahun }}.</p>
                         </div>
                         <div class="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-xs text-amber-700">
@@ -177,7 +177,7 @@
                             <button type="button" @click="showJpSettingsModal = false"
                                 class="rounded-xl border border-slate-200/70 px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-400">Batal</button>
                             <button type="submit"
-                                class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">Simpan</button>
+                                class="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">Simpan</button>
                         </div>
                     </form>
                 </div>
@@ -187,7 +187,7 @@
         <transition name="fade">
             <div v-if="showDeleteModal" class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 px-4"
                 @click.self="showDeleteModal = false">
-                <div class="w-full max-w-md rounded-2xl border border-slate-200/70 bg-white p-6 shadow-2xl">
+                <div class="w-full max-w-md rounded-xl border border-slate-200/70 bg-white p-6 shadow-lg">
                     <div class="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-600">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
@@ -285,7 +285,7 @@ export default {
         const getProgressColor = (achieved, target) => {
             const progress = calculateProgress({ jp_tercapai: achieved, jp_target_display: target || props.jpDefault });
             if (progress >= 100) return 'text-emerald-600';
-            if (progress >= 75) return 'text-indigo-600';
+            if (progress >= 75) return 'text-sky-700';
             if (progress >= 50) return 'text-amber-600';
             return 'text-rose-600';
         };
@@ -293,13 +293,13 @@ export default {
         const getProgressBgColor = (achieved, target) => {
             const progress = calculateProgress({ jp_tercapai: achieved, jp_target_display: target || props.jpDefault });
             if (progress >= 100) return 'bg-emerald-600';
-            if (progress >= 75) return 'bg-indigo-600';
+            if (progress >= 75) return 'bg-sky-700';
             if (progress >= 50) return 'bg-amber-600';
             return 'bg-rose-600';
         };
 
         const palette = [
-            'bg-indigo-100 text-indigo-700',
+            'bg-sky-100 text-sky-700',
             'bg-emerald-100 text-emerald-700',
             'bg-sky-100 text-sky-700',
             'bg-amber-100 text-amber-700',

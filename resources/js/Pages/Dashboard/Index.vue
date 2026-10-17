@@ -2,7 +2,7 @@
     <AppLayout v-if="isAuthenticated">
         <div class="space-y-6 pb-24">
             <div v-if="loading"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-white/70">
                 <div
                     class="flex items-center space-x-3 rounded-xl border border-slate-200/70 bg-white px-6 py-4 shadow-lg">
                     <span class="loading-spinner-small"></span>
@@ -11,10 +11,8 @@
             </div>
 
             <section ref="yearFilterCard"
-                class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
-                <div
-                    class="pointer-events-none absolute inset-x-0 -top-32 h-40 bg-gradient-to-b from-white/20 via-transparent to-transparent">
-                </div>
+                class="relative overflow-hidden rounded-xl border border-sky-200/60 bg-slate-900 px-5 py-6 text-white shadow-sm">
+
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                     <div class="space-y-2">
                         <h1 class="text-2xl font-semibold">Dashboard Kinerja Diklat</h1>
@@ -23,7 +21,7 @@
                     </div>
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <div
-                            class="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white/80 shadow-lg backdrop-blur">
+                            class="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white/80 shadow-lg">
                             <p class="font-medium text-white/90">Tahun aktif</p>
                             <p class="text-lg font-semibold text-white">{{ selectedYear }}</p>
                         </div>
@@ -40,24 +38,24 @@
 
             <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <div v-for="card in summaryCards" :key="card.label"
-                    :class="['flex flex-col justify-between rounded-2xl p-5 text-white shadow-xl ring-1 ring-black/5', card.surface]">
+                    :class="['flex flex-col justify-between rounded-xl p-5 text-slate-900 shadow-sm', card.surface]">
                     <div class="flex items-center justify-between">
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl" :class="card.iconBackground">
                             <i :class="card.icon" class="text-base"></i>
                         </div>
-                        <span class="text-xs font-medium uppercase tracking-wider text-white/70">{{ card.caption
+                        <span class="text-xs font-medium text-slate-600">{{ card.caption
                         }}</span>
                     </div>
                     <div class="mt-6 space-y-1">
-                        <p class="text-sm font-medium text-white/80">{{ card.label }}</p>
-                        <p class="text-2xl font-semibold text-white">{{ card.value }}</p>
+                        <p class="text-sm font-medium text-slate-600">{{ card.label }}</p>
+                        <p class="text-2xl font-semibold text-slate-900">{{ card.value }}</p>
                     </div>
                 </div>
             </section>
 
             <section class="grid gap-6 lg:grid-cols-3">
                 <div
-                    class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur lg:col-span-2">
+                    class="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm  lg:col-span-2">
                     <div
                         class="flex flex-col gap-4 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -66,7 +64,7 @@
                                 tahun {{ selectedYear }}.</p>
                         </div>
                         <div class="rounded-xl bg-slate-50 px-4 py-2 text-sm text-slate-500">
-                            <span class="font-semibold text-indigo-600 text-lg">{{
+                            <span class="font-semibold text-sky-700 text-lg">{{
                                 jpFulfillment?.totals?.overall_progress || 0 }}%</span>
                             <span class="ml-2">progres keseluruhan</span>
                         </div>
@@ -84,7 +82,7 @@
                                     formatNumber(jpFulfillment?.totals?.jp_target || 0) }} JP</span>
                             </div>
                             <div class="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500"
+                                <div class="h-full rounded-full bg-sky-700 transition-all duration-500"
                                     :style="{ width: Math.min(100, jpFulfillment?.totals?.overall_progress || 0) + '%' }">
                                 </div>
                             </div>
@@ -101,7 +99,7 @@
                                 </li>
                                 <li class="flex items-center justify-between">
                                     <span class="flex items-center gap-2"><span
-                                            class="status-dot bg-indigo-600"></span>On track</span>
+                                            class="status-dot bg-sky-700"></span>On track</span>
                                     <span class="font-semibold text-slate-900">{{ jpFulfillment?.categories?.on_track ||
                                         0 }} pegawai</span>
                                 </li>
@@ -121,7 +119,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-slate-900">Sebaran Kategori</h3>
                     <p class="mt-2 text-sm text-slate-500">Persentase pegawai berdasarkan status pemenuhan target.</p>
                     <ul class="mt-5 space-y-4">
@@ -144,10 +142,10 @@
             </section>
 
             <section class="grid gap-6 lg:grid-cols-2">
-                <div class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <h3 class="text-lg font-semibold text-slate-900">Top performer</h3>
-                        <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Pencapaian
+                        <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Pencapaian
                             tertinggi</span>
                     </div>
                     <div class="mt-4 space-y-4">
@@ -170,10 +168,10 @@
                             Belum ada data top performer untuk tahun ini.</p>
                     </div>
                 </div>
-                <div class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <h3 class="text-lg font-semibold text-slate-900">Perlu perhatian</h3>
-                        <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Prioritas
+                        <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Prioritas
                             pendampingan</span>
                     </div>
                     <div class="mt-4 space-y-4">
@@ -199,25 +197,25 @@
             </section>
 
             <section class="grid gap-6 lg:grid-cols-2">
-                <div class="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <h3 class="text-lg font-semibold text-slate-900">Distribusi Jenis Pelatihan</h3>
-                        <span class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ selectedYear
+                        <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ selectedYear
                         }}</span>
                     </div>
                     <div class="mt-4 flex items-center justify-center">
                         <canvas ref="jenisChart" class="max-h-80 w-full"></canvas>
                     </div>
                 </div>
-                <div class="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <h3 class="text-lg font-semibold text-slate-900">Progress terbaru pegawai</h3>
-                        <span class="text-xs font-medium uppercase tracking-wide text-slate-400">7 entri terbaru</span>
+                        <span class="text-xs font-medium uppercase tracking-wide text-slate-500">7 entri terbaru</span>
                     </div>
-                    <div class="mt-4 overflow-hidden rounded-xl border border-slate-200/70 bg-white">
+                    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200/70 bg-white">
                         <table class="min-w-full text-sm">
                             <thead
-                                class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                class="bg-slate-50 text-left text-xs font-semibold text-slate-500">
                                 <tr>
                                     <th class="px-4 py-3">Pegawai</th>
                                     <th class="px-4 py-3">Unit</th>
@@ -240,7 +238,7 @@
                                             </span>
                                         </div>
                                         <div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                                            <div class="h-full rounded-full bg-indigo-600"
+                                            <div class="h-full rounded-full bg-sky-700"
                                                 :style="{ width: Math.min(100, item.persentase) + '%' }"></div>
                                         </div>
                                     </td>
@@ -264,7 +262,7 @@
     <GuestLayout v-else>
         <div class="space-y-6 pb-24">
             <div v-if="loading"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-white/70">
                 <div
                     class="flex items-center space-x-3 rounded-xl border border-slate-200/70 bg-white px-6 py-4 shadow-lg">
                     <span class="loading-spinner-small"></span>
@@ -273,10 +271,8 @@
             </div>
 
             <section ref="yearFilterCard"
-                class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500 px-5 py-6 text-white shadow-xl">
-                <div
-                    class="pointer-events-none absolute inset-x-0 -top-32 h-40 bg-gradient-to-b from-white/20 via-transparent to-transparent">
-                </div>
+                class="relative overflow-hidden rounded-xl border border-sky-200/60 bg-slate-900 px-5 py-6 text-white shadow-sm">
+
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                     <div class="space-y-2">
                         <h1 class="text-2xl font-semibold">Dashboard Kinerja Diklat</h1>
@@ -285,7 +281,7 @@
                     </div>
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <div
-                            class="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white/80 shadow-lg backdrop-blur">
+                            class="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white/80 shadow-lg">
                             <p class="font-medium text-white/90">Tahun aktif</p>
                             <p class="text-lg font-semibold text-white">{{ selectedYear }}</p>
                         </div>
@@ -304,25 +300,25 @@
             <!-- Bagian summary cards, charts, dll sama persis -->
             <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <div v-for="card in summaryCards" :key="card.label"
-                    :class="['flex flex-col justify-between rounded-2xl p-5 text-white shadow-xl ring-1 ring-black/5', card.surface]">
+                    :class="['flex flex-col justify-between rounded-xl p-5 text-slate-900 shadow-sm', card.surface]">
                     <div class="flex items-center justify-between">
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl" :class="card.iconBackground">
                             <i :class="card.icon" class="text-base"></i>
                         </div>
-                        <span class="text-xs font-medium uppercase tracking-wider text-white/70">{{ card.caption
+                        <span class="text-xs font-medium text-slate-600">{{ card.caption
                         }}</span>
                     </div>
                     <div class="mt-4">
                         <p class="text-3xl font-bold">{{ card.value }}</p>
-                        <p class="mt-1 text-sm text-white/80">{{ card.label }}</p>
+                        <p class="mt-1 text-sm text-slate-600">{{ card.label }}</p>
                     </div>
                 </div>
             </section>
 
             <!-- JP Fulfillment Overview -->
             <section
-                class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                class="overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div class="border-b border-slate-200/70 bg-slate-50 px-6 py-4">
                     <h2 class="text-lg font-semibold text-slate-900">Ringkasan Pencapaian JP Pegawai</h2>
                     <p class="mt-1 text-sm text-slate-600">Distribusi status pencapaian target JP tahun {{
                         selectedYear }}</p>
@@ -339,14 +335,14 @@
                                 <p class="text-sm text-emerald-600">Selesai (≥100%)</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-4 rounded-xl border border-indigo-200 bg-indigo-50/50 p-4">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-                                <i class="fas fa-chart-line text-xl text-indigo-600"></i>
+                        <div class="flex items-center gap-4 rounded-xl border border-sky-200 bg-sky-50/50 p-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-sky-100">
+                                <i class="fas fa-chart-line text-xl text-sky-700"></i>
                             </div>
                             <div>
-                                <p class="text-2xl font-bold text-indigo-700">{{ jpFulfillment.categories.on_track }}
+                                <p class="text-2xl font-bold text-sky-700">{{ jpFulfillment.categories.on_track }}
                                 </p>
-                                <p class="text-sm text-indigo-600">On Track (75-99%)</p>
+                                <p class="text-sm text-sky-700">On Track (75-99%)</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
@@ -372,11 +368,11 @@
                     <div class="rounded-xl bg-slate-50 p-4">
                         <div class="mb-2 flex items-center justify-between">
                             <span class="text-sm font-medium text-slate-700">Progress Keseluruhan</span>
-                            <span class="text-lg font-bold text-indigo-600">{{ jpFulfillment.totals.overall_progress
+                            <span class="text-lg font-bold text-sky-700">{{ jpFulfillment.totals.overall_progress
                                 }}%</span>
                         </div>
                         <div class="h-3 w-full rounded-full bg-slate-200">
-                            <div class="h-3 rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all"
+                            <div class="h-3 rounded-full bg-sky-700 transition-all"
                                 :style="{ width: jpFulfillment.totals.overall_progress + '%' }"></div>
                         </div>
                         <div class="mt-2 text-xs text-slate-600">
@@ -390,8 +386,8 @@
             <!-- Charts and other sections -->
             <section class="grid gap-6 lg:grid-cols-2">
                 <div
-                    class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
-                    <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                    class="overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+                    <div class="border-b border-slate-200/70 bg-slate-50 px-6 py-4">
                         <h2 class="text-lg font-semibold text-slate-900">Distribusi Jenis Pelatihan</h2>
                         <p class="mt-1 text-sm text-slate-600">Berdasarkan data tahun {{ selectedYear }}</p>
                     </div>
@@ -401,15 +397,15 @@
                 </div>
 
                 <div
-                    class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
-                    <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                    class="overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+                    <div class="border-b border-slate-200/70 bg-slate-50 px-6 py-4">
                         <h2 class="text-lg font-semibold text-slate-900">Top 10 Pegawai JP Tertinggi</h2>
                         <p class="mt-1 text-sm text-slate-600">Pencapaian JP tahun {{ selectedYear }}</p>
                     </div>
                     <div class="p-6">
                         <div class="space-y-3">
                             <div v-for="(pegawai, index) in progressPegawai" :key="pegawai.id"
-                                class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition-all hover:border-indigo-300 hover:bg-indigo-50/30">
+                                class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition-all hover:border-sky-300 hover:bg-sky-50/30">
                                 <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
                                     :class="{
                                         'bg-amber-100 text-amber-700': index === 0,
@@ -425,10 +421,10 @@
                                     }}</p>
                                 </div>
                                 <div class="flex-shrink-0 text-right">
-                                    <p class="text-sm font-semibold text-indigo-600">{{ pegawai.jp_tercapai }} JP</p>
+                                    <p class="text-sm font-semibold text-sky-700">{{ pegawai.jp_tercapai }} JP</p>
                                     <p class="text-xs" :class="{
                                         'text-emerald-600': pegawai.persentase >= 100,
-                                        'text-indigo-600': pegawai.persentase >= 75 && pegawai.persentase < 100,
+                                        'text-sky-700': pegawai.persentase >= 75 && pegawai.persentase < 100,
                                         'text-amber-600': pegawai.persentase >= 50 && pegawai.persentase < 75,
                                         'text-rose-600': pegawai.persentase < 50
                                     }">
@@ -495,32 +491,32 @@ export default {
                     caption: 'Aktif terdaftar',
                     value: this.formatNumber(this.stats?.total_pegawai || 0),
                     icon: 'fas fa-users',
-                    iconBackground: 'bg-white/20 text-white',
-                    surface: 'bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500',
+                    iconBackground: 'bg-sky-50 text-sky-700',
+                    surface: 'bg-white border border-slate-200',
                 },
                 {
                     label: 'Program pelatihan',
                     caption: 'Seluruh jenis',
                     value: this.formatNumber(this.stats?.total_pelatihan || 0),
                     icon: 'fas fa-briefcase',
-                    iconBackground: 'bg-white/20 text-white',
-                    surface: 'bg-gradient-to-br from-sky-500 via-cyan-500 to-emerald-500',
+                    iconBackground: 'bg-sky-50 text-sky-700',
+                    surface: 'bg-white border border-slate-200',
                 },
                 {
                     label: 'Total JP terserap',
                     caption: 'Kumulatif',
                     value: this.formatNumber(this.stats?.total_jp || 0),
                     icon: 'fas fa-clock',
-                    iconBackground: 'bg-white/20 text-white',
-                    surface: 'bg-gradient-to-br from-indigo-700 via-violet-600 to-fuchsia-500',
+                    iconBackground: 'bg-sky-50 text-sky-700',
+                    surface: 'bg-white border border-slate-200',
                 },
                 {
                     label: 'Rata-rata progress',
                     caption: 'Per pegawai',
                     value: `${Number(this.stats?.rata_progress || 0).toFixed(1)}%`,
                     icon: 'fas fa-chart-line',
-                    iconBackground: 'bg-white/20 text-white',
-                    surface: 'bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500',
+                    iconBackground: 'bg-sky-50 text-sky-700',
+                    surface: 'bg-white border border-slate-200',
                 },
             ];
         },
@@ -536,7 +532,7 @@ export default {
                 {
                     label: 'On track',
                     subtitle: '75-99% target',
-                    color: 'bg-indigo-600',
+                    color: 'bg-sky-700',
                     total: this.jpFulfillment?.categories?.on_track || 0,
                     percentage: this.jpFulfillment?.percentages?.on_track || 0,
                 },
@@ -636,7 +632,7 @@ export default {
         },
         getProgressColorClass(percentage) {
             if (percentage >= 100) return 'text-emerald-600';
-            if (percentage >= 75) return 'text-indigo-600';
+            if (percentage >= 75) return 'text-sky-700';
             if (percentage >= 50) return 'text-amber-600';
             return 'text-rose-600';
         },
@@ -659,7 +655,7 @@ export default {
                     labels: this.pelatihanByJenis.map(item => item.jenis_pelatihan || 'Lainnya'),
                     datasets: [{
                         data: this.pelatihanByJenis.map(item => Number(item.total) || 0),
-                        backgroundColor: ['#4338CA', '#6366F1', '#818CF8', '#A5B4FC', '#C7D2FE', '#E0E7FF'],
+                        backgroundColor: ['#0369a1', '#0f766e', '#64748b', '#0284c7', '#5b808c', '#94a3b8'],
                         borderColor: '#ffffff',
                         borderWidth: 2,
                     }],
@@ -695,8 +691,8 @@ export default {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 9999px;
-    border: 3px solid rgba(79, 70, 229, 0.2);
-    border-top-color: #4f46e5;
+    border: 3px solid rgba(3, 105, 161, 0.2);
+    border-top-color: #0369a1;
     animation: spin 0.8s linear infinite;
 }
 

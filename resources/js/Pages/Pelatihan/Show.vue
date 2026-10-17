@@ -96,7 +96,7 @@
           </div>
           <div>
             <label class="text-sm font-medium text-gray-600">Jam Pelajaran (JP)</label>
-            <p class="text-2xl font-bold text-indigo-600">{{ pelatihan.jp }}</p>
+            <p class="text-2xl font-bold text-sky-700">{{ pelatihan.jp }}</p>
           </div>
         </div>
       </div>
@@ -119,7 +119,7 @@
             <a
               :href="`/storage/${pelatihan.sertifikat_path}`"
               target="_blank"
-              class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200"
+              class="inline-flex items-center px-4 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-700 transition duration-200"
             >
               <i class="fas fa-download mr-2"></i>
               Lihat/Download Sertifikat
@@ -171,9 +171,9 @@ export default {
   methods: {
     getJenisColor(jenis) {
       const colorMap = {
-        'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+        'Diklat Struktural': 'bg-sky-100 text-sky-700',
         'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
-        'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+        'Diklat Teknis': 'bg-sky-100 text-sky-700',
         'Workshop': 'bg-amber-100 text-amber-700'
       };
       return colorMap[jenis] || 'bg-gray-100 text-gray-800';

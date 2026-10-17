@@ -1,13 +1,13 @@
 <template>
 	<AppLayout>
-                <div class="p-3 sm:p-4 md:p-6 animate-slide-up space-y-6">
-                        <div class="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 p-6 text-white shadow-xl animate-fade-scale">
-                                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.3),_transparent_60%)]"></div>
+                <div class="space-y-6">
+                        <div class="relative overflow-hidden rounded-xl border border-sky-200/60 bg-slate-900 p-6 text-white shadow-sm">
+
                                 <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                         <h2 class="text-lg sm:text-xl md:text-2xl font-semibold">Data Pelatihan</h2>
                                         <div class="flex items-center gap-3">
                                                 <button @click="startAddNew" v-if="!isAddingNew"
-                                                        class="w-full sm:w-auto rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-slate-100">
+                                                        class="w-full sm:w-auto rounded-xl bg-white px-4 py-2 text-sm font-semibold text-sky-700 shadow-lg transition hover:bg-slate-100">
                                                         <i class="fas fa-plus mr-2"></i>Tambah Pelatihan
                                                 </button>
                                         </div>
@@ -16,12 +16,12 @@
 
                         <!-- Filters -->
                         <form @submit.prevent="submitFilter"
-                                class="rounded-2xl border border-indigo-100 bg-white/80 p-4 shadow-sm backdrop-blur animate-slide-left delay-100">
+                                class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm  animate-slide-left delay-100">
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
                                         <div>
                                                 <label class="mb-2 block text-sm font-medium text-slate-700">Cari</label>
                                                 <input type="text" v-model="filters.search" placeholder="Nama pelatihan atau pegawai..."
-                                                        class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40" />
+                                                        class="w-full rounded-xl border border-sky-100 px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40" />
                                         </div>
 
                                         <div>
@@ -34,7 +34,7 @@
                                         <div>
                                                 <label class="mb-2 block text-sm font-medium text-slate-700">Tahun</label>
                                                 <select v-model="filters.year" @change="submitFilter"
-                                                        class="w-full rounded-xl border border-indigo-100 px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">
+                                                        class="w-full rounded-xl border border-sky-100 px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40">
                                                         <option value="">Semua Tahun</option>
                                                         <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
                                                 </select>
@@ -59,9 +59,9 @@
 
 			<!-- Table -->
                         <div
-                                class="overflow-hidden rounded-2xl border border-indigo-100 bg-white/90 shadow-lg backdrop-blur animate-slide-up delay-200">
+                                class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm  animate-slide-up delay-200">
 				<div class="overflow-x-auto">
-					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-slate-200 px-4 py-4">
                                         <div class="flex items-center gap-4 text-sm text-slate-600">
                                                 <div>Total: <strong class="text-slate-900">{{ totalPelatihans }}</strong></div>
                                                 <div v-if="rangeText">Menampilkan <strong class="text-slate-900">{{ rangeText
@@ -72,7 +72,7 @@
 							<div class="flex items-center gap-2">
 								<label class="text-sm text-gray-600 hidden sm:inline">Item per halaman:</label>
                                                                 <select v-model.number="filters.per_page" @change="submitFilter"
-                                                                        class="w-full rounded-xl border border-indigo-100 bg-white px-3 py-2 pr-8 text-sm text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 sm:w-auto">
+                                                                        class="w-full rounded-xl border border-sky-100 bg-white px-3 py-2 pr-8 text-sm text-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40 sm:w-auto">
 									<option :value="10">10</option>
 									<option :value="25">25</option>
 									<option :value="50">50</option>
@@ -100,39 +100,39 @@
 						</div>
 					</div>
                                         <table class="min-w-full divide-y divide-slate-100 text-xs">
-                                                <thead class="bg-indigo-50/60 text-slate-600">
+                                                <thead class="bg-sky-50/60 text-slate-600">
                                                         <tr>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         Pegawai
                                                                 </th>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         Pelatihan
                                                                 </th>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         Jenis
                                                                 </th>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         Tanggal
                                                                 </th>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         JP
                                                                 </th>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         Sertifikat
                                                                 </th>
                                                                 <th
-                                                                        class="px-2 py-1 text-left text-xs font-medium uppercase tracking-wider sm:px-3 sm:py-2">
+                                                                        class="px-2 py-1 text-left text-xs font-medium sm:px-3 sm:py-2">
                                                                         Aksi
                                                                 </th>
                                                         </tr>
                                                 </thead>
-                                                <tbody class="divide-y divide-slate-100 bg-white/80">
+                                                <tbody class="divide-y divide-slate-100 bg-white">
 							<!-- Add New Row -->
 							<tr v-if="isAddingNew" class="adding-row">
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
@@ -168,7 +168,7 @@
 										class="text-xs border rounded px-1 py-1 w-full" placeholder="JP" />
 								</td>
 								<td class="px-2 py-2 sm:px-3 sm:py-2 whitespace-nowrap editable-cell">
-									<div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-indigo-400"
+									<div class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-sky-400"
 										@dragover.prevent @drop.prevent="handleFileDrop($event, 'new')"
 										@click="$refs.newFileInput.click()">
                                                                 <span v-if="!newRow.sertifikat" class="text-xs text-slate-500">
@@ -290,7 +290,7 @@
 										<div v-if="pelatihan.sertifikat_path" class="flex items-center gap-1">
 											<a :href="`/storage/${pelatihan.sertifikat_path}`" target="_blank"
 												rel="noopener"
-												class="file-link inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700">
+												class="file-link inline-flex items-center gap-2 text-sky-700 hover:text-sky-700">
 												<i class="fas fa-file-pdf"></i>
 												<span class="file-name text-xs truncate max-w-20"
 													:title="getFileName(pelatihan.sertifikat_path)">
@@ -301,7 +301,7 @@
 										<span v-else class="text-gray-400">Tidak ada</span>
 									</div>
 									<div v-else
-										class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-indigo-400"
+										class="upload-area border-2 border-dashed border-gray-300 rounded p-1 text-center cursor-pointer hover:border-sky-400"
 										@dragover.prevent @drop.prevent="handleFileDrop($event, pelatihan.id)"
 										@click="$refs[`fileInput${pelatihan.id}`][0].click()">
 										<div v-if="!editingFiles[pelatihan.id]" class="text-xs text-center">
@@ -360,7 +360,7 @@
 				<div class="flex justify-center space-x-2">
 					<button v-for="link in pelatihans.links" :key="link.label" @click="changePage(link.url)"
 						:disabled="!link.url" class="px-3 py-2 text-sm border rounded"
-						:class="link.active ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'"
+						:class="link.active ? 'bg-sky-700 text-white' : 'bg-white text-gray-600'"
 						v-html="link.label"></button>
 				</div>
 			</div>
@@ -471,11 +471,11 @@ export default {
 
 		getJenisColor(jenis) {
 			const colorMap = {
-				'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+				'Diklat Struktural': 'bg-sky-100 text-sky-700',
 				'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
-				'Diklat Teknis': 'bg-indigo-100 text-indigo-700',
+				'Diklat Teknis': 'bg-sky-100 text-sky-700',
 				'Workshop': 'bg-amber-100 text-amber-700',
-				'Pelatihan Jarak Jauh': 'bg-indigo-100 text-indigo-700',
+				'Pelatihan Jarak Jauh': 'bg-sky-100 text-sky-700',
 				'E-Learning': 'bg-emerald-100 text-emerald-700',
 				'Seminar': 'bg-rose-100 text-rose-700'
 			};

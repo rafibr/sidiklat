@@ -2,12 +2,12 @@
     <AppLayout>
         <div class="space-y-6 pb-12">
             <nav class="text-xs text-slate-500">
-                <Link :href="route('pegawai.index')" class="hover:text-indigo-600">Data pegawai</Link>
+                <Link :href="route('pegawai.index')" class="hover:text-sky-700">Data pegawai</Link>
                 <span class="mx-2">/</span>
                 <span class="text-slate-700">Edit {{ pegawai.nama_lengkap }}</span>
             </nav>
 
-            <section class="rounded-2xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
+            <section class="rounded-xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
                 <div class="mb-6 flex flex-col gap-2">
                     <h1 class="text-xl font-semibold text-slate-900">Perbarui data pegawai</h1>
                     <p class="text-sm text-slate-500">Sesuaikan data dan target JP untuk memastikan monitoring berjalan akurat.</p>
@@ -24,7 +24,7 @@
 
                             <FormField label="NIP" :error="errors.nip">
                                 <input id="nip" v-model="form.nip" type="text" class="form-input" />
-                                <p class="mt-1 text-xs text-slate-400">Opsional. Kosongkan jika belum tersedia.</p>
+                                <p class="mt-1 text-xs text-slate-500">Opsional. Kosongkan jika belum tersedia.</p>
                             </FormField>
 
                             <FormField label="Pangkat / golongan" :error="errors.pangkat_golongan">
@@ -65,10 +65,10 @@
 
                             <FormField label="Target JP tahunan" :error="errors.jp_target">
                                 <input id="jp_target" v-model.number="form.jp_target" type="number" min="0" class="form-input" />
-                                <p class="mt-1 text-xs text-slate-400">Target default instansi: {{ jpDefault }} JP.</p>
+                                <p class="mt-1 text-xs text-slate-500">Target default instansi: {{ jpDefault }} JP.</p>
                             </FormField>
 
-                            <div class="rounded-2xl border border-slate-200/70 bg-slate-50 px-4 py-4">
+                            <div class="rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-4">
                                 <p class="text-sm font-semibold text-slate-700">Progress saat ini</p>
                                 <div class="mt-3 space-y-2 text-xs text-slate-500">
                                     <div class="flex items-center justify-between">
@@ -80,7 +80,7 @@
                                         <span class="font-semibold text-slate-800">{{ form.jp_target || jpDefault }}</span>
                                     </div>
                                     <div class="h-2 rounded-full bg-white">
-                                        <div class="h-full rounded-full bg-indigo-600" :style="{ width: Math.min(100, calculateProgress()) + '%' }"></div>
+                                        <div class="h-full rounded-full bg-sky-700" :style="{ width: Math.min(100, calculateProgress()) + '%' }"></div>
                                     </div>
                                     <div class="text-right font-medium text-slate-600">{{ Math.round(calculateProgress()) }}% tercapai</div>
                                 </div>
@@ -96,9 +96,9 @@
                         <Link :href="route('pegawai.index')"
                             class="inline-flex items-center justify-center rounded-xl border border-slate-200/70 px-5 py-2 text-sm font-medium text-slate-600 hover:border-slate-400">Kembali</Link>
                         <Link :href="route('pegawai.show', pegawai.id)"
-                            class="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-2 text-sm font-medium text-indigo-600 hover:border-indigo-300">Lihat detail</Link>
+                            class="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-5 py-2 text-sm font-medium text-sky-700 hover:border-sky-300">Lihat detail</Link>
                         <button type="submit" :disabled="form.processing"
-                            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-2 text-sm font-semibold text-white hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-70">
+                            class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-6 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70">
                             <i v-if="form.processing" class="fas fa-spinner fa-spin mr-2"></i>
                             <span>{{ form.processing ? 'Menyimpan...' : 'Simpan perubahan' }}</span>
                         </button>

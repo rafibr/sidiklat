@@ -3,19 +3,19 @@
         <div class="space-y-6 pb-12">
             <div>
                 <Link :href="route('pegawai.index')"
-                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl border border-indigo-200 hover:border-indigo-300 transition-all duration-200 shadow-sm hover:shadow-md">
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 hover:text-sky-700 rounded-xl border border-sky-200 hover:border-sky-300 transition-all duration-200 shadow-sm hover:shadow-md">
                 <i class="fas fa-arrow-left"></i>
                 Kembali ke data pegawai
                 </Link>
             </div>
 
-            <div class="rounded-2xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
+            <div class="rounded-xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm">
                 <div class="flex flex-col lg:flex-row gap-6">
                     <!-- Left Side - Basic Info -->
                     <div class="lg:w-1/3">
                         <div class="flex items-center mb-4">
-                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fas fa-user text-2xl text-indigo-600"></i>
+                            <div class="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-user text-2xl text-sky-700"></i>
                             </div>
                             <div>
                                 <h1 class="text-2xl font-bold text-slate-900">{{ pegawai.nama_lengkap }}</h1>
@@ -23,7 +23,7 @@
                             </div>
                         </div>
 
-                        <div class="space-y-3 bg-slate-50 p-4 rounded-2xl">
+                        <div class="space-y-3 bg-slate-50 p-4 rounded-xl">
                             <div v-if="pegawai.pangkat_golongan" class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-slate-600">Pangkat/Golongan:</span>
                                 <span class="text-sm text-slate-900">{{ pegawai.pangkat_golongan }}</span>
@@ -83,16 +83,16 @@
                     <div class="lg:w-2/3">
                         <!-- Statistics Cards - Only show if there are trainings -->
                         <div v-if="hasPelatihan" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                            <div class="bg-indigo-50 p-4 rounded-2xl">
+                            <div class="bg-sky-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-indigo-600">Total Pelatihan</p>
-                                        <p class="text-2xl font-bold text-indigo-700">{{ getTotalPelatihan() }}</p>
+                                        <p class="text-sm font-medium text-sky-700">Total Pelatihan</p>
+                                        <p class="text-2xl font-bold text-sky-700">{{ getTotalPelatihan() }}</p>
                                     </div>
-                                    <i class="fas fa-graduation-cap text-indigo-600 text-2xl"></i>
+                                    <i class="fas fa-graduation-cap text-sky-700 text-2xl"></i>
                                 </div>
                             </div>
-                            <div class="bg-emerald-50 p-4 rounded-2xl">
+                            <div class="bg-emerald-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-emerald-600">JP Tahun Ini</p>
@@ -102,18 +102,18 @@
                                     <i class="fas fa-chart-line text-emerald-600 text-2xl"></i>
                                 </div>
                             </div>
-                            <div class="bg-indigo-50 p-4 rounded-2xl">
+                            <div class="bg-sky-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-indigo-600">Sertifikat</p>
-                                        <p class="text-2xl font-bold text-indigo-700">{{ getTrainingWithCertificates()
+                                        <p class="text-sm font-medium text-sky-700">Sertifikat</p>
+                                        <p class="text-2xl font-bold text-sky-700">{{ getTrainingWithCertificates()
                                             }}</p>
-                                        <p class="text-xs text-indigo-600">dari {{ getTotalPelatihan() }}</p>
+                                        <p class="text-xs text-sky-700">dari {{ getTotalPelatihan() }}</p>
                                     </div>
-                                    <i class="fas fa-certificate text-indigo-600 text-2xl"></i>
+                                    <i class="fas fa-certificate text-sky-700 text-2xl"></i>
                                 </div>
                             </div>
-                            <div class="bg-amber-50 p-4 rounded-2xl">
+                            <div class="bg-amber-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-amber-600">Rata-rata JP/Tahun</p>
@@ -127,18 +127,18 @@
                         <!-- Additional Statistics Row - Only show if there are trainings with meaningful data -->
                         <div v-if="hasPelatihan && getTotalPelatihan() > 0"
                             class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div v-if="getMostFrequentType()" class="bg-indigo-50 p-4 rounded-2xl">
+                            <div v-if="getMostFrequentType()" class="bg-sky-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-indigo-600">Jenis Terbanyak</p>
-                                        <p class="text-sm font-bold text-indigo-700">{{ getMostFrequentType() }}</p>
-                                        <p class="text-xs text-indigo-600">{{ getMostFrequentTypeCount() }} pelatihan
+                                        <p class="text-sm font-medium text-sky-700">Jenis Terbanyak</p>
+                                        <p class="text-sm font-bold text-sky-700">{{ getMostFrequentType() }}</p>
+                                        <p class="text-xs text-sky-700">{{ getMostFrequentTypeCount() }} pelatihan
                                         </p>
                                     </div>
-                                    <i class="fas fa-medal text-indigo-600 text-2xl"></i>
+                                    <i class="fas fa-medal text-sky-700 text-2xl"></i>
                                 </div>
                             </div>
-                            <div v-if="getMostActiveYear()" class="bg-emerald-50 p-4 rounded-2xl">
+                            <div v-if="getMostActiveYear()" class="bg-emerald-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-emerald-600">Tahun Teraktif</p>
@@ -148,7 +148,7 @@
                                     <i class="fas fa-fire text-emerald-600 text-2xl"></i>
                                 </div>
                             </div>
-                            <div v-if="getHighestJPInYear() > 0" class="bg-rose-50 p-4 rounded-2xl">
+                            <div v-if="getHighestJPInYear() > 0" class="bg-rose-50 p-4 rounded-xl">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-rose-600">JP Terbanyak</p>
@@ -166,7 +166,7 @@
                             <h3 class="text-lg font-semibold text-slate-900 mb-4">Capaian JP Per Tahun</h3>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div v-for="(data, year) in filteredPelatihansByYear" :key="year"
-                                    class="bg-white px-5 py-4 border border-slate-200/70 rounded-2xl shadow-sm">
+                                    class="bg-white px-5 py-4 border border-slate-200/70 rounded-xl shadow-sm">
                                     <div class="flex items-center justify-between mb-2">
                                         <h4 class="font-semibold text-slate-900">{{ year }}</h4>
                                         <span class="text-sm font-medium"
@@ -193,7 +193,7 @@
                         <div v-if="!hasPelatihan" class="text-center py-12">
                             <div
                                 class="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas fa-graduation-cap text-slate-400 text-3xl"></i>
+                                <i class="fas fa-graduation-cap text-slate-500 text-3xl"></i>
                             </div>
                             <h3 class="text-lg font-medium text-slate-900 mb-2">Belum Ada Data Pelatihan</h3>
                             <p class="text-sm text-slate-500">Pegawai ini belum memiliki riwayat pelatihan yang tercatat
@@ -212,7 +212,7 @@
                             <div class="relative">
                                 <input type="text" v-model="searchQuery" placeholder="Cari pelatihan, penyelenggara..."
                                     class="form-input sm:w-64 pr-10" />
-                                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
                             </div>
 
                             <!-- Year Filter -->
@@ -223,7 +223,7 @@
 
                             <!-- View Toggle -->
                             <button @click="toggleView"
-                                class="rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-indigo-400 hover:text-indigo-600">
+                                class="rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-sky-400 hover:text-sky-700">
                                 <i :class="viewMode === 'grid' ? 'fas fa-list' : 'fas fa-th-large'"></i>
                                 {{ viewMode === 'grid' ? 'List' : 'Grid' }}
                             </button>
@@ -235,7 +235,7 @@
                         <p class="text-sm text-slate-600">
                             Menampilkan {{ searchResults.length }} pelatihan dari pencarian "<strong>{{ searchQuery
                                 }}</strong>"
-                            <button @click="clearSearch" class="text-indigo-600 hover:text-indigo-700 ml-2">
+                            <button @click="clearSearch" class="text-sky-700 hover:text-sky-700 ml-2">
                                 <i class="fas fa-times"></i> Hapus filter
                             </button>
                         </p>
@@ -244,7 +244,7 @@
                     <!-- Grid View -->
                     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div v-for="pel in filteredPelatihan" :key="pel.id"
-                            class="bg-white border border-slate-200/70 rounded-2xl p-4 hover:shadow-md transition-shadow"
+                            class="bg-white border border-slate-200/70 rounded-xl p-4 hover:shadow-md transition-shadow"
                             @dragover.prevent @dragenter.prevent="addDragClass($event)"
                             @dragleave.prevent="removeDragClass($event)" @drop.prevent="handleFileDrop($event, pel)">
                             <!-- Training Card Header -->
@@ -258,7 +258,7 @@
                                     </span>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-lg font-bold text-indigo-600">{{ pel.jp }} JP</div>
+                                    <div class="text-lg font-bold text-sky-700">{{ pel.jp }} JP</div>
                                     <div class="text-xs text-slate-500">{{ formatDate(pel.tanggal_mulai) }}</div>
                                 </div>
                             </div>
@@ -277,11 +277,11 @@
                                     <div class="flex items-center gap-2">
                                         <a v-if="pel.file_sertifikat" :href="`/storage/${pel.file_sertifikat}`"
                                             target="_blank"
-                                            class="text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 text-xs">
+                                            class="text-sky-700 hover:text-sky-700 inline-flex items-center gap-1 text-xs">
                                             <i class="fas fa-file-pdf"></i>
                                             <span>{{ getFileName(pel.file_sertifikat) || 'Lihat' }}</span>
                                         </a>
-                                        <span v-else class="text-xs text-slate-400">Tidak ada sertifikat</span>
+                                        <span v-else class="text-xs text-slate-500">Tidak ada sertifikat</span>
                                     </div>
 
                                     <!-- Upload Area (smaller for grid) -->
@@ -291,10 +291,10 @@
                                         @drop.prevent="handleFileDrop($event, pel)"
                                         @click="$refs[`fileInput${pel.id}`] && $refs[`fileInput${pel.id}`][0] ? $refs[`fileInput${pel.id}`][0].click() : $refs[`fileInput${pel.id}`].click()">
                                         <div v-if="!editingFiles[pel.id] && !isUploading[pel.id]">
-                                            <i class="fas fa-cloud-upload text-slate-400"></i>
+                                            <i class="fas fa-cloud-upload text-slate-500"></i>
                                         </div>
                                         <div v-else-if="isUploading[pel.id]">
-                                            <i class="fas fa-spinner fa-spin text-indigo-600"></i>
+                                            <i class="fas fa-spinner fa-spin text-sky-700"></i>
                                         </div>
                                         <div v-else>
                                             <i class="fas fa-file-pdf text-emerald-600"></i>
@@ -310,14 +310,14 @@
                     <!-- List View -->
                     <div v-else v-for="(data, year) in displayedPelatihansByYear" :key="year" class="mb-6">
                         <h3 class="text-lg font-medium text-slate-700 mb-3 flex items-center">
-                            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm mr-3">{{ year
+                            <span class="bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-sm mr-3">{{ year
                             }}</span>
                             <span class="text-sm text-slate-500">({{ (data.pelatihan && data.pelatihan.length) || 0 }}
                                 pelatihan)</span>
                         </h3>
                         <ul class="space-y-3">
                             <li v-for="pel in data.pelatihan || []" :key="pel.id"
-                                class="bg-white border border-slate-200/70 rounded-2xl p-4 hover:shadow-md transition-shadow"
+                                class="bg-white border border-slate-200/70 rounded-xl p-4 hover:shadow-md transition-shadow"
                                 @dragover.prevent @dragenter.prevent="addDragClass($event)"
                                 @dragleave.prevent="removeDragClass($event)"
                                 @drop.prevent="handleFileDrop($event, pel)">
@@ -344,18 +344,18 @@
                                     </div>
 
                                     <div class="flex flex-col items-end gap-2">
-                                        <div class="text-lg font-bold text-indigo-600">{{ pel.jp }} JP</div>
+                                        <div class="text-lg font-bold text-sky-700">{{ pel.jp }} JP</div>
 
                                         <!-- Certificate and Upload Section -->
                                         <div class="flex items-center gap-2">
                                             <a v-if="pel.file_sertifikat" :href="`/storage/${pel.file_sertifikat}`"
                                                 target="_blank"
-                                                class="text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-2 text-sm">
+                                                class="text-sky-700 hover:text-sky-700 inline-flex items-center gap-2 text-sm">
                                                 <i class="fas fa-file-pdf"></i>
                                                 <span>{{ getFileName(pel.file_sertifikat) || 'Lihat Sertifikat'
                                                 }}</span>
                                             </a>
-                                            <span v-else class="text-xs text-slate-400">Tidak ada sertifikat</span>
+                                            <span v-else class="text-xs text-slate-500">Tidak ada sertifikat</span>
 
                                             <div class="upload-area" @dragover.prevent
                                                 @dragenter.prevent="addDragClass($event)"
@@ -377,7 +377,7 @@
                                                     </div>
                                                 </div>
                                                 <div v-else-if="isUploading[pel.id]"
-                                                    class="text-xs text-center text-indigo-600">
+                                                    class="text-xs text-center text-sky-700">
                                                     <i class="fas fa-spinner fa-spin mr-1"></i>
                                                     <span>Uploading...</span>
                                                 </div>
@@ -561,7 +561,7 @@ export default {
         getProgressColor(achieved, target) {
             const progress = this.calculateProgress({ jp_tercapai: achieved, jp_target: target });
             if (progress >= 100) return 'text-emerald-600';
-            if (progress >= 75) return 'text-indigo-600';
+            if (progress >= 75) return 'text-sky-700';
             if (progress >= 50) return 'text-amber-600';
             return 'text-rose-600';
         },
@@ -569,18 +569,18 @@ export default {
         getProgressBgColor(achieved, target) {
             const progress = this.calculateProgress({ jp_tercapai: achieved, jp_target: target });
             if (progress >= 100) return 'bg-emerald-600';
-            if (progress >= 75) return 'bg-indigo-600';
+            if (progress >= 75) return 'bg-sky-700';
             if (progress >= 50) return 'bg-amber-600';
             return 'bg-rose-600';
         },
 
         getJenisColor(jenis) {
             const colorMap = {
-                'Diklat Struktural': 'bg-indigo-100 text-indigo-700',
+                'Diklat Struktural': 'bg-sky-100 text-sky-700',
                 'Diklat Fungsional': 'bg-emerald-100 text-emerald-700',
                 'Diklat Teknis': 'bg-sky-100 text-sky-700',
                 'Workshop': 'bg-amber-100 text-amber-700',
-                'Pelatihan Jarak Jauh': 'bg-indigo-100 text-indigo-700',
+                'Pelatihan Jarak Jauh': 'bg-sky-100 text-sky-700',
                 'E-Learning': 'bg-slate-200 text-slate-700',
                 'Seminar': 'bg-rose-100 text-rose-700'
             };
@@ -735,7 +735,7 @@ export default {
         getYearProgressBgColor(jp, target) {
             const percentage = this.getYearProgressPercentage(jp, target);
             if (percentage >= 100) return 'bg-emerald-600';
-            if (percentage >= 75) return 'bg-indigo-600';
+            if (percentage >= 75) return 'bg-sky-700';
             if (percentage >= 50) return 'bg-amber-600';
             return 'bg-rose-600';
         },
@@ -843,7 +843,7 @@ export default {
 
             // Create notification element
             const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-2xl text-white ${alertClass === 'alert-success' ? 'bg-emerald-600' : alertClass === 'alert-error' ? 'bg-rose-600' : 'bg-indigo-600'}`;
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-xl text-white ${alertClass === 'alert-success' ? 'bg-emerald-600' : alertClass === 'alert-error' ? 'bg-rose-600' : 'bg-sky-700'}`;
             notification.textContent = message;
 
             document.body.appendChild(notification);

@@ -3,9 +3,9 @@
         <div class="relative p-3 sm:p-4 md:p-6 animate-slide-up">
             <!-- Loading overlay -->
             <div v-if="loading" class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center">
-                <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 animate-fade-scale">
+            <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">
                 Perbandingan Data Pelatihan
             </h2>
 
@@ -15,9 +15,9 @@
 
                 <div class="flex flex-wrap gap-2 mb-3">
                     <span v-for="year in selectedYears" :key="year"
-                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-sky-100 text-sky-700">
                         {{ year }}
-                        <button @click="removeYear(year)" class="ml-2 text-indigo-600 hover:text-indigo-700">
+                        <button @click="removeYear(year)" class="ml-2 text-sky-700 hover:text-sky-700">
                             <i class="fas fa-times text-xs"></i>
                         </button>
                     </span>
@@ -45,7 +45,7 @@
             <div
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 md:mb-8 animate-slide-up delay-200">
                 <div v-for="(count, year) in yearlyData" :key="year"
-                    class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-xl text-white">
+                    class="bg-sky-700 p-4 rounded-xl text-white">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-white/90 text-sm">Pelatihan {{ year }}</p>

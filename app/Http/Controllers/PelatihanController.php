@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pelatihan;
-use App\Models\Pegawai;
 use App\Models\JenisPelatihan;
+use App\Models\Pegawai;
+use App\Models\Pelatihan;
 use App\Support\Database\DateQueryHelper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class PelatihanController extends Controller
@@ -29,7 +29,7 @@ class PelatihanController extends Controller
 
         // Get selected years from request or use default (current and last year)
         $selectedYears = $request->get('years', [date('Y'), date('Y') - 1]);
-        if (!is_array($selectedYears)) {
+        if (! is_array($selectedYears)) {
             $selectedYears = explode(',', $selectedYears);
         }
         $selectedYears = array_filter($selectedYears); // Remove empty values
@@ -102,9 +102,9 @@ class PelatihanController extends Controller
         // Search
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('nama_pelatihan', 'like', '%' . $request->search . '%')
+                $q->where('nama_pelatihan', 'like', '%'.$request->search.'%')
                     ->orWhereHas('pegawai', function ($subQ) use ($request) {
-                        $subQ->where('nama_lengkap', 'like', '%' . $request->search . '%');
+                        $subQ->where('nama_lengkap', 'like', '%'.$request->search.'%');
                     });
             });
         }
@@ -155,7 +155,9 @@ class PelatihanController extends Controller
 
         if ($request->filled('jenis')) {
             $jenisId = JenisPelatihan::where('nama', $request->jenis)->value('id');
-            if ($jenisId) $query->where('jenis_pelatihan_id', $jenisId);
+            if ($jenisId) {
+                $query->where('jenis_pelatihan_id', $jenisId);
+            }
         }
 
         if ($request->filled('year')) {
@@ -164,9 +166,9 @@ class PelatihanController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('nama_pelatihan', 'like', '%' . $request->search . '%')
+                $q->where('nama_pelatihan', 'like', '%'.$request->search.'%')
                     ->orWhereHas('pegawai', function ($subQ) use ($request) {
-                        $subQ->where('nama_lengkap', 'like', '%' . $request->search . '%');
+                        $subQ->where('nama_lengkap', 'like', '%'.$request->search.'%');
                     });
             });
         }
@@ -179,14 +181,16 @@ class PelatihanController extends Controller
                 $html = view('pelatihan.export_pdf', ['items' => $items])->render();
                 $pdf = app()->make('dompdf.wrapper');
                 $pdf->loadHTML($html);
-                return $pdf->download('pelatihan_' . date('Ymd_His') . '.pdf');
+
+                return $pdf->download('pelatihan_'.date('Ymd_His').'.pdf');
             }
 
             // Fallback: return HTML file for printing
             $html = view('pelatihan.export_pdf', ['items' => $items])->render();
+
             return response($html, 200, [
                 'Content-Type' => 'text/html',
-                'Content-Disposition' => 'attachment; filename="pelatihan_' . date('Ymd_His') . '.html"'
+                'Content-Disposition' => 'attachment; filename="pelatihan_'.date('Ymd_His').'.html"',
             ]);
         }
 
@@ -196,15 +200,15 @@ class PelatihanController extends Controller
 
             return response($html, 200, [
                 'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => "attachment; filename=\"pelatihan_" . date('Ymd_His') . ".xls\"",
+                'Content-Disposition' => 'attachment; filename="pelatihan_'.date('Ymd_His').'.xls"',
                 'Pragma' => 'no-cache',
                 'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-                'Expires' => '0'
+                'Expires' => '0',
             ]);
         }
 
         // CSV format
-        $filename = 'pelatihan_' . date('Ymd_His') . '.csv';
+        $filename = 'pelatihan_'.date('Ymd_His').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -220,7 +224,7 @@ class PelatihanController extends Controller
                 // Gabungkan nama dan NIP dalam satu kolom (untuk CSV, ganti newline dengan space)
                 $pegawaiInfo = optional($it->pegawai)->nama_lengkap;
                 if (optional($it->pegawai)->nip) {
-                    $pegawaiInfo .= " - " . optional($it->pegawai)->nip;
+                    $pegawaiInfo .= ' - '.optional($it->pegawai)->nip;
                 }
 
                 // Pastikan jenis pelatihan dimuat dengan benar
@@ -238,10 +242,10 @@ class PelatihanController extends Controller
                 // Do not include status or sertifikat_path in CSV export
                 fputcsv($out, [
                     $it->id,
-                    $pegawaiInfo,
-                    $it->nama_pelatihan,
-                    $jenisNama,
-                    $it->penyelenggara,
+                    $this->escapeCsvText($pegawaiInfo),
+                    $this->escapeCsvText($it->nama_pelatihan),
+                    $this->escapeCsvText($jenisNama),
+                    $this->escapeCsvText($it->penyelenggara),
                     $tanggalMulai,
                     $tanggalSelesai,
                     $it->jp,
@@ -251,6 +255,15 @@ class PelatihanController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    private function escapeCsvText(?string $value): string
+    {
+        $value = $value ?? '';
+
+        return preg_match('/^(?:[\x00-\x20]*[=+\-@]|[\t\r\n])/', $value) === 1
+            ? "'".$value
+            : $value;
     }
 
     public function create()
@@ -276,15 +289,15 @@ class PelatihanController extends Controller
             'penyelenggara' => 'required|string|max:255',
             'tempat' => 'nullable|string|max:255',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'jp' => 'required|integer|min:1',
             'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
             'deskripsi' => 'nullable|string',
-            'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
+            'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         // Set default status if not provided
-        if (!isset($validated['status'])) {
+        if (! isset($validated['status'])) {
             $validated['status'] = 'selesai';
         }
 
@@ -305,7 +318,7 @@ class PelatihanController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data pelatihan berhasil ditambahkan.',
-                'data' => $pelatihan->load(['pegawai', 'jenisPelatihan'])
+                'data' => $pelatihan->load(['pegawai', 'jenisPelatihan']),
             ]);
         }
 
@@ -340,18 +353,18 @@ class PelatihanController extends Controller
             'penyelenggara' => 'required|string|max:255',
             'tempat' => 'nullable|string|max:255',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'jp' => 'required|integer|min:1',
             'status' => 'nullable|in:selesai,sedang_berjalan,akan_datang',
             'deskripsi' => 'nullable|string',
-            'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
+            'sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $oldJp = $pelatihan->jp;
         $oldStatus = $pelatihan->status;
 
         // Set default status if not provided
-        if (!isset($validated['status'])) {
+        if (! isset($validated['status'])) {
             $validated['status'] = $pelatihan->status ?? 'selesai';
         }
 
@@ -367,7 +380,7 @@ class PelatihanController extends Controller
         // If frontend requests to replace/remove the file without uploading a new one
         // (e.g. sends replace_file=true but no file), delete existing file and
         // clear the sertifikat_path so the DB reflects removal.
-        if ($request->has('replace_file') && !$request->hasFile('sertifikat')) {
+        if ($request->boolean('replace_file') && ! $request->hasFile('sertifikat')) {
             if ($pelatihan->sertifikat_path) {
                 Storage::disk('public')->delete($pelatihan->sertifikat_path);
             }
@@ -384,7 +397,7 @@ class PelatihanController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data pelatihan berhasil diperbarui.',
-                'data' => $pelatihan->load(['pegawai', 'jenisPelatihan'])
+                'data' => $pelatihan->load(['pegawai', 'jenisPelatihan']),
             ]);
         }
 
@@ -407,7 +420,7 @@ class PelatihanController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Data pelatihan berhasil dihapus.'
+                'message' => 'Data pelatihan berhasil dihapus.',
             ]);
         }
 

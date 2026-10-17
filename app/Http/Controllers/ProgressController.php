@@ -10,82 +10,83 @@ use Inertia\Inertia;
 
 class ProgressController extends Controller
 {
-	public function index(Request $request)
-	{
-		// Get year filter, default to current year
-		$year = $request->get('year', now()->year);
+    public function index(Request $request)
+    {
+        // Get year filter, default to current year
+        $year = $request->get('year', now()->year);
 
-		$query = Pegawai::select(
-			'pegawais.id',
-			'pegawais.nama_lengkap',
-			'pegawais.nip',
-			'pegawais.pangkat_golongan',
-			'pegawais.unit_kerja'
-		)
-			->selectRaw('COALESCE(SUM(pelatihans.jp), 0) as jp_tercapai_filtered')
-			->leftJoin('pelatihans', function ($join) use ($year) {
-				$join->on('pegawais.id', '=', 'pelatihans.pegawai_id')
-					->whereYear('pelatihans.tanggal_mulai', $year);
-			})
-			->groupBy('pegawais.id', 'pegawais.nama_lengkap', 'pegawais.nip', 'pegawais.pangkat_golongan', 'pegawais.unit_kerja');
+        $query = Pegawai::select(
+            'pegawais.id',
+            'pegawais.nama_lengkap',
+            'pegawais.nip',
+            'pegawais.pangkat_golongan',
+            'pegawais.unit_kerja'
+        )
+            ->selectRaw('COALESCE(SUM(pelatihans.jp), 0) as jp_tercapai_filtered')
+            ->leftJoin('pelatihans', function ($join) use ($year) {
+                $join->on('pegawais.id', '=', 'pelatihans.pegawai_id')
+                    ->whereYear('pelatihans.tanggal_mulai', $year);
+            })
+            ->groupBy('pegawais.id', 'pegawais.nama_lengkap', 'pegawais.nip', 'pegawais.pangkat_golongan', 'pegawais.unit_kerja');
 
-		// Filter by unit kerja
-		if ($request->filled('unit_kerja')) {
-			$query->where('pegawais.unit_kerja', $request->unit_kerja);
-		}
+        // Filter by unit kerja
+        if ($request->filled('unit_kerja')) {
+            $query->where('pegawais.unit_kerja', $request->unit_kerja);
+        }
 
-		// Search by name
-		if ($request->filled('search')) {
-			$query->where('pegawais.nama_lengkap', 'like', '%' . $request->search . '%');
-		}
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('pegawais.nama_lengkap', 'like', '%'.$request->search.'%');
+        }
 
-		$pegawais = $query->paginate(10);
+        $pegawais = $query->paginate(10)->withQueryString();
 
-		// Add pelatihan relationship data and yearly JP target for each pegawai
-		$pegawais->getCollection()->transform(function ($pegawai) use ($year) {
-			// Get JP target for this year using the new system
-			$pegawai->jp_target = $pegawai->getJpTargetForYear($year);
+        // Add pelatihan relationship data and yearly JP target for each pegawai
+        $pegawais->getCollection()->transform(function ($pegawai) use ($year) {
+            // Get JP target for this year using the new system
+            $pegawai->jp_target = $pegawai->getJpTargetForYear($year);
 
-			$pegawai->pelatihans = Pelatihan::where('pegawai_id', $pegawai->id)
-				->whereYear('tanggal_mulai', $year)
-				->with('jenisPelatihan')
-				->get()
-				->map(function ($pelatihan) {
-					return [
-						'id' => $pelatihan->id,
-						'nama_pelatihan' => $pelatihan->nama_pelatihan,
-						'jp' => $pelatihan->jp,
-						'jenis_pelatihan' => $pelatihan->jenisPelatihan->nama ?? 'Unknown',
-					];
-				});
-			return $pegawai;
-		});
+            $pegawai->pelatihans = Pelatihan::where('pegawai_id', $pegawai->id)
+                ->whereYear('tanggal_mulai', $year)
+                ->with('jenisPelatihan')
+                ->get()
+                ->map(function ($pelatihan) {
+                    return [
+                        'id' => $pelatihan->id,
+                        'nama_pelatihan' => $pelatihan->nama_pelatihan,
+                        'jp' => $pelatihan->jp,
+                        'jenis_pelatihan' => $pelatihan->jenisPelatihan->nama ?? 'Unknown',
+                    ];
+                });
 
-		$unitKerjas = Pegawai::distinct('unit_kerja')->pluck('unit_kerja');
+            return $pegawai;
+        });
 
-		// Get available years from pelatihan data
-                $yearExpression = DateQueryHelper::yearExpression('tanggal_mulai');
+        $unitKerjas = Pegawai::distinct('unit_kerja')->pluck('unit_kerja');
 
-                $availableYears = Pelatihan::selectRaw("DISTINCT {$yearExpression} as year")
-                        ->whereNotNull('tanggal_mulai')
-                        ->orderByDesc('year')
-                        ->pluck('year')
-                        ->map(fn ($value) => (int) $value)
-                        ->filter()
-                        ->values()
-                        ->toArray();
+        // Get available years from pelatihan data
+        $yearExpression = DateQueryHelper::yearExpression('tanggal_mulai');
 
-		// Ensure current year is in available years if not present
-		if (!in_array($year, $availableYears)) {
-			$availableYears[] = $year;
-			rsort($availableYears);
-		}
+        $availableYears = Pelatihan::selectRaw("DISTINCT {$yearExpression} as year")
+            ->whereNotNull('tanggal_mulai')
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->map(fn ($value) => (int) $value)
+            ->filter()
+            ->values()
+            ->toArray();
 
-		return Inertia::render('Progress/Index', [
-			'pegawais' => $pegawais,
-			'unitKerjas' => $unitKerjas,
-			'availableYears' => $availableYears,
-			'selectedYear' => $year,
-		]);
-	}
+        // Ensure current year is in available years if not present
+        if (! in_array($year, $availableYears)) {
+            $availableYears[] = $year;
+            rsort($availableYears);
+        }
+
+        return Inertia::render('Progress/Index', [
+            'pegawais' => $pegawais,
+            'unitKerjas' => $unitKerjas,
+            'availableYears' => $availableYears,
+            'selectedYear' => $year,
+        ]);
+    }
 }
